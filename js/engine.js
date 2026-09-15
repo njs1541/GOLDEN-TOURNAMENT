@@ -181,27 +181,51 @@ class TournamentEngine {
     if (linkDirectB) linkDirectB.href = `https://www.youtube.com/watch?v=${candB.youtubeId}`;
     if (statsMatchesB) statsMatchesB.textContent = `${candB.matches}회 대결`;
 
-    // 4. 연승(Streak) 불꽃 뱃지 연출
+    // 4. 실시간 예상 승률(Elo Expected Win Rate) 계산 및 렌더링
+    const expectedA = 1 / (1 + Math.pow(10, (candB.elo - candA.elo) / 400));
+    const percentA = Math.max(5, Math.min(95, Math.round(expectedA * 100)));
+    const percentB = 100 - percentA;
+
+    const probValA = document.getElementById('prob-val-a');
+    const probValB = document.getElementById('prob-val-b');
+    const probFillA = document.getElementById('prob-fill-a');
+    const probFillB = document.getElementById('prob-fill-b');
+
+    if (probValA) probValA.textContent = `${percentA}%`;
+    if (probValB) probValB.textContent = `${percentB}%`;
+    if (probFillA) probFillA.style.width = `${percentA}%`;
+    if (probFillB) probFillB.style.width = `${percentB}%`;
+
+    // 이전 매치 플래시 효과 리셋
+    document.getElementById('card-a')?.classList.remove('vote-win-flash');
+    document.getElementById('card-b')?.classList.remove('vote-win-flash');
+
+    // 5. 연승(Streak) 인디케이터 정밀 판정 (둘 다 연승 시 맞대결, 한쪽만 연승 시 더 높은 쪽 표시)
     const streakIndicator = document.getElementById('streak-indicator');
     if (streakIndicator) {
-      if (candA.streak >= 3) {
-        streakIndicator.textContent = `🔥 A 후보 ${candA.streak}연승 질주 중!`;
-      } else if (candB.streak >= 3) {
-        streakIndicator.textContent = `🔥 B 후보 ${candB.streak}연승 질주 중!`;
+      const sA = candA.streak || 0;
+      const sB = candB.streak || 0;
+
+      if (sA >= 2 && sB >= 2) {
+        streakIndicator.textContent = `⚡ [A] ${sA}연승 vs [B] ${sB}연승 맞대결!`;
+      } else if (sA >= 2 && sA >= sB) {
+        streakIndicator.textContent = `🔥 PLAYER A ${sA}연승 질주 중!`;
+      } else if (sB >= 2 && sB > sA) {
+        streakIndicator.textContent = `🔥 PLAYER B ${sB}연승 질주 중!`;
       } else {
         streakIndicator.textContent = '';
       }
     }
 
-    // 5. 화면 전환 (대결 화면 활성화)
+    // 6. 화면 전환 (대결 화면 활성화)
     this.app.switchView('battle');
 
-    // 6. 유튜브 플레이어에 영상 로드 (Zero-Lag 인스턴스 재활용)
+    // 7. 유튜브 플레이어에 영상 로드 (Zero-Lag 인스턴스 재활용)
     if (window.dualPlayer) {
       window.dualPlayer.loadMatch(candA, candB);
     }
 
-    // 7. 투표 버튼 리스너 바인딩
+    // 8. 투표 버튼 리스너 바인딩
     this.bindVoteButtons();
   }
 
@@ -226,6 +250,12 @@ class TournamentEngine {
 
     const { candA, candB } = this.currentMatch;
     const isWinnerA = winnerSide === 'A';
+
+    // 선택된 카드에 시각적 타격감(플래시) 부여
+    const winCard = document.getElementById(isWinnerA ? 'card-a' : 'card-b');
+    if (winCard) {
+      winCard.classList.add('vote-win-flash');
+    }
 
     // Elo K-Factor (대결 횟수가 적을수록 변동폭을 크게 부여하여 빠른 수렴)
     const kFactorA = candA.matches < 3 ? 48 : 32;
@@ -265,7 +295,7 @@ class TournamentEngine {
     setTimeout(() => {
       this.isProcessingVote = false;
       this.nextMatch();
-    }, 150);
+    }, 200);
   }
 
   /**

@@ -114,12 +114,26 @@ class AppController {
       });
     }
 
-    // 모드 선택 라디오 UI 동기화
-    const modeRadios = document.querySelectorAll('input[name="match-mode"]');
-    modeRadios.forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
-        e.target.closest('.mode-card')?.classList.add('selected');
+    // 신규 영상 입력 엔터 키 지원
+    const inputUrl = document.getElementById('input-yt-url');
+    const inputTitle = document.getElementById('input-yt-title');
+    const handleEnterAdd = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.handleAddVideo();
+      }
+    };
+    if (inputUrl) inputUrl.addEventListener('keydown', handleEnterAdd);
+    if (inputTitle) inputTitle.addEventListener('keydown', handleEnterAdd);
+
+    // 모드 선택 카드 UI 동기화
+    const modeCards = document.querySelectorAll('.mode-card');
+    modeCards.forEach(card => {
+      card.addEventListener('click', () => {
+        modeCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const radio = card.querySelector('input[name="match-mode"]');
+        if (radio) radio.checked = true;
       });
     });
 
@@ -182,23 +196,38 @@ class AppController {
     const countEl = document.getElementById('candidate-count');
     if (!listEl) return;
 
-    countEl.textContent = this.candidates.length;
+    if (countEl) {
+      countEl.textContent = this.candidates.length;
+    }
     listEl.innerHTML = '';
 
     this.candidates.forEach((cand, idx) => {
       const itemEl = document.createElement('div');
       itemEl.className = 'candidate-item';
       const thumbUrl = `https://img.youtube.com/vi/${cand.youtubeId}/mqdefault.jpg`;
+      const numStr = String(idx + 1).padStart(2, '0');
 
       itemEl.innerHTML = `
-        <div class="item-thumb-title">
-          <img class="item-thumb" src="${thumbUrl}" alt="썸네일" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'44\\' height=\\'44\\' fill=\\'%23333\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'">
+        <div class="item-left-area">
+          <span class="item-index-badge">${numStr}</span>
+          <div class="item-thumb-wrapper">
+            <img class="item-thumb" src="${thumbUrl}" alt="썸네일" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'80\\' height=\\'45\\' fill=\\'%23222\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'">
+            <div class="thumb-overlay-play">▶</div>
+          </div>
           <div class="item-info">
-            <span class="item-title">${cand.title}</span>
-            <span class="item-channel">${cand.creator || 'YouTube'}</span>
+            <span class="item-title" title="${cand.title}">${cand.title}</span>
+            <span class="item-channel">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+              ${cand.creator || 'YouTube 영상'}
+            </span>
           </div>
         </div>
-        <button class="btn-remove-item" title="제거" data-idx="${idx}">&times;</button>
+        <button class="btn-remove-item" title="제거" data-idx="${idx}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       `;
 
       itemEl.querySelector('.btn-remove-item').addEventListener('click', () => {

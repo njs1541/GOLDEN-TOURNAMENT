@@ -58,18 +58,33 @@
           <!-- 설정 옵션들 -->
           <div class="setup-grid">
             <div class="setup-box">
-              <label class="setup-label">참가 영상 목록 (<span id="candidate-count">16</span>개)</label>
+              <div class="setup-box-header">
+                <label class="setup-label">참가 영상 목록</label>
+                <span class="badge-count"><span id="candidate-count">16</span>개 등록됨</span>
+              </div>
               <div class="candidate-list-container custom-scrollbar" id="candidate-list">
                 <!-- 동적으로 리스트 렌더링 -->
               </div>
             </div>
 
             <div class="setup-box">
-              <label class="setup-label">신규 유튜브 영상 추가</label>
+              <div class="setup-box-header">
+                <label class="setup-label">신규 유튜브 영상 추가</label>
+                <span class="badge-sub">URL 또는 ID</span>
+              </div>
               <div class="add-video-form">
-                <input type="text" id="input-yt-url" placeholder="YouTube URL 또는 영상 ID 입력..." class="input-field">
-                <input type="text" id="input-yt-title" placeholder="영상 제목 (선택사항)" class="input-field">
-                <button id="btn-add-video" class="btn-secondary">+ 목록에 추가</button>
+                <div class="input-group">
+                  <span class="input-icon">🔗</span>
+                  <input type="text" id="input-yt-url" placeholder="YouTube URL 또는 영상 ID 입력..." class="input-field">
+                </div>
+                <div class="input-group">
+                  <span class="input-icon">🎬</span>
+                  <input type="text" id="input-yt-title" placeholder="영상 제목 (선택사항 - 미입력시 자동)" class="input-field">
+                </div>
+                <button id="btn-add-video" class="btn-secondary btn-add-full">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  목록에 영상 추가하기
+                </button>
               </div>
 
               <div class="match-mode-selector">
@@ -77,41 +92,72 @@
                 <div class="mode-options-grid">
                   <label class="mode-card">
                     <input type="radio" name="match-mode" value="quick">
+                    <div class="mode-card-indicator"></div>
                     <div class="mode-card-body">
-                      <span class="mode-name">⚡ 퀵 코스 (16매치)</span>
-                      <span class="mode-desc">모든 영상 2회씩 대결 후 바로 4강전</span>
+                      <div class="mode-title-row">
+                        <span class="mode-name">⚡ 퀵 코스 (16매치)</span>
+                      </div>
+                      <span class="mode-desc">모든 영상 2회씩 균등 대결 후 즉시 4강전 돌입</span>
                     </div>
                   </label>
                   <label class="mode-card selected">
                     <input type="radio" name="match-mode" value="standard" checked>
+                    <div class="mode-card-indicator"></div>
                     <div class="mode-card-body">
-                      <span class="mode-name">⚖️ 표준 밸런스 (28매치)</span>
-                      <span class="mode-desc">스위스 균등 + 정밀 라이벌 매치 [추천]</span>
+                      <div class="mode-title-row">
+                        <span class="mode-name">⚖️ 표준 밸런스 (28매치)</span>
+                        <span class="badge-recommend">추천</span>
+                      </div>
+                      <span class="mode-desc">스위스 2회 균등 노출 + 정밀 Elo 라이벌 매칭</span>
                     </div>
                   </label>
                   <label class="mode-card">
                     <input type="radio" name="match-mode" value="deep">
+                    <div class="mode-card-indicator"></div>
                     <div class="mode-card-body">
-                      <span class="mode-name">🎯 마스터 래더 (45매치)</span>
-                      <span class="mode-desc">완벽한 취향 티어표를 위한 딥 매치</span>
+                      <div class="mode-title-row">
+                        <span class="mode-name">🎯 마스터 래더 (45매치)</span>
+                      </div>
+                      <span class="mode-desc">완벽한 취향 분석과 정밀 티어표 완성을 위한 심층 리그</span>
                     </div>
                   </label>
                 </div>
               </div>
 
               <div class="rule-features-box">
-                <h4>✨ 핵심 시스템 안내</h4>
-                <ul>
-                  <li><strong>1단계 스위스 보정:</strong> 모든 영상이 최소 2회 이상 균등 노출 (광탈 방지)</li>
-                  <li><strong>2단계 Elo 래더:</strong> 실력/인기가 비슷한 라이벌끼리 팽팽한 1:1 대결</li>
-                  <li><strong>3단계 골든 파이널:</strong> 상위 4개 영상의 극적인 4강 토너먼트 결승전</li>
-                  <li><strong>4단계 최종 결과:</strong> 1위 챔피언 트로피 & S~D 전체 티어표 자동 생성</li>
-                </ul>
+                <div class="rule-box-header">
+                  <span class="sparkle-icon">✨</span>
+                  <h4>골든 토너먼트 핵심 시스템</h4>
+                </div>
+                <div class="rule-steps-grid">
+                  <div class="rule-step-item">
+                    <span class="step-num">01</span>
+                    <div class="step-desc"><strong>스위스 균등 노출:</strong> 억울한 1라운드 광탈 완전 방지</div>
+                  </div>
+                  <div class="rule-step-item">
+                    <span class="step-num">02</span>
+                    <div class="step-desc"><strong>실시간 Elo 래더:</strong> 호각의 라이벌끼리 매칭되어 긴장감 극대화</div>
+                  </div>
+                  <div class="rule-step-item">
+                    <span class="step-num">03</span>
+                    <div class="step-desc"><strong>골든 파이널 4강:</strong> 상위 4개 영상의 극적인 결승 토너먼트</div>
+                  </div>
+                  <div class="rule-step-item">
+                    <span class="step-num">04</span>
+                    <div class="step-desc"><strong>마그네틱 티어표:</strong> S~D 순위표 자동 산출 & 자유로운 드래그 커스텀</div>
+                  </div>
+                </div>
               </div>
 
               <div class="action-row">
-                <button id="btn-reset-default" class="btn-ghost">기본 16선 복구</button>
-                <button id="btn-start-tournament" class="btn-primary btn-gold-glow">토너먼트 시작하기 🔥</button>
+                <button id="btn-reset-default" class="btn-ghost" title="기본 영상 16개로 초기화">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                  기본 16선 복구
+                </button>
+                <button id="btn-start-tournament" class="btn-primary btn-gold-glow">
+                  토너먼트 시작하기
+                  <span class="btn-arrow">🔥</span>
+                </button>
               </div>
             </div>
           </div>
@@ -121,91 +167,125 @@
       <!-- ================= 2. 대결 화면 (DUAL BATTLE VIEW) ================= -->
       <section id="view-battle" class="view-panel">
         <div class="battle-arena">
-          <!-- 좌측 후보 (Player A) -->
-          <div class="battle-card glass-panel" id="card-a">
+          <!-- 좌측 후보 (Player A - Cyan Arena) -->
+          <div class="battle-card glass-panel card-player-a" id="card-a">
             <div class="candidate-header">
-              <span class="corner-tag tag-a">PLAYER A</span>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <a id="link-direct-a" href="#" target="_blank" rel="noopener noreferrer" class="btn-yt-direct" title="YouTube에서 새 탭으로 직접 보기">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  YouTube 열기 ↗
-                </a>
-                <div class="elo-badge" id="badge-elo-a">ELO 1200</div>
+              <div class="player-tag-row">
+                <span class="corner-tag tag-a">PLAYER A</span>
+                <span class="elo-badge badge-elo-cyan" id="badge-elo-a">ELO 1200</span>
               </div>
+              <a id="link-direct-a" href="#" target="_blank" rel="noopener noreferrer" class="btn-yt-direct" title="YouTube에서 새 탭으로 직접 보기">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                <span>YouTube ↗</span>
+              </a>
             </div>
 
-            <div class="player-container">
+            <div class="player-container frame-a">
               <div id="player-a-iframe"></div>
               <div class="player-cover-loader" id="loader-a">
-                <div class="spinner"></div>
+                <div class="dual-spinner"></div>
+                <span class="loader-text">영상 동기화 중...</span>
               </div>
             </div>
 
             <div class="candidate-meta">
               <h3 class="candidate-title" id="title-a">영상 제목 로딩 중...</h3>
-              <p class="candidate-channel" id="channel-a">채널명</p>
-              <div class="candidate-stats">
-                <span id="stats-record-a">0승 0패</span> &bull;
-                <span id="stats-matches-a">0회 노출</span>
+              <div class="meta-sub-row">
+                <p class="candidate-channel" id="channel-a">채널명</p>
+                <div class="candidate-stats">
+                  <span class="stat-pill" id="stats-record-a">0승 0패</span>
+                  <span class="stat-pill" id="stats-matches-a">0회 대결</span>
+                </div>
               </div>
             </div>
 
-            <button id="btn-vote-a" class="btn-vote btn-gold-action">
-              <span>이 영상 선택하기</span>
-              <kbd class="key-hint">A / &larr;</kbd>
+            <button id="btn-vote-a" class="btn-vote btn-vote-cyan">
+              <span class="btn-vote-label">A 선택하기</span>
+              <div class="key-hint-group">
+                <kbd class="key-hint">A</kbd>
+                <kbd class="key-hint">&larr;</kbd>
+              </div>
             </button>
           </div>
 
-          <!-- 중앙 VS 연출 디바이더 -->
+          <!-- 중앙 VS & 승률 연출 디바이더 -->
           <div class="battle-vs-divider">
+            <div class="match-indicator-badge" id="current-match-indicator">MATCH 1 / 28</div>
             <div class="vs-glow-circle">
               <span class="vs-text">VS</span>
             </div>
-            <div class="match-indicator" id="current-match-indicator">MATCH 1 / 32</div>
-            <div class="streak-indicator" id="streak-indicator"></div>
-          </div>
-
-          <!-- 우측 후보 (Player B) -->
-          <div class="battle-card glass-panel" id="card-b">
-            <div class="candidate-header">
-              <span class="corner-tag tag-b">PLAYER B</span>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <a id="link-direct-b" href="#" target="_blank" rel="noopener noreferrer" class="btn-yt-direct" title="YouTube에서 새 탭으로 직접 보기">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                  YouTube 열기 ↗
-                </a>
-                <div class="elo-badge" id="badge-elo-b">ELO 1200</div>
+            
+            <!-- 실시간 Elo 기반 예상 승률 게이지 -->
+            <div class="win-prob-box" title="Elo 점수 기반 예상 승률">
+              <div class="prob-labels">
+                <span id="prob-val-a" class="prob-text prob-a">50%</span>
+                <span class="prob-title">예상 승률</span>
+                <span id="prob-val-b" class="prob-text prob-b">50%</span>
+              </div>
+              <div class="prob-track">
+                <div id="prob-fill-a" class="prob-bar-a" style="width: 50%"></div>
+                <div id="prob-fill-b" class="prob-bar-b" style="width: 50%"></div>
               </div>
             </div>
 
-            <div class="player-container">
+            <div class="streak-indicator" id="streak-indicator"></div>
+          </div>
+
+          <!-- 우측 후보 (Player B - Rose Arena) -->
+          <div class="battle-card glass-panel card-player-b" id="card-b">
+            <div class="candidate-header">
+              <div class="player-tag-row">
+                <span class="corner-tag tag-b">PLAYER B</span>
+                <span class="elo-badge badge-elo-rose" id="badge-elo-b">ELO 1200</span>
+              </div>
+              <a id="link-direct-b" href="#" target="_blank" rel="noopener noreferrer" class="btn-yt-direct" title="YouTube에서 새 탭으로 직접 보기">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                <span>YouTube ↗</span>
+              </a>
+            </div>
+
+            <div class="player-container frame-b">
               <div id="player-b-iframe"></div>
               <div class="player-cover-loader" id="loader-b">
-                <div class="spinner"></div>
+                <div class="dual-spinner"></div>
+                <span class="loader-text">영상 동기화 중...</span>
               </div>
             </div>
 
             <div class="candidate-meta">
               <h3 class="candidate-title" id="title-b">영상 제목 로딩 중...</h3>
-              <p class="candidate-channel" id="channel-b">채널명</p>
-              <div class="candidate-stats">
-                <span id="stats-record-b">0승 0패</span> &bull;
-                <span id="stats-matches-b">0회 노출</span>
+              <div class="meta-sub-row">
+                <p class="candidate-channel" id="channel-b">채널명</p>
+                <div class="candidate-stats">
+                  <span class="stat-pill" id="stats-record-b">0승 0패</span>
+                  <span class="stat-pill" id="stats-matches-b">0회 대결</span>
+                </div>
               </div>
             </div>
 
-            <button id="btn-vote-b" class="btn-vote btn-gold-action">
-              <span>이 영상 선택하기</span>
-              <kbd class="key-hint">D / &rarr;</kbd>
+            <button id="btn-vote-b" class="btn-vote btn-vote-rose">
+              <span class="btn-vote-label">B 선택하기</span>
+              <div class="key-hint-group">
+                <kbd class="key-hint">D</kbd>
+                <kbd class="key-hint">&rarr;</kbd>
+              </div>
             </button>
           </div>
         </div>
 
-        <!-- 하단 보조 툴바 -->
+        <!-- 하단 보조 플로팅 툴바 -->
         <div class="battle-toolbar">
-          <button id="btn-battle-skip" class="btn-ghost-sm" title="승패 없이 다음 매칭 진행">스킵 (무승부)</button>
-          <button id="btn-toggle-play-both" class="btn-ghost-sm">동시 일시정지 ⏸</button>
-          <button id="btn-jump-to-final" class="btn-ghost-sm" style="color:var(--gold-primary); border-color:rgba(245,176,65,0.4);" title="현재 상위 1~4위로 바로 결승 토너먼트 진행">🏆 지금 바로 4강전 진출</button>
+          <button id="btn-battle-skip" class="btn-ghost-sm" title="승패 없이 다음 매칭 진행">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+            스킵 (무승부)
+          </button>
+          <button id="btn-toggle-play-both" class="btn-ghost-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            동시 일시정지
+          </button>
+          <button id="btn-jump-to-final" class="btn-ghost-sm btn-jump-glow" title="현재 상위 1~4위로 바로 결승 토너먼트 진행">
+            🏆 지금 바로 4강전 진출
+          </button>
         </div>
       </section>
 

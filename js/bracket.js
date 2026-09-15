@@ -41,54 +41,199 @@ class GoldenBracketManager {
       btnStart.textContent = "4강 제1경기 시작 (1위 vs 4위) 🔥";
       btnStart.onclick = () => this.runNextFinalMatch();
     }
+
+    // 화면 리사이즈 시 SVG 커넥터 좌표 동기화
+    window.addEventListener('resize', () => {
+      if (this.app && this.app.currentView === 'final') {
+        this.updateConnectors();
+      }
+    });
+  }
+
+  // 브래킷 개별 슬롯 렌더링 헬퍼
+  renderSlotHtml(cand, rankText, isWinner, placeholderText = '승자 대기 중...', slotId = '') {
+    if (!cand) {
+      return `
+        <div class="bracket-slot slot-waiting" ${slotId ? `id="${slotId}"` : ''}>
+          <div class="slot-placeholder-thumb">⏳</div>
+          <div class="slot-info">
+            <span class="slot-title text-dim">${placeholderText}</span>
+            <span class="slot-sub">결과 대기 중</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const thumbUrl = `https://img.youtube.com/vi/${cand.youtubeId}/mqdefault.jpg`;
+    return `
+      <div class="bracket-slot ${isWinner ? 'winner' : ''}" ${slotId ? `id="${slotId}"` : ''}>
+        <div class="slot-thumb-box">
+          <img src="${thumbUrl}" alt="썸네일" class="slot-thumb" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\' fill=\\'%23333\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'">
+          ${rankText ? `<span class="slot-rank-tag">${rankText}</span>` : ''}
+        </div>
+        <div class="slot-info">
+          <span class="slot-title" title="${cand.title}">${cand.title}</span>
+          <div class="slot-meta">
+            <span class="slot-elo">ELO ${Math.round(cand.elo)}</span>
+            <span class="slot-record">${cand.wins}승 ${cand.losses}패</span>
+          </div>
+        </div>
+        ${isWinner ? `<div class="slot-winner-tag">👑 결승 진출!</div>` : ''}
+      </div>
+    `;
   }
 
   renderBracketView() {
     const treeEl = document.getElementById('final-bracket-tree');
     if (!treeEl) return;
 
+    const isSemi1Done = !!this.semi1.winner;
+    const isSemi2Done = !!this.semi2.winner;
+    const isFinalDone = !!this.grandFinal.winner;
+
     treeEl.innerHTML = `
-      <div class="bracket-round">
-        <h4 style="font-size: 13px; color: var(--gold-primary); margin-bottom: 12px;">SEMIFINALS (4강전)</h4>
+      <!-- 4강 라운드 (좌측) -->
+      <div class="bracket-round round-semifinals">
+        <div class="round-header-badge">
+          <span class="round-dot"></span>
+          <span>SEMIFINALS (4강전)</span>
+        </div>
         
         <!-- 4강 1경기 -->
-        <div class="bracket-match-node" id="node-semi-1">
-          <div class="bracket-slot ${this.semi1.winner?.id === this.semi1.candA.id ? 'winner' : ''}">
-            <span>1위. ${this.semi1.candA.title}</span>
-            <span style="color:var(--gold-primary)">ELO ${Math.round(this.semi1.candA.elo)}</span>
+        <div class="bracket-match-node ${isSemi1Done ? 'completed' : 'ready'}" id="node-semi-1">
+          <div class="node-header">
+            <span class="match-tag">MATCH 1</span>
+            <span class="match-desc">1위 vs 4위</span>
           </div>
-          <div class="bracket-slot ${this.semi1.winner?.id === this.semi1.candB.id ? 'winner' : ''}">
-            <span>4위. ${this.semi1.candB.title}</span>
-            <span style="color:var(--gold-primary)">ELO ${Math.round(this.semi1.candB.elo)}</span>
+          <div class="node-slots">
+            ${this.renderSlotHtml(this.semi1.candA, '1위', this.semi1.winner?.id === this.semi1.candA.id, '', 'slot-s1-a')}
+            <div class="slot-vs-divider">VS</div>
+            ${this.renderSlotHtml(this.semi1.candB, '4위', this.semi1.winner?.id === this.semi1.candB.id, '', 'slot-s1-b')}
           </div>
         </div>
 
         <!-- 4강 2경기 -->
-        <div class="bracket-match-node" id="node-semi-2">
-          <div class="bracket-slot ${this.semi2.winner?.id === this.semi2.candA.id ? 'winner' : ''}">
-            <span>2위. ${this.semi2.candA.title}</span>
-            <span style="color:var(--gold-primary)">ELO ${Math.round(this.semi2.candA.elo)}</span>
+        <div class="bracket-match-node ${isSemi2Done ? 'completed' : 'ready'}" id="node-semi-2">
+          <div class="node-header">
+            <span class="match-tag">MATCH 2</span>
+            <span class="match-desc">2위 vs 3위</span>
           </div>
-          <div class="bracket-slot ${this.semi2.winner?.id === this.semi2.candB.id ? 'winner' : ''}">
-            <span>3위. ${this.semi2.candB.title}</span>
-            <span style="color:var(--gold-primary)">ELO ${Math.round(this.semi2.candB.elo)}</span>
+          <div class="node-slots">
+            ${this.renderSlotHtml(this.semi2.candA, '2위', this.semi2.winner?.id === this.semi2.candA.id, '', 'slot-s2-a')}
+            <div class="slot-vs-divider">VS</div>
+            ${this.renderSlotHtml(this.semi2.candB, '3위', this.semi2.winner?.id === this.semi2.candB.id, '', 'slot-s2-b')}
           </div>
         </div>
       </div>
 
-      <!-- 결승전 -->
-      <div class="bracket-round">
-        <h4 style="font-size: 13px; color: var(--accent-rose); margin-bottom: 12px;">GRAND FINAL (결승전)</h4>
-        <div class="bracket-match-node" id="node-grand-final">
-          <div class="bracket-slot ${this.grandFinal.winner?.id === this.grandFinal.candA?.id ? 'winner' : ''}">
-            <span>${this.grandFinal.candA ? this.grandFinal.candA.title : '4강 1경기 승자'}</span>
+      <!-- 대진표 동적 네온 연결선 (이긴 노래로부터 결승전으로 흐르는 인터랙티브 SVG) -->
+      <div class="bracket-connectors" id="bracket-connectors-wrapper">
+        <svg id="bracket-svg-canvas" class="bracket-svg" width="100%" height="100%">
+          <defs>
+            <linearGradient id="gold-stream-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#f5b041"/>
+              <stop offset="100%" stop-color="#ffd700"/>
+            </linearGradient>
+            <filter id="gold-glow-filter" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <path id="path-s1-a" class="conn-path path-idle" />
+          <path id="path-s1-b" class="conn-path path-idle" />
+          <path id="path-s2-a" class="conn-path path-idle" />
+          <path id="path-s2-b" class="conn-path path-idle" />
+        </svg>
+      </div>
+
+      <!-- 결승전 라운드 (우측) -->
+      <div class="bracket-round round-final">
+        <div class="round-header-badge badge-grand-final">
+          <span class="round-dot-gold"></span>
+          <span>👑 GRAND FINAL (결승전)</span>
+        </div>
+
+        <div class="bracket-match-node node-final ${isFinalDone ? 'completed' : 'ready'}" id="node-grand-final">
+          <div class="node-header node-header-final">
+            <span class="match-tag-final">CHAMPIONSHIP</span>
+            <span class="match-desc">왕중왕전 결승</span>
           </div>
-          <div class="bracket-slot ${this.grandFinal.winner?.id === this.grandFinal.candB?.id ? 'winner' : ''}">
-            <span>${this.grandFinal.candB ? this.grandFinal.candB.title : '4강 2경기 승자'}</span>
+          <div class="node-slots">
+            ${this.renderSlotHtml(this.grandFinal.candA, this.grandFinal.candA ? '4강 1경기 승자' : '', this.grandFinal.winner?.id === this.grandFinal.candA?.id, '4강 1경기 승자 대기 중', 'slot-gf-a')}
+            <div class="slot-vs-divider vs-final">FINAL VS</div>
+            ${this.renderSlotHtml(this.grandFinal.candB, this.grandFinal.candB ? '4강 2경기 승자' : '', this.grandFinal.winner?.id === this.grandFinal.candB?.id, '4강 2경기 승자 대기 중', 'slot-gf-b')}
           </div>
         </div>
       </div>
     `;
+
+    // 렌더링 직후 슬롯 좌표를 읽어와 정확한 1:1 연결선 드로잉
+    this.updateConnectors();
+  }
+
+  updateConnectors() {
+    requestAnimationFrame(() => {
+      const wrapper = document.getElementById('bracket-connectors-wrapper');
+      if (!wrapper) return;
+      const wrapRect = wrapper.getBoundingClientRect();
+      if (wrapRect.width === 0 || wrapRect.height === 0) return;
+
+      const getSlotAnchor = (id, side = 'right') => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        const rect = el.getBoundingClientRect();
+        return {
+          x: side === 'right' ? 0 : wrapRect.width,
+          y: (rect.top + rect.height / 2) - wrapRect.top
+        };
+      };
+
+      const s1A = getSlotAnchor('slot-s1-a', 'right');
+      const s1B = getSlotAnchor('slot-s1-b', 'right');
+      const s2A = getSlotAnchor('slot-s2-a', 'right');
+      const s2B = getSlotAnchor('slot-s2-b', 'right');
+      const gfA = getSlotAnchor('slot-gf-a', 'left');
+      const gfB = getSlotAnchor('slot-gf-b', 'left');
+
+      if (!s1A || !s1B || !s2A || !s2B || !gfA || !gfB) return;
+
+      const makeBezier = (start, end) => {
+        const dx = (end.x - start.x) * 0.55;
+        return `M ${start.x} ${start.y} C ${start.x + dx} ${start.y}, ${end.x - dx} ${end.y}, ${end.x} ${end.y}`;
+      };
+
+      const pathS1A = document.getElementById('path-s1-a');
+      const pathS1B = document.getElementById('path-s1-b');
+      const pathS2A = document.getElementById('path-s2-a');
+      const pathS2B = document.getElementById('path-s2-b');
+
+      if (pathS1A) pathS1A.setAttribute('d', makeBezier(s1A, gfA));
+      if (pathS1B) pathS1B.setAttribute('d', makeBezier(s1B, gfA));
+      if (pathS2A) pathS2A.setAttribute('d', makeBezier(s2A, gfB));
+      if (pathS2B) pathS2B.setAttribute('d', makeBezier(s2B, gfB));
+
+      // 승리한 노래 슬롯에서 출발하는 선을 명확한 황금 네온으로 점등!
+      const isWinnerS1A = this.semi1.winner && this.semi1.winner.id === this.semi1.candA.id;
+      const isWinnerS1B = this.semi1.winner && this.semi1.winner.id === this.semi1.candB.id;
+      const isWinnerS2A = this.semi2.winner && this.semi2.winner.id === this.semi2.candA.id;
+      const isWinnerS2B = this.semi2.winner && this.semi2.winner.id === this.semi2.candB.id;
+
+      if (pathS1A) {
+        pathS1A.className.baseVal = `conn-path ${isWinnerS1A ? 'path-active-winner' : (this.semi1.winner ? 'path-eliminated' : 'path-idle')}`;
+      }
+      if (pathS1B) {
+        pathS1B.className.baseVal = `conn-path ${isWinnerS1B ? 'path-active-winner' : (this.semi1.winner ? 'path-eliminated' : 'path-idle')}`;
+      }
+      if (pathS2A) {
+        pathS2A.className.baseVal = `conn-path ${isWinnerS2A ? 'path-active-winner' : (this.semi2.winner ? 'path-eliminated' : 'path-idle')}`;
+      }
+      if (pathS2B) {
+        pathS2B.className.baseVal = `conn-path ${isWinnerS2B ? 'path-active-winner' : (this.semi2.winner ? 'path-eliminated' : 'path-idle')}`;
+      }
+    });
   }
 
   runNextFinalMatch() {

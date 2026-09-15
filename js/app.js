@@ -70,6 +70,47 @@ class AppController {
       btnAdd.addEventListener('click', () => this.handleAddVideo());
     }
 
+    // 참가영상 목록 복사/공유 버튼
+    const btnCopy = document.getElementById('btn-copy-candidates');
+    if (btnCopy) {
+      btnCopy.addEventListener('click', () => this.handleCopyCandidates());
+    }
+
+    // 참가영상 목록 붙여넣기 모달 열기
+    const btnPaste = document.getElementById('btn-paste-candidates');
+    if (btnPaste) {
+      btnPaste.addEventListener('click', () => this.openPasteModal());
+    }
+
+    // 붙여넣기 모달 닫기
+    const btnClosePaste = document.getElementById('btn-close-paste-modal');
+    const btnCancelPaste = document.getElementById('btn-cancel-paste');
+    const modalPaste = document.getElementById('modal-paste-candidates');
+
+    if (btnClosePaste) {
+      btnClosePaste.addEventListener('click', () => this.closePasteModal());
+    }
+    if (btnCancelPaste) {
+      btnCancelPaste.addEventListener('click', () => this.closePasteModal());
+    }
+    if (modalPaste) {
+      modalPaste.addEventListener('click', (e) => {
+        if (e.target === modalPaste) this.closePasteModal();
+      });
+    }
+
+    // 클립보드 빠른 읽기 버튼
+    const btnQuickRead = document.getElementById('btn-read-clipboard-quick');
+    if (btnQuickRead) {
+      btnQuickRead.addEventListener('click', () => this.handleQuickReadClipboard());
+    }
+
+    // 붙여넣기 확정 버튼 (기존 목록 + 신규 추가)
+    const btnConfirmPaste = document.getElementById('btn-confirm-paste');
+    if (btnConfirmPaste) {
+      btnConfirmPaste.addEventListener('click', () => this.handleConfirmPaste());
+    }
+
     // 참가영상 목록 한번에 지우기 버튼
     const btnClearAll = document.getElementById('btn-clear-all-videos');
     if (btnClearAll) {
@@ -282,6 +323,235 @@ class AppController {
     if (inputUrl) inputUrl.value = '';
     if (inputTitle) inputTitle.value = '';
     this.renderCandidateList();
+  }
+
+  // 참가영상 목록 텍스트 클립보드 복사 (공유용)
+  handleCopyCandidates() {
+    if (!this.candidates || this.candidates.length === 0) {
+      alert("복사할 참가 영상이 없습니다. 영상을 먼저 추가해 주세요.");
+      return;
+    }
+
+    const lines = [
+      `🏆 [골든 토너먼트 참가 영상 목록] (총 ${this.candidates.length}곡)`,
+      `─────────────────────────────────────────`
+    ];
+
+    this.candidates.forEach((cand, idx) => {
+      const numStr = String(idx + 1).padStart(2, '0');
+      const ytUrl = `https://www.youtube.com/watch?v=${cand.youtubeId}`;
+      lines.push(`${numStr}. ${cand.title} | ${ytUrl}`);
+    });
+
+    lines.push(`─────────────────────────────────────────`);
+    lines.push(`✨ 위 내용을 복사한 뒤, 골든 토너먼트의 [목록 붙여넣기]를 누르면 동일한 참가 목록이 그대로 추가됩니다!`);
+
+    const textToCopy = lines.join('\n');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert(`📋 참가 영상 목록(${this.candidates.length}곡)이 클립보드에 복사되었습니다!\n\n수정한 영상 제목과 유튜브 링크가 모두 포함되어 있습니다.\n다른 사람에게 공유하면 [목록 붙여넣기]로 동일한 목록을 즉시 생성/추가할 수 있습니다.`);
+      }).catch(err => {
+        this.fallbackCopyText(textToCopy);
+      });
+    } else {
+      this.fallbackCopyText(textToCopy);
+    }
+  }
+
+  fallbackCopyText(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      alert(`📋 참가 영상 목록이 클립보드에 복사되었습니다!\n\n수정한 영상 제목과 유튜브 링크가 모두 포함되어 있습니다.\n붙여넣기(Ctrl+V)하여 공유해 보세요.`);
+    } catch (e) {
+      prompt("아래 텍스트를 복사(Ctrl+C)하여 공유하세요:", text);
+    }
+    document.body.removeChild(textarea);
+  }
+
+  // 참가영상 목록 붙여넣기 모달 열기
+  openPasteModal() {
+    const modal = document.getElementById('modal-paste-candidates');
+    const textarea = document.getElementById('paste-candidates-text');
+    if (modal) {
+      modal.classList.add('active');
+    }
+    if (textarea) {
+      textarea.value = '';
+      textarea.focus();
+      // 가능한 경우 클립보드 자동 읽기 시도
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(text => {
+          if (text && textarea && !textarea.value) {
+            textarea.value = text;
+          }
+        }).catch(() => {});
+      }
+    }
+  }
+
+  // 참가영상 목록 붙여넣기 모달 닫기
+  closePasteModal() {
+    const modal = document.getElementById('modal-paste-candidates');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+
+  // [클립보드에서 자동 가져오기] 빠른 실행
+  handleQuickReadClipboard() {
+    const textarea = document.getElementById('paste-candidates-text');
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      navigator.clipboard.readText().then(text => {
+        if (text) {
+          if (textarea) {
+            textarea.value = text;
+            textarea.focus();
+          }
+        } else {
+          alert("클립보드에 복사된 내용이 없습니다.");
+        }
+      }).catch(err => {
+        alert("브라우저의 클립보드 읽기 권한이 허용되지 않았습니다.\n입력창을 클릭하신 후 Ctrl + V로 직접 붙여넣어 주세요.");
+      });
+    } else {
+      alert("현재 브라우저에서는 클립보드 자동 읽기를 지원하지 않습니다.\n입력창을 클릭하신 후 키보드로 Ctrl + V를 눌러 붙여넣어 주세요.");
+    }
+  }
+
+  // 공유 텍스트 지능형 파싱 (한 줄 포맷, 여러 줄 포맷, 단순 URL, JSON 모두 지원)
+  parseCandidatesText(rawText) {
+    if (!rawText || typeof rawText !== 'string') return [];
+    const text = rawText.trim();
+    if (!text) return [];
+
+    const results = [];
+
+    // 1. JSON 포맷 시도
+    if (text.startsWith('[') && text.endsWith(']')) {
+      try {
+        const jsonList = JSON.parse(text);
+        if (Array.isArray(jsonList)) {
+          jsonList.forEach((item, idx) => {
+            const ytId = item.youtubeId || this.parseYouTubeId(item.url || item.link || '');
+            if (ytId) {
+              results.push({
+                id: `custom_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+                title: (item.title || item.name || 'YouTube 영상').trim(),
+                youtubeId: ytId,
+                creator: item.creator || item.channel || '사용자 추가',
+                startSec: Number(item.startSec) || 0,
+                isCustom: true
+              });
+            }
+          });
+          if (results.length > 0) return results;
+        }
+      } catch (e) {}
+    }
+
+    // 2. 줄(Line) 단위 지능형 정규식 파싱
+    const lines = text.split(/\r?\n/);
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      // 구분선 및 헤더/푸터 안내 문구 스킵
+      if (line.startsWith('🏆') || line.startsWith('───') || line.startsWith('===') || line.startsWith('✨') || line.startsWith('*')) {
+        continue;
+      }
+
+      const match = line.match(ytRegex);
+      if (match) {
+        const ytId = match[1];
+        let title = '';
+        let creator = '공유 영상';
+
+        // 같은 줄에서 URL을 제외한 나머지 텍스트 추출
+        let remaining = line.replace(match[0], '').trim();
+
+        // 파이프(|), 하이픈(-), 링크 이모지(🔗), 앞쪽 순번('01. ', '1) ') 등 불필요한 서식 정돈
+        remaining = remaining.replace(/^🔗\s*/, '');
+        remaining = remaining.replace(/^[|–—\-:\s]+|[|–—\-:\s]+$/g, '');
+        remaining = remaining.replace(/^#?\d+[\.\)\s\-]+\s*/, '');
+        remaining = remaining.replace(/^[|–—\-:\s]+|[|–—\-:\s]+$/g, '').trim();
+
+        if (remaining.length > 0) {
+          title = remaining;
+        } else {
+          // 같은 줄에 제목이 없다면 바로 윗줄 확인 (예: 윗줄에 '01. 영상 제목'이 배치된 포맷)
+          if (i > 0) {
+            let prevLine = lines[i - 1].trim();
+            if (prevLine && !prevLine.match(ytRegex) && !prevLine.startsWith('───') && !prevLine.startsWith('🏆')) {
+              prevLine = prevLine.replace(/^#?\d+[\.\)\s\-]+\s*/, '').trim();
+              if (prevLine.length > 0) {
+                title = prevLine;
+              }
+            }
+          }
+        }
+
+        // 바로 아랫줄에 '👤 채널: XXX' 서식이 있다면 채널명 보존
+        if (i + 1 < lines.length) {
+          const nextLine = lines[i + 1].trim();
+          const channelMatch = nextLine.match(/(?:👤\s*채널\s*[:|]\s*)([^\n]+)/i);
+          if (channelMatch) {
+            creator = channelMatch[1].trim();
+          }
+        }
+
+        if (!title) {
+          title = `YouTube 영상 (${ytId})`;
+        }
+
+        results.push({
+          id: `custom_${Date.now()}_${results.length}_${Math.random().toString(36).substring(2, 6)}`,
+          title: title,
+          youtubeId: ytId,
+          creator: creator,
+          startSec: 0,
+          isCustom: true
+        });
+      }
+    }
+
+    return results;
+  }
+
+  // 목록 붙여넣기 확정: 원래 가지고 있는 목록 + 신규 붙여넣은 목록 추가
+  handleConfirmPaste() {
+    const textarea = document.getElementById('paste-candidates-text');
+    if (!textarea) return;
+
+    const rawText = textarea.value.trim();
+    if (!rawText) {
+      alert("붙여넣을 텍스트를 입력해 주세요.");
+      textarea.focus();
+      return;
+    }
+
+    const parsedList = this.parseCandidatesText(rawText);
+    if (parsedList.length === 0) {
+      alert("입력한 텍스트에서 올바른 YouTube 영상 링크를 찾을 수 없습니다.\n\nYouTube 영상 URL(예: https://www.youtube.com/watch?v=...)이 포함된 목록 텍스트를 붙여넣어 주세요.");
+      return;
+    }
+
+    // 사용자 핵심 요구사항: 원래 가지고 있는 목록 + 신규로 붙여넣은 목록 추가
+    this.candidates = [...this.candidates, ...parsedList];
+    this.saveCandidatesToStorage();
+    this.renderCandidateList();
+
+    this.closePasteModal();
+    alert(`🎉 총 ${parsedList.length}개의 영상이 기존 참가 목록에 성공적으로 추가되었습니다!\n\n(현재 참가 목록: 총 ${this.candidates.length}곡)`);
   }
 
   // 참가영상 목록 한번에 지우기 (웹 저장소 실시간 동기화)

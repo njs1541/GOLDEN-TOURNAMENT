@@ -63,10 +63,20 @@
                   <label class="setup-label">참가 영상 목록</label>
                   <span class="badge-count"><span id="candidate-count">16</span>개 등록됨</span>
                 </div>
-                <button id="btn-clear-all-videos" class="btn-text-action" title="참가 목록의 모든 영상을 한번에 비웁니다">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                  목록 비우기
-                </button>
+                <div class="header-action-group">
+                  <button id="btn-copy-candidates" class="btn-text-action" title="현재 참가 영상 목록을 복사하여 다른 사람에게 공유합니다">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    목록 복사
+                  </button>
+                  <button id="btn-paste-candidates" class="btn-text-action btn-accent-action" title="공유받은 참가 영상 목록을 붙여넣어 기존 목록에 추가합니다">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                    목록 붙여넣기
+                  </button>
+                  <button id="btn-clear-all-videos" class="btn-text-action btn-danger-action" title="참가 목록의 모든 영상을 한번에 비웁니다">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    목록 비우기
+                  </button>
+                </div>
               </div>
               <div class="candidate-list-container custom-scrollbar" id="candidate-list">
                 <!-- 동적으로 리스트 렌더링 -->
@@ -357,6 +367,35 @@
         </div>
         <div class="modal-body custom-scrollbar" id="live-ranking-list">
           <!-- 실시간 랭킹 렌더링 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 참가 영상 목록 붙여넣기 / 가져오기 모달 다이얼로그 -->
+    <div class="modal-backdrop" id="modal-paste-candidates">
+      <div class="modal-dialog glass-panel paste-modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-title-icon">📋</span>
+            <h3>참가 영상 목록 붙여넣기</h3>
+          </div>
+          <button class="modal-close" id="btn-close-paste-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="paste-modal-tip">공유받은 목록 텍스트를 붙여넣으세요. <strong>원래 가지고 있는 목록에 새로 추가</strong>됩니다.</p>
+          <div class="paste-input-wrap">
+            <textarea id="paste-candidates-text" class="paste-textarea custom-scrollbar" placeholder="여기에 공유받은 텍스트를 붙여넣으세요 (Ctrl + V)...&#10;&#10;[지원되는 포맷 예시]&#10;01. NewJeans - Super Shy | https://www.youtube.com/watch?v=ArmDp-zijuc&#10;02. IVE - I AM | https://www.youtube.com/watch?v=6ZUIwj3FgUY&#10;&#10;* 줄마다 영상 링크가 포함되어 있으면 제목과 함께 자동으로 인식됩니다."></textarea>
+          </div>
+          <div class="paste-modal-footer">
+            <button id="btn-read-clipboard-quick" class="btn-ghost btn-sm" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              클립보드에서 자동 가져오기
+            </button>
+            <div class="paste-action-btns">
+              <button id="btn-cancel-paste" class="btn-secondary btn-sm" type="button">취소</button>
+              <button id="btn-confirm-paste" class="btn-primary btn-gold-glow btn-sm" type="button">기존 목록에 추가하기 (+)</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

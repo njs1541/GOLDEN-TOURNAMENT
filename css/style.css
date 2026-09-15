@@ -44,6 +44,15 @@
   --radius-sm: 6px;
   --transition-fast: 0.16s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-smooth: 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* 방송 송출(치지직/유튜브) 가독성 최적화 타이포그래피 변수 체계 */
+  --font-scale-global: 1.15;
+  --fs-battle-title: 22px;
+  --fs-battle-channel: 16px;
+  --fs-battle-meta: 16px;
+  --fs-battle-btn: 18px;
+  --fs-bracket-title: 16px;
+  --fs-ranking-title: 16px;
 }
 
 /* 기본 리셋 & 타이포그래피 */
@@ -55,6 +64,7 @@
 
 body {
   font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  font-size: calc(15px * var(--font-scale-global, 1.15));
   background-color: var(--bg-base);
   background-image:
     radial-gradient(ellipse 60% 40% at 20% 0%, rgba(142, 45, 226, 0.15) 0%, transparent 70%),
@@ -1150,10 +1160,10 @@ body[data-current-view="battle"] {
 }
 
 .corner-tag {
-  font-size: 11px;
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.82);
   font-weight: 900;
   letter-spacing: 1.2px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 6px;
   text-transform: uppercase;
 }
@@ -1173,9 +1183,9 @@ body[data-current-view="battle"] {
 }
 
 .elo-badge {
-  font-size: 11.5px;
+  font-size: var(--fs-battle-meta, 16px);
   font-weight: 800;
-  padding: 3px 9px;
+  padding: 4px 12px;
   border-radius: 999px;
   letter-spacing: 0.5px;
   font-family: 'Outfit', monospace;
@@ -1200,9 +1210,9 @@ body[data-current-view="battle"] {
   background: rgba(255, 0, 0, 0.15);
   border: 1px solid rgba(255, 0, 0, 0.38);
   color: #ff5e5e;
-  font-size: 11.5px;
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.85);
   font-weight: 800;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 999px;
   text-decoration: none;
   transition: all var(--transition-fast);
@@ -1326,7 +1336,7 @@ body[data-current-view="battle"] {
 }
 
 .candidate-title {
-  font-size: 15px;
+  font-size: var(--fs-battle-title, 22px);
   font-weight: 800;
   line-height: 1.35;
   white-space: nowrap;
@@ -1343,7 +1353,7 @@ body[data-current-view="battle"] {
 }
 
 .candidate-channel {
-  font-size: 12.5px;
+  font-size: var(--fs-battle-channel, 16px);
   color: var(--text-dim);
   font-weight: 600;
 }
@@ -1355,12 +1365,12 @@ body[data-current-view="battle"] {
 }
 
 .stat-pill {
-  font-size: 11px;
+  font-size: calc(var(--fs-battle-channel, 16px) * 0.85);
   font-weight: 700;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-glass);
-  padding: 2px 7px;
+  padding: 3px 9px;
   border-radius: 4px;
 }
 
@@ -1376,13 +1386,13 @@ body[data-current-view="battle"] {
 }
 
 .match-indicator-badge {
-  font-size: 11px;
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.88);
   font-weight: 900;
   letter-spacing: 1.2px;
   color: var(--gold-primary);
   background: rgba(245, 176, 65, 0.1);
   border: 1px solid rgba(245, 176, 65, 0.3);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 999px;
   box-shadow: 0 0 10px var(--gold-glow-soft);
 }
@@ -1543,7 +1553,7 @@ body[data-current-view="battle"] {
 }
 
 .btn-vote-label {
-  font-size: 14.5px;
+  font-size: var(--fs-battle-btn, 18px);
   font-weight: 800;
   letter-spacing: 0.3px;
 }
@@ -1552,14 +1562,14 @@ body[data-current-view="battle"] {
 .key-hint-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .key-hint {
-  font-size: 11px;
+  font-size: calc(var(--fs-battle-btn, 18px) * 0.72);
   font-weight: 900;
   font-family: 'Outfit', monospace;
-  padding: 3px 7px;
+  padding: 4px 9px;
   background: rgba(0, 0, 0, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-bottom: 2px solid rgba(255, 255, 255, 0.35);
@@ -1579,7 +1589,7 @@ body[data-current-view="battle"] {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-top: 4px;
   margin-bottom: 2px;
   flex-shrink: 0;
@@ -1589,13 +1599,13 @@ body[data-current-view="battle"] {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-glass);
   color: var(--text-dim);
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 11.5px;
+  font-size: 13.5px;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   transition: var(--transition-fast);
   cursor: pointer;
 }
@@ -1847,7 +1857,7 @@ body[data-current-view="battle"] {
 }
 
 .slot-title {
-  font-size: 12.5px;
+  font-size: var(--fs-bracket-title, 16px);
   font-weight: 700;
   color: var(--text-main);
   white-space: nowrap;
@@ -1859,7 +1869,7 @@ body[data-current-view="battle"] {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 10.5px;
+  font-size: calc(var(--fs-bracket-title, 16px) * 0.82);
 }
 
 .slot-elo {
@@ -2116,16 +2126,16 @@ body[data-current-view="battle"] {
 }
 
 .tier-chip-title {
-  font-size: 12px;
+  font-size: var(--fs-ranking-title, 16px);
   font-weight: 600;
-  max-width: 140px;
+  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .tier-chip-elo {
-  font-size: 10px;
+  font-size: calc(var(--fs-ranking-title, 16px) * 0.82);
   color: var(--gold-primary);
   font-weight: 700;
 }
@@ -2345,7 +2355,12 @@ body[data-current-view="battle"] {
 .prob-text {
   font-family: 'Outfit', monospace;
   font-weight: 800;
-  font-size: 12px;
+  font-size: var(--fs-battle-meta, 16px);
+}
+
+.prob-title {
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.82);
+  font-weight: 700;
 }
 
 .text-dim {
@@ -2391,11 +2406,205 @@ body[data-current-view="battle"] {
   color: var(--text-muted);
 }
 
-/* 실시간 랭킹 모달 행 내부 래퍼 */
+/* 실시간 랭킹 모달 행 내부 래퍼 & 폰트 크기 바인딩 */
 .item-thumb-title {
   display: flex;
   align-items: center;
   gap: 12px;
   flex: 1;
   overflow: hidden;
+}
+
+.ranking-item .item-title {
+  font-size: var(--fs-ranking-title, 16px) !important;
+  font-weight: 700;
+}
+
+.ranking-item .item-channel {
+  font-size: calc(var(--fs-ranking-title, 16px) * 0.85) !important;
+}
+
+/* ================= 화면 & 글씨 크기 설정 모달 전용 스타일 ================= */
+.font-settings-modal-dialog {
+  max-width: 680px;
+  width: 94%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.font-settings-body {
+  max-height: calc(88vh - 75px);
+  padding: 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.font-settings-banner {
+  background: linear-gradient(135deg, rgba(245, 176, 65, 0.12) 0%, rgba(0, 242, 254, 0.08) 100%);
+  border: 1px solid rgba(245, 176, 65, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+}
+
+.banner-badge {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: var(--gold-primary);
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.banner-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.font-settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.font-setting-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  transition: all var(--transition-fast);
+}
+
+.font-setting-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.font-setting-item.highlight-box {
+  background: linear-gradient(90deg, rgba(0, 242, 254, 0.08) 0%, rgba(245, 176, 65, 0.08) 100%);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 242, 254, 0.08);
+}
+
+.font-setting-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.setting-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setting-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.setting-label {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-main);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.setting-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  display: block;
+}
+
+.setting-val-badge {
+  font-size: 13px;
+  font-weight: 900;
+  font-family: 'Outfit', monospace;
+  color: var(--gold-primary);
+  background: rgba(245, 176, 65, 0.14);
+  border: 1px solid rgba(245, 176, 65, 0.35);
+  padding: 4px 12px;
+  border-radius: 999px;
+  min-width: 58px;
+  text-align: center;
+  box-shadow: 0 0 10px var(--gold-glow-soft);
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.slider-min,
+.slider-max {
+  font-size: 11.5px;
+  font-family: 'Outfit', monospace;
+  font-weight: 700;
+  color: var(--text-dim);
+  min-width: 38px;
+}
+
+.slider-max {
+  text-align: right;
+}
+
+/* 커스텀 슬라이더 컨트롤러 */
+.custom-range {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  outline: none;
+  transition: background var(--transition-fast);
+}
+
+.custom-range:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.custom-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gold-gradient);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--gold-glow), 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.custom-range::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 16px var(--gold-glow), 0 3px 8px rgba(0, 0, 0, 0.5);
+}
+
+.custom-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gold-gradient);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 0 10px var(--gold-glow), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.font-settings-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-glass);
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
 }

@@ -3,10 +3,23 @@
  */
 
 const STORAGE_CANDIDATES_KEY = 'GOLDEN_TOURNAMENT_CANDIDATES_LIST';
+const STORAGE_FONT_SETTINGS_KEY = 'GOLDEN_TOURNAMENT_FONT_SETTINGS';
+
+// 치지직/유튜브 방송 송출 가독성 최적화 권장 기본값
+const DEFAULT_FONT_SETTINGS = {
+  scaleGlobal: 115,    // 115%
+  battleTitle: 22,    // 22px
+  battleChannel: 16,  // 16px
+  battleMeta: 16,     // 16px
+  battleBtn: 18,      // 18px
+  bracketTitle: 16,   // 16px
+  rankingTitle: 16    // 16px
+};
 
 class AppController {
   constructor() {
     this.candidates = [];
+    this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
     this.currentView = 'setup'; // 'setup' | 'battle' | 'final' | 'result'
     this.engine = null; // engine.js에서 초기화
     this.bracket = null; // bracket.js에서 초기화
@@ -14,6 +27,9 @@ class AppController {
   }
 
   init() {
+    // 0. 화면 및 글씨 크기 설정 복원 및 즉시 적용
+    this.initFontSettings();
+
     // 1. 웹 저장소의 후보 목록 복원 (저장된 상태가 없으면 기본 16선 로드)
     this.loadDefaultCandidates();
 
@@ -145,6 +161,45 @@ class AppController {
         modalRanking.classList.remove('active');
       });
     }
+
+    // 화면 & 글씨 크기 설정 모달 열기/닫기
+    const btnFontSettings = document.getElementById('btn-open-font-settings');
+    const modalFontSettings = document.getElementById('modal-font-settings');
+    const btnCloseFontModal = document.getElementById('btn-close-font-modal');
+    const btnCloseFontConfirm = document.getElementById('btn-close-font-settings-confirm');
+    const btnResetFont = document.getElementById('btn-reset-font-settings');
+
+    if (btnFontSettings && modalFontSettings) {
+      btnFontSettings.addEventListener('click', () => {
+        this.syncFontSettingsUI();
+        modalFontSettings.classList.add('active');
+      });
+    }
+
+    const closeFontModal = () => {
+      if (modalFontSettings) modalFontSettings.classList.remove('active');
+    };
+
+    if (btnCloseFontModal) btnCloseFontModal.addEventListener('click', closeFontModal);
+    if (btnCloseFontConfirm) btnCloseFontConfirm.addEventListener('click', closeFontModal);
+    if (modalFontSettings) {
+      modalFontSettings.addEventListener('click', (e) => {
+        if (e.target === modalFontSettings) closeFontModal();
+      });
+    }
+
+    if (btnResetFont) {
+      btnResetFont.addEventListener('click', () => this.resetFontSettings());
+    }
+
+    // 각 글씨 조절 슬라이더 실시간 바인딩 (Zero-Lag 60FPS)
+    this.bindFontSlider('slider-scale-global', 'val-scale-global', 'scaleGlobal', '%');
+    this.bindFontSlider('slider-battle-title', 'val-battle-title', 'battleTitle', 'px');
+    this.bindFontSlider('slider-battle-channel', 'val-battle-channel', 'battleChannel', 'px');
+    this.bindFontSlider('slider-battle-meta', 'val-battle-meta', 'battleMeta', 'px');
+    this.bindFontSlider('slider-battle-btn', 'val-battle-btn', 'battleBtn', 'px');
+    this.bindFontSlider('slider-bracket-title', 'val-bracket-title', 'bracketTitle', 'px');
+    this.bindFontSlider('slider-ranking-title', 'val-ranking-title', 'rankingTitle', 'px');
 
     // 키보드 단축키 (A / D, 좌 / 우 화살표)
     window.addEventListener('keydown', (e) => {
@@ -783,6 +838,98 @@ class AppController {
         </div>
       `;
       listEl.appendChild(row);
+    });
+  }
+
+  // ================= 화면 & 글씨 크기 설정 매니저 (치지직/방송 최적화) =================
+  initFontSettings() {
+    this.loadFontSettings();
+    this.applyFontSettings();
+  }
+
+  loadFontSettings() {
+    try {
+      const stored = localStorage.getItem(STORAGE_FONT_SETTINGS_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          this.fontSettings = Object.assign({}, DEFAULT_FONT_SETTINGS, parsed);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('폰트 설정 로드 실패, 기본값으로 초기화:', e);
+    }
+    this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
+  }
+
+  applyFontSettings() {
+    const s = this.fontSettings;
+    const root = document.documentElement;
+
+    // CSS Custom Properties 즉시 주입 (GPU 하드웨어 가속, 60fps 무지연)
+    root.style.setProperty('--font-scale-global', (s.scaleGlobal / 100).toString());
+    root.style.setProperty('--fs-battle-title', `${s.battleTitle}px`);
+    root.style.setProperty('--fs-battle-channel', `${s.battleChannel}px`);
+    root.style.setProperty('--fs-battle-meta', `${s.battleMeta}px`);
+    root.style.setProperty('--fs-battle-btn', `${s.battleBtn}px`);
+    root.style.setProperty('--fs-bracket-title', `${s.bracketTitle}px`);
+    root.style.setProperty('--fs-ranking-title', `${s.rankingTitle}px`);
+
+    this.syncFontSettingsUI();
+  }
+
+  saveFontSettings() {
+    try {
+      localStorage.setItem(STORAGE_FONT_SETTINGS_KEY, JSON.stringify(this.fontSettings));
+    } catch (e) {
+      console.error('폰트 설정 로컬스토리지 저장 실패:', e);
+    }
+  }
+
+  resetFontSettings() {
+    this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
+    this.applyFontSettings();
+    this.saveFontSettings();
+  }
+
+  syncFontSettingsUI() {
+    const mapping = [
+      { slider: 'slider-scale-global', val: 'val-scale-global', key: 'scaleGlobal', unit: '%' },
+      { slider: 'slider-battle-title', val: 'val-battle-title', key: 'battleTitle', unit: 'px' },
+      { slider: 'slider-battle-channel', val: 'val-battle-channel', key: 'battleChannel', unit: 'px' },
+      { slider: 'slider-battle-meta', val: 'val-battle-meta', key: 'battleMeta', unit: 'px' },
+      { slider: 'slider-battle-btn', val: 'val-battle-btn', key: 'battleBtn', unit: 'px' },
+      { slider: 'slider-bracket-title', val: 'val-bracket-title', key: 'bracketTitle', unit: 'px' },
+      { slider: 'slider-ranking-title', val: 'val-ranking-title', key: 'rankingTitle', unit: 'px' }
+    ];
+
+    mapping.forEach(m => {
+      const sliderEl = document.getElementById(m.slider);
+      const valEl = document.getElementById(m.val);
+      const currentVal = this.fontSettings[m.key];
+      if (sliderEl && currentVal !== undefined) {
+        sliderEl.value = currentVal;
+      }
+      if (valEl && currentVal !== undefined) {
+        valEl.textContent = `${currentVal}${m.unit}`;
+      }
+    });
+  }
+
+  bindFontSlider(sliderId, valId, key, unit) {
+    const sliderEl = document.getElementById(sliderId);
+    const valEl = document.getElementById(valId);
+    if (!sliderEl) return;
+
+    sliderEl.addEventListener('input', (e) => {
+      const num = Number(e.target.value);
+      this.fontSettings[key] = num;
+      if (valEl) {
+        valEl.textContent = `${num}${unit}`;
+      }
+      this.applyFontSettings();
+      this.saveFontSettings();
     });
   }
 }

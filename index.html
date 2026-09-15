@@ -35,6 +35,13 @@
           </svg>
           실시간 랭킹
         </button>
+        <button id="btn-open-font-settings" class="btn-ghost" title="화면 및 글씨 크기 설정">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          글씨 설정
+        </button>
       </div>
     </header>
 
@@ -395,6 +402,170 @@
               <button id="btn-cancel-paste" class="btn-secondary btn-sm" type="button">취소</button>
               <button id="btn-confirm-paste" class="btn-primary btn-gold-glow btn-sm" type="button">기존 목록에 추가하기 (+)</button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 화면 & 영역별 글씨 크기 조절 모달 다이얼로그 -->
+    <div class="modal-backdrop" id="modal-font-settings">
+      <div class="modal-dialog glass-panel font-settings-modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-title-icon">⚙️</span>
+            <h3>화면 & 글씨 크기 설정</h3>
+          </div>
+          <button class="modal-close" id="btn-close-font-modal">&times;</button>
+        </div>
+        <div class="modal-body custom-scrollbar font-settings-body">
+          <div class="font-settings-banner">
+            <span class="banner-badge">📺 방송 송출 가독성 최적화</span>
+            <p class="banner-desc">치지직, 유튜브 등 방송 화면에 송출할 때 시청자가 제목과 스탯을 선명하게 볼 수 있도록 영역별 글씨 크기를 맞춤 조절합니다. 조절 즉시 실시간 반영되며 새로고침해도 자동 유지됩니다.</p>
+          </div>
+
+          <div class="font-settings-grid">
+            <!-- 1. 전체 글씨 배율 (전역 UI 스케일) -->
+            <div class="font-setting-item highlight-box">
+              <div class="font-setting-header">
+                <div class="setting-title-wrap">
+                  <span class="setting-icon">🌐</span>
+                  <div>
+                    <label class="setting-label" for="slider-scale-global">전체 화면 글씨 배율 (전역 스케일)</label>
+                    <span class="setting-desc">모든 화면의 기본 폰트 크기를 비율로 조절합니다</span>
+                  </div>
+                </div>
+                <span class="setting-val-badge" id="val-scale-global">115%</span>
+              </div>
+              <div class="slider-row">
+                <span class="slider-min">80%</span>
+                <input type="range" id="slider-scale-global" min="80" max="160" step="5" value="115" class="custom-range">
+                <span class="slider-max">160%</span>
+              </div>
+            </div>
+
+            <!-- 2. 대결 영상 제목 크기 -->
+            <div class="font-setting-item">
+              <div class="font-setting-header">
+                <div class="setting-title-wrap">
+                  <span class="setting-icon">🎵</span>
+                  <div>
+                    <label class="setting-label" for="slider-battle-title">대결 화면: 영상 제목 크기</label>
+                    <span class="setting-desc">플레이어 아래 후보 영상 제목(곡명)의 크기</span>
+                  </div>
+                </div>
+                <span class="setting-val-badge" id="val-battle-title">22px</span>
+              </div>
+              <div class="slider-row">
+                <span class="slider-min">14px</span>
+                <input type="range" id="slider-battle-title" min="14" max="32" step="1" value="22" class="custom-range">
+                <span class="slider-max">32px</span>
+              </div>
+            </div>
+
+            <!-- 3. 대결 영상 채널명 & 전적 기록 크기 -->
+            <div class="font-setting-item">
+              <div class="font-setting-header">
+                <div class="setting-title-wrap">
+                  <span class="setting-icon">👤</span>
+                  <div>
+                    <label class="setting-label" for="slider-battle-channel">대결 화면: 채널명 & 전적 기록</label>
+                    <span class="setting-desc">영상 아래 채널명 및 승패 뱃지 글씨 크기</span>
+                  </div>
+                </div>
+                <span class="setting-val-badge" id="val-battle-channel">16px</span>
+              </div>
+              <div class="slider-row">
+                <span class="slider-min">12px</span>
+                <input type="range" id="slider-battle-channel" min="12" max="24" step="1" value="16" class="custom-range">
+                <span class="slider-max">24px</span>
+              </div>
+            </div>
+
+            <!-- 4. ELO 점수 & 승률 게이지 크기 -->
+            <div class="font-setting-item">
+              <div class="font-setting-header">
+                <div class="setting-title-wrap">
+                  <span class="setting-icon">⚡</span>
+                  <div>
+                    <label class="setting-label" for="slider-battle-meta">대결 화면: ELO & 승률 정보</label>
+                    <span class="setting-desc">상단 ELO 레이팅 뱃지 및 중앙 승률 퍼센트 크기</span>
+                  </div>
+                </div>
+                <span class="setting-val-badge" id="val-battle-meta">16px</span>
+              </div>
+              <div class="slider-row">
+                <span class="slider-min">12px</span>
+                <input type="range" id="slider-battle-meta" min="12" max="24" step="1" value="16" class="custom-range">
+                <span class="slider-max">24px</span>
+              </div>
+            </div>
+
+            <!-- 5. 투표 버튼 & 단축키 안내 크기 -->
+            <div class="font-setting-item">
+              <div class="font-setting-header">
+                <div class="setting-title-wrap">
+                  <span class="setting-icon">🖱️</span>
+                  <div>
+                    <label class="setting-label" for="slider-battle-btn">대결 화면: 투표 버튼 & 단축키</label>
+                    <span class="setting-desc">하단 투표 버튼 문구 및 키보드 단축키(A/D) 뱃지</span>
+                  </div>
+                </div>
+                <span class="setting-val-badge" id="val-battle-btn">18px</span>
+              </div>
+              <div class="slider-row">
+                <span class="slider-min">13px</span>
+                <input type="range" id="slider-battle-btn" min="13" max="26" step="1" value="18" class="custom-range">
+                <span class="slider-max">26px</span>
+              </div>
+            </div>
+
+            <!-- 6. 4강 대진표 슬롯 크기 -->
+            <div class="font-setting-item">
+              <div class="font-setting-header">
+                <div class="setting-title-wrap">
+                  <span class="setting-icon">🏆</span>
+                  <div>
+                    <label class="setting-label" for="slider-bracket-title">4강 대진표: 매치 카드 글씨</label>
+                    <span class="setting-desc">브래킷 노드의 곡명, ELO, 라운드 헤더 크기</span>
+                  </div>
+                </div>
+                <span class="setting-val-badge" id="val-bracket-title">16px</span>
+              </div>
+              <div class="slider-row">
+                <span class="slider-min">12px</span>
+                <input type="range" id="slider-bracket-title" min="12" max="24" step="1" value="16" class="custom-range">
+                <span class="slider-max">24px</span>
+              </div>
+            </div>
+
+            <!-- 7. 실시간 랭킹 & 티어표 크기 -->
+            <div class="font-setting-item">
+              <div class="font-setting-header">
+                <div class="setting-title-wrap">
+                  <span class="setting-icon">📊</span>
+                  <div>
+                    <label class="setting-label" for="slider-ranking-title">실시간 랭킹 & 티어표 글씨</label>
+                    <span class="setting-desc">Elo 순위표 모달 및 최종 티어표 카드 제목 크기</span>
+                  </div>
+                </div>
+                <span class="setting-val-badge" id="val-ranking-title">16px</span>
+              </div>
+              <div class="slider-row">
+                <span class="slider-min">12px</span>
+                <input type="range" id="slider-ranking-title" min="12" max="24" step="1" value="16" class="custom-range">
+                <span class="slider-max">24px</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="font-settings-footer">
+            <button id="btn-reset-font-settings" class="btn-ghost btn-sm" type="button" title="치지직 방송 송출에 최적화된 권장 기본값으로 되돌립니다">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+              방송 최적 기본값 복구
+            </button>
+            <button id="btn-close-font-settings-confirm" class="btn-primary btn-gold-glow btn-sm" type="button">
+              설정 완료 & 닫기
+            </button>
           </div>
         </div>
       </div>

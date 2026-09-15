@@ -160,13 +160,17 @@ class DualPlayerManager {
     document.getElementById('card-b')?.classList.remove('embed-error');
     const loaderA = document.getElementById('loader-a');
     const loaderB = document.getElementById('loader-b');
+    const defaultLoaderHtml = `
+      <div class="dual-spinner"></div>
+      <span class="loader-text">영상 동기화 중...</span>
+    `;
     if (loaderA) {
       loaderA.classList.remove('active');
-      loaderA.innerHTML = '<div class="spinner"></div>';
+      loaderA.innerHTML = defaultLoaderHtml;
     }
     if (loaderB) {
       loaderB.classList.remove('active');
-      loaderB.innerHTML = '<div class="spinner"></div>';
+      loaderB.innerHTML = defaultLoaderHtml;
     }
 
     const cueOrPlay = (player, video, containerId) => {

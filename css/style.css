@@ -1956,3 +1956,68 @@ button {
     margin: 8px 0;
   }
 }
+
+/* ================= 보조 유틸리티 & 누락 스타일 보강 ================= */
+.sparkle-icon {
+  display: inline-block;
+  font-size: 14px;
+  animation: floatIcon 2.4s ease-in-out infinite;
+}
+
+.prob-text {
+  font-family: 'Outfit', monospace;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.text-dim {
+  color: var(--text-dim) !important;
+}
+
+/* 임베드 제한 시 노출되는 YouTube 직접 듣기 버튼 */
+.btn-direct-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ff0000;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13.5px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(255, 0, 0, 0.45);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn-direct-hero:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 26px rgba(255, 0, 0, 0.65);
+}
+
+/* 티어메이커 섹션 헤더 타이틀 */
+.section-title-row {
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.section-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* 실시간 랭킹 모달 행 내부 래퍼 */
+.item-thumb-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}

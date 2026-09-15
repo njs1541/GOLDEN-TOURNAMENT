@@ -286,6 +286,8 @@ class GoldenBracketManager {
     document.getElementById('channel-a').textContent = candA.creator || 'YouTube';
     document.getElementById('badge-elo-a').textContent = `ELO ${Math.round(candA.elo)}`;
     document.getElementById('stats-record-a').textContent = `${candA.wins}승 ${candA.losses}패`;
+    const statsMatchesA = document.getElementById('stats-matches-a');
+    if (statsMatchesA) statsMatchesA.textContent = `${candA.matches}회 대결`;
     const linkDirectA = document.getElementById('link-direct-a');
     if (linkDirectA) linkDirectA.href = `https://www.youtube.com/watch?v=${candA.youtubeId}`;
 
@@ -293,31 +295,63 @@ class GoldenBracketManager {
     document.getElementById('channel-b').textContent = candB.creator || 'YouTube';
     document.getElementById('badge-elo-b').textContent = `ELO ${Math.round(candB.elo)}`;
     document.getElementById('stats-record-b').textContent = `${candB.wins}승 ${candB.losses}패`;
+    const statsMatchesB = document.getElementById('stats-matches-b');
+    if (statsMatchesB) statsMatchesB.textContent = `${candB.matches}회 대결`;
     const linkDirectB = document.getElementById('link-direct-b');
     if (linkDirectB) linkDirectB.href = `https://www.youtube.com/watch?v=${candB.youtubeId}`;
 
+    // 실시간 예상 승률 계산 및 렌더링
+    const expectedA = 1 / (1 + Math.pow(10, (candB.elo - candA.elo) / 400));
+    const percentA = Math.max(5, Math.min(95, Math.round(expectedA * 100)));
+    const percentB = 100 - percentA;
+
+    const probValA = document.getElementById('prob-val-a');
+    const probValB = document.getElementById('prob-val-b');
+    const probFillA = document.getElementById('prob-fill-a');
+    const probFillB = document.getElementById('prob-fill-b');
+
+    if (probValA) probValA.textContent = `${percentA}%`;
+    if (probValB) probValB.textContent = `${percentB}%`;
+    if (probFillA) probFillA.style.width = `${percentA}%`;
+    if (probFillB) probFillB.style.width = `${percentB}%`;
+
+    // 이전 매치 플래시 효과 리셋
+    document.getElementById('card-a')?.classList.remove('vote-win-flash');
+    document.getElementById('card-b')?.classList.remove('vote-win-flash');
+
     document.getElementById('current-match-indicator').textContent = phaseTitle;
     document.getElementById('streak-indicator').textContent = '⚡ 골든 파이널 진검승부!';
+
+    // 4강/결승전에서는 스킵 및 4강 바로가기 버튼 숨김
+    const btnSkip = document.getElementById('btn-battle-skip');
+    const btnJump = document.getElementById('btn-jump-to-final');
+    if (btnSkip) btnSkip.style.display = 'none';
+    if (btnJump) btnJump.style.display = 'none';
 
     if (window.dualPlayer) {
       window.dualPlayer.loadMatch(candA, candB);
     }
 
-    // 투표 버튼 일회성 바인딩
+    // 투표 버튼 일회성 바인딩 (타격감 플래시 포함)
     const btnA = document.getElementById('btn-vote-a');
     const btnB = document.getElementById('btn-vote-b');
 
-    btnA.onclick = () => {
+    const handleFinalVote = (winnerCand, winnerSide) => {
       btnA.onclick = null;
       btnB.onclick = null;
-      onWon(candA);
+      const winCard = document.getElementById(winnerSide === 'A' ? 'card-a' : 'card-b');
+      if (winCard) winCard.classList.add('vote-win-flash');
+
+      setTimeout(() => {
+        // 하단 버튼 원상복구
+        if (btnSkip) btnSkip.style.display = '';
+        if (btnJump) btnJump.style.display = '';
+        onWon(winnerCand);
+      }, 250);
     };
 
-    btnB.onclick = () => {
-      btnA.onclick = null;
-      btnB.onclick = null;
-      onWon(candB);
-    };
+    btnA.onclick = () => handleFinalVote(candA, 'A');
+    btnB.onclick = () => handleFinalVote(candB, 'B');
   }
 
   finishTournament(champion) {

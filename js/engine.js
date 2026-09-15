@@ -179,7 +179,6 @@ class TournamentEngine {
     if (statsMatchesB) statsMatchesB.textContent = `${candB.matches}회 대결`;
     const linkDirectB = document.getElementById('link-direct-b');
     if (linkDirectB) linkDirectB.href = `https://www.youtube.com/watch?v=${candB.youtubeId}`;
-    if (statsMatchesB) statsMatchesB.textContent = `${candB.matches}회 대결`;
 
     // 4. 실시간 예상 승률(Elo Expected Win Rate) 계산 및 렌더링
     const expectedA = 1 / (1 + Math.pow(10, (candB.elo - candA.elo) / 400));

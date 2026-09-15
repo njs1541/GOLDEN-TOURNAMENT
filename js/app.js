@@ -2,6 +2,8 @@
  * 메인 애플리케이션 진입점 & 화면 전환 컨트롤러
  */
 
+const STORAGE_CANDIDATES_KEY = 'GOLDEN_TOURNAMENT_CANDIDATES_LIST';
+
 class AppController {
   constructor() {
     this.candidates = [];
@@ -12,7 +14,7 @@ class AppController {
   }
 
   init() {
-    // 1. 기본 영상 리스트 복원
+    // 1. 웹 저장소의 후보 목록 복원 (저장된 상태가 없으면 기본 16선 로드)
     this.loadDefaultCandidates();
 
     // 2. DOM 이벤트 리스너 등록
@@ -28,11 +30,37 @@ class AppController {
     this.switchView('setup');
   }
 
-  loadDefaultCandidates() {
-    if (window.DEFAULT_VIDEOS && Array.isArray(window.DEFAULT_VIDEOS)) {
-      // 복사본 생성
-      this.candidates = window.DEFAULT_VIDEOS.map(v => ({ ...v }));
+  // 후보 목록 전체를 웹 저장소(localStorage)에 실시간 동기화
+  saveCandidatesToStorage() {
+    try {
+      localStorage.setItem(STORAGE_CANDIDATES_KEY, JSON.stringify(this.candidates));
+    } catch (e) {
+      console.error('웹 저장소 동기화 실패:', e);
     }
+  }
+
+  loadDefaultCandidates() {
+    // 웹 저장소에 사용자가 조작한 목록(빈 목록 포함)이 저장되어 있다면 그대로 복원!
+    try {
+      const stored = localStorage.getItem(STORAGE_CANDIDATES_KEY);
+      if (stored !== null) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          this.candidates = parsed;
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn('웹 저장소 로드 오류, 기본값으로 초기화:', e);
+    }
+
+    // 저장소 데이터가 없는 최초 방문 시에만 기본 16선 로드 및 저장
+    if (window.DEFAULT_VIDEOS && Array.isArray(window.DEFAULT_VIDEOS)) {
+      this.candidates = window.DEFAULT_VIDEOS.map(v => ({ ...v }));
+    } else {
+      this.candidates = [];
+    }
+    this.saveCandidatesToStorage();
   }
 
   bindEvents() {
@@ -42,13 +70,16 @@ class AppController {
       btnAdd.addEventListener('click', () => this.handleAddVideo());
     }
 
+    // 참가영상 목록 한번에 지우기 버튼
+    const btnClearAll = document.getElementById('btn-clear-all-videos');
+    if (btnClearAll) {
+      btnClearAll.addEventListener('click', () => this.handleClearAllCandidates());
+    }
+
     // 기본 16선 복구 버튼
     const btnReset = document.getElementById('btn-reset-default');
     if (btnReset) {
-      btnReset.addEventListener('click', () => {
-        this.loadDefaultCandidates();
-        this.renderCandidateList();
-      });
+      btnReset.addEventListener('click', () => this.handleResetDefault());
     }
 
     // 토너먼트 시작 버튼
@@ -158,37 +189,181 @@ class AppController {
     return match ? match[1] : null;
   }
 
-  handleAddVideo() {
+  // 유튜브 oEmbed API를 이용해 원본 영상 제목 및 채널명 자동 추출
+  async fetchYouTubeInfo(videoId) {
+    try {
+      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+      const res = await fetch(oembedUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.title) {
+          return {
+            title: data.title,
+            author_name: data.author_name || 'YouTube'
+          };
+        }
+      }
+    } catch (err) {
+      // 백업 noembed 시도
+      try {
+        const noembedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
+        const res2 = await fetch(noembedUrl);
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (data2 && data2.title) {
+            return {
+              title: data2.title,
+              author_name: data2.author_name || 'YouTube'
+            };
+          }
+        }
+      } catch (err2) {}
+    }
+    return null;
+  }
+
+  // 신규 영상 추가 (미입력 시 유튜브 원본 타이틀 자동 추출)
+  async handleAddVideo() {
     const inputUrl = document.getElementById('input-yt-url');
     const inputTitle = document.getElementById('input-yt-title');
-    const ytId = this.parseYouTubeId(inputUrl.value);
+    const btnAdd = document.getElementById('btn-add-video');
+    const ytId = this.parseYouTubeId(inputUrl ? inputUrl.value : '');
 
     if (!ytId) {
       alert("올바른 YouTube URL 또는 11자리 영상 ID를 입력해 주세요.");
       return;
     }
 
-    const title = inputTitle.value.trim() || `YouTube Video (${ytId})`;
-    this.candidates.push({
+    let title = inputTitle ? inputTitle.value.trim() : '';
+    let creator = "사용자 추가";
+
+    // 영상 제목 미입력 시 YouTube 공식 oEmbed API로 원본 영상 제목 및 채널명 자동 추출
+    if (!title) {
+      let originalBtnHtml = '';
+      if (btnAdd) {
+        originalBtnHtml = btnAdd.innerHTML;
+        btnAdd.disabled = true;
+        btnAdd.innerHTML = `<span>⏳</span> 유튜브 원본 제목 가져오는 중...`;
+      }
+
+      try {
+        const info = await this.fetchYouTubeInfo(ytId);
+        if (info && info.title) {
+          title = info.title;
+          creator = info.author_name || 'YouTube';
+        }
+      } catch (e) {
+        console.warn('유튜브 정보 조회 오류:', e);
+      } finally {
+        if (btnAdd) {
+          btnAdd.disabled = false;
+          btnAdd.innerHTML = originalBtnHtml;
+        }
+      }
+    }
+
+    if (!title) {
+      title = `YouTube Video (${ytId})`;
+    }
+
+    const newVideo = {
       id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       youtubeId: ytId,
       title: title,
-      creator: "사용자 추가",
-      startSec: 0
-    });
+      creator: creator,
+      startSec: 0,
+      isCustom: true
+    };
 
-    inputUrl.value = '';
-    inputTitle.value = '';
+    // 가장 최근에 추가한 신규 영상이 참가 목록 최상단으로 오도록 unshift 사용
+    this.candidates.unshift(newVideo);
+    this.saveCandidatesToStorage();
+
+    if (inputUrl) inputUrl.value = '';
+    if (inputTitle) inputTitle.value = '';
     this.renderCandidateList();
   }
 
-  removeCandidate(index) {
-    if (this.candidates.length <= 4) {
-      alert("최소 4개 이상의 영상이 등록되어 있어야 토너먼트를 진행할 수 있습니다.");
+  // 참가영상 목록 한번에 지우기 (웹 저장소 실시간 동기화)
+  handleClearAllCandidates() {
+    if (this.candidates.length === 0) {
+      alert("참가 영상 목록이 이미 비어 있습니다.");
       return;
     }
+    if (confirm("등록된 모든 참가 영상을 목록에서 비우시겠습니까?\n(언제든 [기본 16선 복구] 버튼으로 복원할 수 있습니다)")) {
+      this.candidates = [];
+      this.saveCandidatesToStorage();
+      this.renderCandidateList();
+    }
+  }
+
+  // 기본 16선 복구 (웹 저장소 초기화 후 기본값 저장)
+  handleResetDefault() {
+    if (confirm("웹 저장소에 저장된 목록을 초기화하고 기본 16선으로 복구하시겠습니까?")) {
+      try {
+        localStorage.removeItem(STORAGE_CANDIDATES_KEY);
+      } catch (e) {
+        console.error('웹 저장소 초기화 실패:', e);
+      }
+      if (window.DEFAULT_VIDEOS && Array.isArray(window.DEFAULT_VIDEOS)) {
+        this.candidates = window.DEFAULT_VIDEOS.map(v => ({ ...v }));
+      } else {
+        this.candidates = [];
+      }
+      this.saveCandidatesToStorage();
+      this.renderCandidateList();
+    }
+  }
+
+  // 영상 개별 제거 (웹 저장소 실시간 동기화)
+  removeCandidate(index) {
     this.candidates.splice(index, 1);
+    this.saveCandidatesToStorage();
     this.renderCandidateList();
+  }
+
+  // 영상 제목 직접 수정 모드
+  startEditingTitle(idx, titleRowEl) {
+    const cand = this.candidates[idx];
+    if (!cand || !titleRowEl) return;
+
+    const currentTitle = cand.title;
+    titleRowEl.innerHTML = `
+      <input type="text" class="input-edit-title" value="${currentTitle.replace(/"/g, '&quot;')}" placeholder="새 영상 제목 입력...">
+    `;
+
+    const input = titleRowEl.querySelector('.input-edit-title');
+    if (!input) return;
+
+    input.focus();
+    input.select();
+
+    let isSaved = false;
+    const saveTitle = () => {
+      if (isSaved) return;
+      isSaved = true;
+      const newTitle = input.value.trim();
+      if (newTitle && newTitle !== currentTitle) {
+        cand.title = newTitle;
+        this.saveCandidatesToStorage();
+      }
+      this.renderCandidateList();
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveTitle();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        isSaved = true;
+        this.renderCandidateList();
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      saveTitle();
+    });
   }
 
   renderCandidateList() {
@@ -200,6 +375,18 @@ class AppController {
       countEl.textContent = this.candidates.length;
     }
     listEl.innerHTML = '';
+
+    // 후보가 0개일 때 빈 상태 안내
+    if (this.candidates.length === 0) {
+      listEl.innerHTML = `
+        <div class="empty-candidate-state">
+          <span class="empty-icon">📭</span>
+          <p class="empty-title">참가 영상 목록이 비어 있습니다</p>
+          <p class="empty-desc">신규 영상을 추가하거나, 우측 하단의 [기본 16선 복구] 버튼을 눌러 기본 영상을 불러오세요.</p>
+        </div>
+      `;
+      return;
+    }
 
     this.candidates.forEach((cand, idx) => {
       const itemEl = document.createElement('div');
@@ -215,7 +402,12 @@ class AppController {
             <div class="thumb-overlay-play">▶</div>
           </div>
           <div class="item-info">
-            <span class="item-title" title="${cand.title}">${cand.title}</span>
+            <div class="item-title-row" data-idx="${idx}">
+              <span class="item-title" title="클릭하여 제목 수정" data-idx="${idx}">${cand.title}</span>
+              <button class="btn-edit-title" title="제목 직접 수정" data-idx="${idx}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+            </div>
             <span class="item-channel">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
               ${cand.creator || 'YouTube 영상'}
@@ -230,6 +422,24 @@ class AppController {
         </button>
       `;
 
+      // 제목 클릭 또는 수정 버튼 클릭 시 인라인 편집 모드 전환
+      const titleRow = itemEl.querySelector('.item-title-row');
+      const titleEl = itemEl.querySelector('.item-title');
+      const editBtn = itemEl.querySelector('.btn-edit-title');
+
+      if (titleEl && titleRow) {
+        titleEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.startEditingTitle(idx, titleRow);
+        });
+      }
+      if (editBtn && titleRow) {
+        editBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.startEditingTitle(idx, titleRow);
+        });
+      }
+
       itemEl.querySelector('.btn-remove-item').addEventListener('click', () => {
         this.removeCandidate(idx);
       });
@@ -241,6 +451,12 @@ class AppController {
   // 화면 전환 (Zero-Lag 60FPS: display + opacity 트랜지션)
   switchView(viewName) {
     this.currentView = viewName;
+    const viewport = document.getElementById('view-viewport');
+    if (viewport) {
+      viewport.setAttribute('data-view', viewName);
+    }
+    document.body.setAttribute('data-current-view', viewName);
+
     const views = ['setup', 'battle', 'final', 'result'];
     views.forEach(v => {
       const el = document.getElementById(`view-${v}`);
@@ -285,7 +501,7 @@ class AppController {
 
     sorted.forEach((item, idx) => {
       const row = document.createElement('div');
-      row.className = 'candidate-item';
+      row.className = 'candidate-item ranking-item';
       row.innerHTML = `
         <div class="item-thumb-title">
           <span style="font-weight: 800; width: 24px; color: ${idx < 3 ? 'var(--gold-primary)' : 'var(--text-dim)'};">${idx + 1}</span>

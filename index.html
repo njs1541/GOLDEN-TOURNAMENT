@@ -59,8 +59,14 @@
           <div class="setup-grid">
             <div class="setup-box">
               <div class="setup-box-header">
-                <label class="setup-label">참가 영상 목록</label>
-                <span class="badge-count"><span id="candidate-count">16</span>개 등록됨</span>
+                <div class="setup-title-group">
+                  <label class="setup-label">참가 영상 목록</label>
+                  <span class="badge-count"><span id="candidate-count">16</span>개 등록됨</span>
+                </div>
+                <button id="btn-clear-all-videos" class="btn-text-action" title="참가 목록의 모든 영상을 한번에 비웁니다">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  목록 비우기
+                </button>
               </div>
               <div class="candidate-list-container custom-scrollbar" id="candidate-list">
                 <!-- 동적으로 리스트 렌더링 -->
@@ -344,12 +350,12 @@
 
     <!-- 실시간 랭킹 모달 다이얼로그 -->
     <div class="modal-backdrop" id="modal-live-ranking">
-      <div class="modal-dialog glass-panel custom-scrollbar">
+      <div class="modal-dialog glass-panel">
         <div class="modal-header">
           <h3>📊 실시간 Elo 순위표</h3>
           <button class="modal-close" id="btn-close-modal">&times;</button>
         </div>
-        <div class="modal-body" id="live-ranking-list">
+        <div class="modal-body custom-scrollbar" id="live-ranking-list">
           <!-- 실시간 랭킹 렌더링 -->
         </div>
       </div>

@@ -234,11 +234,11 @@ class TournamentEngine {
 
     if (window.renderStreakIndicator) {
       if (sA >= 2 && sB >= 2) {
-        window.renderStreakIndicator('⚡', `[A] ${sA}연승 vs [B] ${sB}연승`, '라이벌 맞대결!', 'theme-rival');
+        window.renderStreakIndicator('⚡', `[A] ${sA}연승 vs [B] ${sB}연승`, '연승 맞대결', 'theme-rival');
       } else if (sA >= 2 && sA >= sB) {
-        window.renderStreakIndicator('🔥', 'PLAYER A', `${sA}연승 질주 중!`, 'theme-a');
+        window.renderStreakIndicator('🔥', 'PLAYER A', `${sA}연승 기록 중`, 'theme-a');
       } else if (sB >= 2 && sB > sA) {
-        window.renderStreakIndicator('🔥', 'PLAYER B', `${sB}연승 질주 중!`, 'theme-b');
+        window.renderStreakIndicator('🔥', 'PLAYER B', `${sB}연승 기록 중`, 'theme-b');
       } else {
         window.renderStreakIndicator('', '', '');
       }

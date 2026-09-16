@@ -38,7 +38,7 @@ class GoldenBracketManager {
 
     const btnStart = document.getElementById('btn-start-final-match');
     if (btnStart) {
-      btnStart.textContent = "4강 제1경기 시작 (1위 vs 4위) 🔥";
+      btnStart.textContent = "4강 제1경기 시작 (1위 vs 4위)";
       btnStart.onclick = () => this.runNextFinalMatch();
     }
 
@@ -78,7 +78,7 @@ class GoldenBracketManager {
             <span class="slot-record">${cand.wins}승 ${cand.losses}패</span>
           </div>
         </div>
-        ${isWinner ? `<div class="slot-winner-tag">👑 결승 진출!</div>` : ''}
+        ${isWinner ? `<div class="slot-winner-tag">🏆 결승 진출</div>` : ''}
       </div>
     `;
   }
@@ -153,13 +153,13 @@ class GoldenBracketManager {
       <div class="bracket-round round-final">
         <div class="round-header-badge badge-grand-final">
           <span class="round-dot-gold"></span>
-          <span>👑 GRAND FINAL (결승전)</span>
+          <span>🏆 GRAND FINAL (결승전)</span>
         </div>
 
         <div class="bracket-match-node node-final ${isFinalDone ? 'completed' : 'ready'}" id="node-grand-final">
           <div class="node-header node-header-final">
-            <span class="match-tag-final">CHAMPIONSHIP</span>
-            <span class="match-desc">왕중왕전 결승</span>
+            <span class="match-tag-final">FINAL MATCH</span>
+            <span class="match-desc">최종 결승전</span>
           </div>
           <div class="node-slots">
             ${this.renderSlotHtml(this.grandFinal.candA, this.grandFinal.candA ? '4강 1경기 승자' : '', this.grandFinal.winner?.id === this.grandFinal.candA?.id, '4강 1경기 승자 대기 중', 'slot-gf-a')}
@@ -246,7 +246,7 @@ class GoldenBracketManager {
         this.app.switchView('final');
         const btnStart = document.getElementById('btn-start-final-match');
         if (btnStart) {
-          btnStart.textContent = "4강 제2경기 시작 (2위 vs 3위) 🔥";
+          btnStart.textContent = "4강 제2경기 시작 (2위 vs 3위)";
           btnStart.onclick = () => this.runNextFinalMatch();
         }
       });
@@ -259,12 +259,12 @@ class GoldenBracketManager {
         this.app.switchView('final');
         const btnStart = document.getElementById('btn-start-final-match');
         if (btnStart) {
-          btnStart.textContent = "🏆 GRAND FINAL 결승전 시작하기! 🏆";
+          btnStart.textContent = "결승전 시작하기 🏆";
           btnStart.onclick = () => this.runNextFinalMatch();
         }
       });
     } else if (this.currentFinalStep === 'final') {
-      this.playMatch(this.grandFinal.candA, this.grandFinal.candB, '👑 골든 그랜드 파이널 (결승전)', (winner) => {
+      this.playMatch(this.grandFinal.candA, this.grandFinal.candB, '골든 파이널 결승전', (winner) => {
         this.grandFinal.winner = winner;
         this.currentFinalStep = 'done';
         this.finishTournament(winner);
@@ -336,9 +336,9 @@ class GoldenBracketManager {
       }
     }
     if (window.renderStreakIndicator) {
-      window.renderStreakIndicator('⚡', '골든 파이널', '진검승부!', 'theme-final');
+      window.renderStreakIndicator('⚡', '골든 파이널', '결승 토너먼트', 'theme-final');
     } else {
-      document.getElementById('streak-indicator').textContent = '⚡ 골든 파이널 진검승부!';
+      document.getElementById('streak-indicator').textContent = '⚡ 골든 파이널 결승 토너먼트';
     }
 
     // 4강/결승전에서는 스킵 및 4강 바로가기 버튼 숨김
@@ -382,7 +382,7 @@ class GoldenBracketManager {
       const tm = new window.TierMakerManager(champion, this.allCandidates, this.app);
       tm.render();
     } else {
-      alert(`🎉 축하합니다! 최종 우승: ${champion.title}`);
+      alert(`🏆 최종 우승: ${champion.title}`);
       this.app.switchView('setup');
     }
   }

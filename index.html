@@ -315,19 +315,25 @@
       <!-- ================= 3. 골든 파이널 4강 화면 (BRACKET VIEW) ================= -->
       <section id="view-final" class="view-panel">
         <div class="final-container glass-panel">
-          <div class="final-header">
-            <span class="sparkle-badge">GOLDEN FINAL 4</span>
-            <h2 class="view-title">골든 파이널 4강 토너먼트</h2>
-            <p class="view-desc">스위스-Elo 래더 상위 4개 영상의 최종 순위 결정전</p>
+          <!-- 상단 헤더 및 조작 버튼 바 (스크롤 없이 즉시 조작 가능하도록 상단 배치) -->
+          <div class="final-header-bar">
+            <div class="final-header-info">
+              <div class="final-header-top-badge">
+                <span class="sparkle-badge">GOLDEN FINAL 4</span>
+              </div>
+              <h2 class="view-title">골든 파이널 4강 토너먼트</h2>
+              <p class="view-desc">스위스-Elo 래더 상위 4개 영상의 최종 순위 결정전</p>
+            </div>
+
+            <!-- 경기 시작 버튼 액션 영역 (상단 우측 배치) -->
+            <div class="final-action-area">
+              <button id="btn-start-final-match" class="btn-primary btn-gold-glow">4강전 시작하기</button>
+            </div>
           </div>
 
           <!-- 브래킷 트리 시각화 -->
           <div class="bracket-tree" id="final-bracket-tree">
             <!-- bracket.js에서 렌더링 -->
-          </div>
-
-          <div class="final-action-area">
-            <button id="btn-start-final-match" class="btn-primary btn-gold-glow">4강전 시작하기</button>
           </div>
         </div>
       </section>

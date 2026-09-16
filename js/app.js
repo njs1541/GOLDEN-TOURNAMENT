@@ -4,6 +4,7 @@
 
 const STORAGE_CANDIDATES_KEY = 'GOLDEN_TOURNAMENT_CANDIDATES_LIST';
 const STORAGE_FONT_SETTINGS_KEY = 'GOLDEN_TOURNAMENT_FONT_SETTINGS';
+const STORAGE_PERF_MODE_KEY = 'GOLDEN_TOURNAMENT_PERF_MODE';
 
 // 치지직/유튜브 방송 송출 가독성 최적화 권장 기본값
 const DEFAULT_FONT_SETTINGS = {
@@ -20,6 +21,7 @@ class AppController {
   constructor() {
     this.candidates = [];
     this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
+    this.isLowPerfMode = false;
     this.currentView = 'setup'; // 'setup' | 'battle' | 'final' | 'result'
     this.engine = null; // engine.js에서 초기화
     this.bracket = null; // bracket.js에서 초기화
@@ -29,6 +31,9 @@ class AppController {
   init() {
     // 0. 화면 및 글씨 크기 설정 복원 및 즉시 적용
     this.initFontSettings();
+
+    // 0-1. 저사양 / 하드웨어 가속 환경 자동 진단 및 성능 모드 복원
+    this.initPerformanceMode();
 
     // 1. 웹 저장소의 후보 목록 복원 (저장된 상태가 없으면 기본 16선 로드)
     this.loadDefaultCandidates();
@@ -159,6 +164,14 @@ class AppController {
     if (btnCloseModal && modalRanking) {
       btnCloseModal.addEventListener('click', () => {
         modalRanking.classList.remove('active');
+      });
+    }
+
+    // 모달 내 성능 최적화 모드 토글 스위치
+    const modalTogglePerf = document.getElementById('modal-toggle-perf-mode');
+    if (modalTogglePerf) {
+      modalTogglePerf.addEventListener('change', (e) => {
+        this.setPerformanceMode(e.target.checked, true, true);
       });
     }
 
@@ -921,6 +934,12 @@ class AppController {
         valEl.textContent = `${currentVal}${m.unit}`;
       }
     });
+
+    // 모달 내 성능 최적화 토글 체크박스 상태 동기화
+    const modalToggle = document.getElementById('modal-toggle-perf-mode');
+    if (modalToggle) {
+      modalToggle.checked = this.isLowPerfMode;
+    }
   }
 
   bindFontSlider(sliderId, valId, key, unit) {
@@ -937,6 +956,173 @@ class AppController {
       this.applyFontSettings();
       this.saveFontSettings();
     });
+  }
+
+  // ================= 저사양 / 하드웨어 가속 최적화 모드 컨트롤러 =================
+
+  // 브라우저 하드웨어 가속 (WebGL / GPU 래스터라이저) 동작 여부 진단
+  detectHardwareAcceleration() {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        return { isHardwareAccelerated: false, reason: 'WebGL 미지원 또는 브라우저 가속 비활성화' };
+      }
+
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      if (debugInfo) {
+        const renderer = (gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '').toLowerCase();
+        const vendor = (gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || '').toLowerCase();
+
+        // 크롬 SwiftShader, Mesa llvmpipe, 윈도우 기본 래스터라이저 등 소프트웨어 렌더링 키워드
+        const softwareKeywords = [
+          'swiftshader',
+          'llvmpipe',
+          'software',
+          'software rasterizer',
+          'basic render',
+          'microsoft basic',
+          'gdi generic',
+          'swrast'
+        ];
+
+        const isSoftware = softwareKeywords.some(keyword => renderer.includes(keyword) || vendor.includes(keyword));
+        if (isSoftware) {
+          return { isHardwareAccelerated: false, reason: `소프트웨어 래스터라이저 감지 (${renderer})` };
+        }
+      }
+
+      return { isHardwareAccelerated: true, reason: '하드웨어 가속 정상 작동' };
+    } catch (e) {
+      return { isHardwareAccelerated: false, reason: '가속 진단 오류 (소프트웨어 fallback)' };
+    }
+  }
+
+  // 초기 로드 시 성능 모드 상태 복원 또는 자동 감지 적용
+  initPerformanceMode() {
+    let savedMode = null;
+    try {
+      savedMode = localStorage.getItem(STORAGE_PERF_MODE_KEY);
+    } catch (e) {
+      console.warn('성능 모드 설정 로드 실패:', e);
+    }
+
+    if (savedMode === 'low') {
+      // 사용자가 이전에 저사양 모드를 켜둔 경우
+      this.setPerformanceMode(true, false, false);
+    } else if (savedMode === 'high') {
+      // 사용자가 이전에 명시적으로 일반 모드를 유지한 경우
+      this.setPerformanceMode(false, false, false);
+    } else {
+      // 최초 방문: 하드웨어 가속 자동 진단 실행
+      const hwCheck = this.detectHardwareAcceleration();
+      if (!hwCheck.isHardwareAccelerated) {
+        // 하드웨어 가속 꺼짐 감지 -> 성능 모드 자동 활성화 및 안내 토스트 표시
+        this.setPerformanceMode(true, true, false);
+        setTimeout(() => {
+          this.showPerfToast(
+            '⚡ 그래픽 가속 비활성화 감지',
+            '원활한 재생을 위해 [성능 최적화 모드]를 켰습니다. (화면 설정에서 언제든 변경 가능)',
+            'warning',
+            6000
+          );
+        }, 700);
+      } else {
+        // 일반 환경 -> 기본 고화질 모드
+        this.setPerformanceMode(false, false, false);
+      }
+    }
+  }
+
+  // 성능 최적화 모드 켜기/끄기 및 UI/스토리지 일괄 동기화
+  setPerformanceMode(enable, saveToStorage = true, showToast = true, toastTitle = null, toastMsg = null) {
+    this.isLowPerfMode = Boolean(enable);
+
+    // 1. body 클래스 토글 (CSS 룰셋 즉시 발동)
+    document.body.classList.toggle('low-perf-mode', this.isLowPerfMode);
+
+    // 2. 헤더 토글 버튼 UI 업데이트
+    const btnToggle = document.getElementById('btn-toggle-perf-mode');
+    const textToggle = document.getElementById('btn-toggle-perf-text');
+    if (btnToggle) {
+      btnToggle.classList.toggle('active', this.isLowPerfMode);
+      btnToggle.title = this.isLowPerfMode 
+        ? '성능 최적화 모드 작동 중 (클릭 시 원본 화려한 모드로 복원)' 
+        : '저사양 환경을 위한 성능 최적화 모드 (클릭 시 켜기)';
+    }
+    if (textToggle) {
+      textToggle.textContent = this.isLowPerfMode ? '성능 모드 ON' : '성능 모드';
+    }
+
+    // 3. 모달 내 토글 스위치 동기화
+    const modalToggle = document.getElementById('modal-toggle-perf-mode');
+    if (modalToggle) {
+      modalToggle.checked = this.isLowPerfMode;
+    }
+
+    // 4. 로컬스토리지 저장
+    if (saveToStorage) {
+      try {
+        localStorage.setItem(STORAGE_PERF_MODE_KEY, this.isLowPerfMode ? 'low' : 'high');
+      } catch (e) {
+        console.error('성능 모드 로컬스토리지 저장 오류:', e);
+      }
+    }
+
+    // 5. 알림 토스트 표시
+    if (showToast) {
+      if (this.isLowPerfMode) {
+        this.showPerfToast(
+          toastTitle || '⚡ 성능 최적화 모드 켜짐',
+          toastMsg || '블러, 무거운 그림자, 애니메이션을 단순화하여 렉 없이 부드럽게 동작합니다.',
+          'info'
+        );
+      } else {
+        this.showPerfToast(
+          toastTitle || '✨ 화려한 그래픽 모드 켜짐',
+          toastMsg || '글래스모피즘 블러 및 네온 글로우 효과가 복원되었습니다.',
+          'info'
+        );
+      }
+    }
+  }
+
+  // 플로팅 토스트 알림창 띄우기
+  showPerfToast(title, message, type = 'info', duration = 4500) {
+    const container = document.getElementById('perf-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `perf-toast toast-${type}`;
+    const icon = type === 'warning' ? '⚠️' : '⚡';
+
+    toast.innerHTML = `
+      <span class="toast-icon">${icon}</span>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+      <button class="toast-close" title="닫기">&times;</button>
+    `;
+
+    const btnClose = toast.querySelector('.toast-close');
+    const dismiss = () => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-8px)';
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 300);
+    };
+
+    if (btnClose) {
+      btnClose.addEventListener('click', dismiss);
+    }
+
+    container.appendChild(toast);
+
+    if (duration > 0) {
+      setTimeout(dismiss, duration);
+    }
   }
 }
 

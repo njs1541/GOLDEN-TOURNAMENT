@@ -2815,3 +2815,271 @@ body[data-current-view="battle"] {
   flex-wrap: wrap;
   margin-top: 8px;
 }
+
+/* ================= PERFORMANCE OPTIMIZATION (LOW-SPEC MODE) ================= */
+
+/* 헤더 성능 모드 토글 버튼 활성 상태 */
+#btn-toggle-perf-mode.active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: rgba(0, 242, 254, 0.55);
+  color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+}
+
+#btn-toggle-perf-mode.active svg {
+  stroke: var(--accent-cyan);
+  fill: rgba(0, 242, 254, 0.2);
+}
+
+/* 모달 내 성능 설정 박스 */
+.perf-setting-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  background: rgba(0, 242, 254, 0.05);
+  border: 1px solid rgba(0, 242, 254, 0.25);
+  border-radius: var(--radius-lg);
+  margin-bottom: 20px;
+}
+
+.perf-setting-info {
+  flex: 1;
+}
+
+.perf-setting-title-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.perf-setting-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-main);
+  display: block;
+  margin-bottom: 3px;
+  cursor: pointer;
+}
+
+.perf-setting-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* 커스텀 토글 스위치 */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-glass-bright);
+  border-radius: 999px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #f8fafc;
+  border-radius: 50%;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(22px);
+  background-color: #08090d;
+}
+
+/* 플로팅 알림 토스트 (Toast Notification) */
+.perf-toast-container {
+  position: fixed;
+  top: 76px;
+  right: 28px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: 420px;
+}
+
+.perf-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 18px;
+  background: #111522;
+  border: 1px solid rgba(0, 242, 254, 0.5);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  color: #f8fafc;
+  font-size: 13px;
+  line-height: 1.45;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(0);
+}
+
+.perf-toast.toast-warning {
+  border-color: rgba(245, 176, 65, 0.6);
+}
+
+.perf-toast.toast-warning .toast-icon {
+  color: var(--gold-primary);
+}
+
+.perf-toast.toast-info {
+  border-color: rgba(0, 242, 254, 0.6);
+}
+
+.perf-toast.toast-info .toast-icon {
+  color: var(--accent-cyan);
+}
+
+.toast-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 11.5px;
+  color: #94a3b8;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.toast-close:hover {
+  color: #f8fafc;
+}
+
+/* =======================================================
+   저사양 모드 활성화 시 (body.low-perf-mode) 
+   - CPU 폭주 1위: backdrop-filter 블러 연산 완전 제거
+   - 화면 재도색 1위: background-attachment: fixed 제거 및 단색화
+   - 과도한 box-shadow 및 drop-shadow를 깔끔한 단일 보더로 대체
+   - 무한 반복 애니메이션 정지
+======================================================= */
+body.low-perf-mode {
+  background-attachment: scroll !important;
+  background-image: none !important;
+  background-color: #0b0d13 !important;
+}
+
+body.low-perf-mode * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+/* 블러가 빠져도 구조와 디자인이 또렷하게 보이도록 솔리드 다크 배경 + 테두리 제공 */
+body.low-perf-mode .app-header {
+  background: #0e111a !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+body.low-perf-mode .glass-panel,
+body.low-perf-mode .setup-card,
+body.low-perf-mode .battle-card,
+body.low-perf-mode .modal-dialog,
+body.low-perf-mode .modal-card,
+body.low-perf-mode .ranking-container,
+body.low-perf-mode .live-ranking-modal-card {
+  background: #121622 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+body.low-perf-mode .candidate-item,
+body.low-perf-mode .candidate-list-container,
+body.low-perf-mode .setup-box,
+body.low-perf-mode .mode-card,
+body.low-perf-mode .bracket-node-match,
+body.low-perf-mode .tier-drop-zone {
+  background: #171c2b !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+body.low-perf-mode .mode-card.selected {
+  background: #20273c !important;
+  border-color: var(--gold-primary) !important;
+}
+
+body.low-perf-mode .vs-glow-circle {
+  background: #1c2234 !important;
+  border: 2px solid var(--gold-primary) !important;
+}
+
+body.low-perf-mode .btn-primary {
+  background: var(--gold-primary) !important;
+  color: #08090d !important;
+}
+
+body.low-perf-mode .btn-vote-cyan {
+  background: #00f2fe !important;
+  color: #08090d !important;
+}
+
+body.low-perf-mode .btn-vote-gold {
+  background: #f5b041 !important;
+  color: #08090d !important;
+}
+
+body.low-perf-mode #btn-toggle-perf-mode.active {
+  background: #00f2fe !important;
+  color: #08090d !important;
+}
+
+body.low-perf-mode #btn-toggle-perf-mode.active svg {
+  stroke: #08090d !important;
+}

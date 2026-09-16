@@ -319,8 +319,27 @@ class GoldenBracketManager {
     document.getElementById('card-a')?.classList.remove('vote-win-flash');
     document.getElementById('card-b')?.classList.remove('vote-win-flash');
 
-    document.getElementById('current-match-indicator').textContent = phaseTitle;
-    document.getElementById('streak-indicator').textContent = '⚡ 골든 파이널 진검승부!';
+    const matchIndicator = document.getElementById('current-match-indicator');
+    if (matchIndicator) {
+      if (phaseTitle.includes('(') && phaseTitle.includes(')')) {
+        const parts = phaseTitle.match(/^(.*?)\s*\((.*?)\)$/);
+        if (parts) {
+          matchIndicator.classList.add('badge-multiline');
+          matchIndicator.innerHTML = `<span class="match-main-text">${parts[1]}</span><span class="match-sub-text">(${parts[2]})</span>`;
+        } else {
+          matchIndicator.classList.remove('badge-multiline');
+          matchIndicator.textContent = phaseTitle;
+        }
+      } else {
+        matchIndicator.classList.remove('badge-multiline');
+        matchIndicator.textContent = phaseTitle;
+      }
+    }
+    if (window.renderStreakIndicator) {
+      window.renderStreakIndicator('⚡', '골든 파이널', '진검승부!', 'theme-final');
+    } else {
+      document.getElementById('streak-indicator').textContent = '⚡ 골든 파이널 진검승부!';
+    }
 
     // 4강/결승전에서는 스킵 및 4강 바로가기 버튼 숨김
     const btnSkip = document.getElementById('btn-battle-skip');

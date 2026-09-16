@@ -5,6 +5,32 @@
  * 3단계: 목표 매치 수 달성 시 골든 파이널 4강 진출
  */
 
+/**
+ * 연승(Streak) 인디케이터 렌더링 헬퍼
+ * 글씨 크기 설정(1줄 모드 / 2줄 모드) 및 불꽃 엠블럼 특수 연출 대응
+ */
+window.renderStreakIndicator = function(icon, line1, line2, theme = '') {
+  const streakEl = document.getElementById('streak-indicator');
+  if (!streakEl) return;
+
+  if (!icon && !line1 && !line2) {
+    streakEl.innerHTML = '';
+    return;
+  }
+
+  streakEl.innerHTML = `
+    <div class="streak-indicator-wrap ${theme}">
+      <div class="streak-fire-wrap">
+        <span class="streak-fire">${icon}</span>
+      </div>
+      <div class="streak-text-wrap">
+        <span class="streak-line streak-line-primary">${line1}</span>
+        <span class="streak-line streak-line-secondary">${line2}</span>
+      </div>
+    </div>
+  `;
+};
+
 class TournamentEngine {
   constructor(candidates, app, mode = 'standard') {
     this.app = app;
@@ -148,7 +174,10 @@ class TournamentEngine {
     const progressPercent = Math.min(100, Math.round((this.currentMatchIndex / this.totalLadderMatches) * 100));
     if (progressBar) progressBar.style.width = `${progressPercent}%`;
     if (progressLabel) progressLabel.textContent = `진행도: ${this.currentMatchIndex} / ${this.totalLadderMatches} 매치 (${progressPercent}%)`;
-    if (matchIndicator) matchIndicator.textContent = `MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
+    if (matchIndicator) {
+      matchIndicator.classList.remove('badge-multiline');
+      matchIndicator.textContent = `MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
+    }
 
     // 2. 카드 A 메타데이터 렌더링
     const titleA = document.getElementById('title-a');
@@ -200,19 +229,18 @@ class TournamentEngine {
     document.getElementById('card-b')?.classList.remove('vote-win-flash');
 
     // 5. 연승(Streak) 인디케이터 정밀 판정 (둘 다 연승 시 맞대결, 한쪽만 연승 시 더 높은 쪽 표시)
-    const streakIndicator = document.getElementById('streak-indicator');
-    if (streakIndicator) {
-      const sA = candA.streak || 0;
-      const sB = candB.streak || 0;
+    const sA = candA.streak || 0;
+    const sB = candB.streak || 0;
 
+    if (window.renderStreakIndicator) {
       if (sA >= 2 && sB >= 2) {
-        streakIndicator.textContent = `⚡ [A] ${sA}연승 vs [B] ${sB}연승 맞대결!`;
+        window.renderStreakIndicator('⚡', `[A] ${sA}연승 vs [B] ${sB}연승`, '라이벌 맞대결!', 'theme-rival');
       } else if (sA >= 2 && sA >= sB) {
-        streakIndicator.textContent = `🔥 PLAYER A ${sA}연승 질주 중!`;
+        window.renderStreakIndicator('🔥', 'PLAYER A', `${sA}연승 질주 중!`, 'theme-a');
       } else if (sB >= 2 && sB > sA) {
-        streakIndicator.textContent = `🔥 PLAYER B ${sB}연승 질주 중!`;
+        window.renderStreakIndicator('🔥', 'PLAYER B', `${sB}연승 질주 중!`, 'theme-b');
       } else {
-        streakIndicator.textContent = '';
+        window.renderStreakIndicator('', '', '');
       }
     }
 

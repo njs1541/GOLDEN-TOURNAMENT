@@ -1077,7 +1077,7 @@ body[data-current-view="battle"] {
 
 .battle-arena {
   display: grid;
-  grid-template-columns: 1fr 115px 1fr;
+  grid-template-columns: 1fr auto 1fr;
   gap: 16px;
   align-items: stretch;
   max-width: 100%;
@@ -1380,21 +1380,56 @@ body[data-current-view="battle"] {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 0 4px;
+  gap: 10px;
+  padding: 0 6px;
   flex-shrink: 0;
+  min-width: 140px;
+  max-width: 240px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .match-indicator-badge {
   font-size: calc(var(--fs-battle-meta, 16px) * 0.88);
   font-weight: 900;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.1px;
   color: var(--gold-primary);
   background: rgba(245, 176, 65, 0.1);
   border: 1px solid rgba(245, 176, 65, 0.3);
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 999px;
   box-shadow: 0 0 10px var(--gold-glow-soft);
+  text-align: center;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.3;
+}
+
+/* 4강/결승전 등 긴 타이틀일 때의 멀티라인 배지 */
+.match-indicator-badge.badge-multiline {
+  flex-direction: column;
+  border-radius: 12px;
+  padding: 5px 12px;
+  gap: 2px;
+  background: linear-gradient(135deg, rgba(245, 176, 65, 0.14) 0%, rgba(255, 65, 108, 0.08) 100%);
+  border-color: rgba(245, 176, 65, 0.45);
+  box-shadow: 0 0 14px var(--gold-glow-soft);
+}
+
+.match-indicator-badge .match-main-text {
+  font-weight: 900;
+  white-space: nowrap;
+  letter-spacing: 0.8px;
+}
+
+.match-indicator-badge .match-sub-text {
+  font-size: 0.85em;
+  font-weight: 700;
+  color: rgba(245, 176, 65, 0.85);
+  white-space: nowrap;
 }
 
 .vs-glow-circle {
@@ -1409,6 +1444,7 @@ body[data-current-view="battle"] {
   justify-content: center;
   animation: pulseVs 2.6s infinite ease-in-out;
   position: relative;
+  flex-shrink: 0;
 }
 
 @keyframes pulseVs {
@@ -1443,25 +1479,32 @@ body[data-current-view="battle"] {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 8px;
-  background: rgba(0, 0, 0, 0.4);
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+  box-sizing: border-box;
 }
 
 .prob-labels {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
-  font-weight: 800;
+  gap: 6px;
+  width: 100%;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .prob-title {
-  font-size: 9.5px;
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.78);
   color: var(--text-dim);
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-align: center;
+  flex-shrink: 1;
 }
 
 .prob-a {
@@ -1474,7 +1517,7 @@ body[data-current-view="battle"] {
 
 .prob-track {
   width: 100%;
-  height: 6px;
+  height: 7px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   overflow: hidden;
@@ -1496,13 +1539,174 @@ body[data-current-view="battle"] {
 }
 
 .streak-indicator {
-  font-size: 11.5px;
+  min-height: 22px;
+  text-align: center;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 2px 4px;
+}
+
+/* 1줄 모드 (글씨 크기가 보통 이하일 때) */
+.streak-indicator-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.82);
   font-weight: 800;
   color: #ff9f43;
-  min-height: 18px;
-  text-align: center;
   text-shadow: 0 0 10px rgba(255, 159, 67, 0.5);
   animation: pulse 1.8s infinite ease-in-out;
+}
+
+.streak-indicator-wrap .streak-fire {
+  display: inline-block;
+  font-size: 1.1em;
+}
+
+.streak-indicator-wrap .streak-text-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.streak-indicator-wrap .streak-line-primary {
+  font-weight: 900;
+}
+
+.streak-indicator-wrap.theme-a .streak-line-primary {
+  color: var(--accent-cyan);
+}
+
+.streak-indicator-wrap.theme-b .streak-line-primary {
+  color: var(--accent-rose);
+}
+
+.streak-indicator-wrap.theme-rival .streak-line-primary {
+  color: #ffd700;
+}
+
+.streak-indicator-wrap.theme-final .streak-line-primary {
+  color: var(--gold-primary);
+}
+
+/* 2줄 모드 (글씨 크기가 커졌을 때: 자동 전환) */
+.streak-indicator.multiline .streak-indicator-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  animation: none;
+  padding: 4px 10px;
+  background: rgba(255, 107, 0, 0.06);
+  border: 1px solid rgba(255, 159, 67, 0.25);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 14px rgba(255, 107, 0, 0.08);
+}
+
+/* 2줄 모드 전용 불꽃 엠블럼 특수 연출 (타오르는 네온 헤일로 & 펄스) */
+.streak-indicator.multiline .streak-fire-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 2px;
+}
+
+.streak-indicator.multiline .streak-fire-wrap::before {
+  content: '';
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, rgba(255, 69, 0, 0.45) 0%, rgba(255, 165, 0, 0.18) 60%, transparent 80%);
+  border-radius: 50%;
+  animation: flameHalo 1.8s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+.streak-indicator.multiline .streak-fire {
+  font-size: calc(var(--fs-battle-meta, 16px) * 1.35);
+  display: inline-block;
+  transform-origin: center bottom;
+  animation: flameEmberPulse 1.2s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 6px #ff4500) drop-shadow(0 0 12px #ffa500);
+}
+
+@keyframes flameEmberPulse {
+  0% {
+    transform: scale(0.92) translateY(0) rotate(-3deg);
+    filter: drop-shadow(0 0 4px rgba(255, 69, 0, 0.7)) drop-shadow(0 0 8px rgba(255, 165, 0, 0.5));
+  }
+  50% {
+    transform: scale(1.18) translateY(-2px) rotate(3deg);
+    filter: drop-shadow(0 0 10px #ff3700) drop-shadow(0 0 16px #ffb300);
+  }
+  100% {
+    transform: scale(1.08) translateY(-1px) rotate(-1deg);
+    filter: drop-shadow(0 0 8px rgba(255, 69, 0, 0.9)) drop-shadow(0 0 14px rgba(255, 180, 0, 0.7));
+  }
+}
+
+@keyframes flameHalo {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+.streak-indicator.multiline .streak-text-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 100%;
+}
+
+.streak-indicator.multiline .streak-line-primary {
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.88);
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.streak-indicator.multiline .theme-a .streak-line-primary {
+  color: var(--accent-cyan);
+  text-shadow: 0 0 12px var(--accent-cyan-glow);
+}
+
+.streak-indicator.multiline .theme-b .streak-line-primary {
+  color: var(--accent-rose);
+  text-shadow: 0 0 12px rgba(255, 65, 108, 0.6);
+}
+
+.streak-indicator.multiline .theme-rival .streak-line-primary {
+  color: #ffd700;
+  text-shadow: 0 0 12px var(--gold-glow);
+}
+
+.streak-indicator.multiline .theme-final .streak-line-primary {
+  color: var(--gold-primary);
+  text-shadow: 0 0 12px var(--gold-glow);
+}
+
+.streak-indicator.multiline .streak-line-secondary {
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.8);
+  font-weight: 800;
+  color: #ff9f43;
+  text-shadow: 0 0 8px rgba(255, 159, 67, 0.6);
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 /* ================= VOTE BUTTONS ================= */
@@ -2356,11 +2560,14 @@ body[data-current-view="battle"] {
   font-family: 'Outfit', monospace;
   font-weight: 800;
   font-size: var(--fs-battle-meta, 16px);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .prob-title {
-  font-size: calc(var(--fs-battle-meta, 16px) * 0.82);
+  font-size: calc(var(--fs-battle-meta, 16px) * 0.78);
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .text-dim {

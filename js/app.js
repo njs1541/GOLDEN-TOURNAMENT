@@ -876,6 +876,12 @@ class AppController {
     root.style.setProperty('--fs-bracket-title', `${s.bracketTitle}px`);
     root.style.setProperty('--fs-ranking-title', `${s.rankingTitle}px`);
 
+    // 배틀 메타 정보 폰트 크기가 16px 이상이면 2줄 모드 + 불꽃 특수 엠블럼 연출 모드 활성화
+    const streakEl = document.getElementById('streak-indicator');
+    if (streakEl) {
+      streakEl.classList.toggle('multiline', s.battleMeta >= 16);
+    }
+
     this.syncFontSettingsUI();
   }
 

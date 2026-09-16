@@ -3002,84 +3002,65 @@ body[data-current-view="battle"] {
 }
 
 /* =======================================================
-   저사양 모드 활성화 시 (body.low-perf-mode) 
-   - CPU 폭주 1위: backdrop-filter 블러 연산 완전 제거
-   - 화면 재도색 1위: background-attachment: fixed 제거 및 단색화
-   - 과도한 box-shadow 및 drop-shadow를 깔끔한 단일 보더로 대체
-   - 무한 반복 애니메이션 정지
+   저사양 성능 모드 활성화 시 (body.low-perf-mode) 
+   - [디자인 & 여백 완벽 보존]: 기존 padding, margin, gap, border-radius를 일절 건드리지 않음
+   - [CPU 병목 1위 차단]: backdrop-filter 가우시안 블러 소프트웨어 연산 완전 제거
+   - [재도색 병목 차단]: background-attachment: fixed 해제 및 경량 솔리드 다크 배경
+   - [GPU/CPU 낭비 방지]: 무한 반복 애니메이션 정지 및 무거운 네온 글로우를 가벼운 그림자로 단순화
 ======================================================= */
+
 body.low-perf-mode {
+  /* 불투명 솔리드 다크 컬러로 디자인 토큰 오버라이드 (블러가 빠져도 배경 비침 없이 깔끔) */
+  --bg-base: #0b0d14;
+  --bg-surface: #121622;
+  --bg-surface-elevated: #171c2c;
+  --bg-card: rgba(255, 255, 255, 0.038);
+  --bg-card-hover: rgba(255, 255, 255, 0.075);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-glass-bright: rgba(255, 255, 255, 0.2);
+
   background-attachment: scroll !important;
   background-image: none !important;
-  background-color: #0b0d13 !important;
+  background-color: #0b0d14 !important;
 }
 
-body.low-perf-mode * {
+/* CPU 폭주의 핵심인 블러 연산만 정확히 전역 차단 */
+body.low-perf-mode *,
+body.low-perf-mode *::before,
+body.low-perf-mode *::after {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
   text-shadow: none !important;
-  filter: none !important;
+}
+
+/* 헤더 불투명 배경 전환 (블러 제거 대비) */
+body.low-perf-mode .app-header {
+  background: #0d1018 !important;
+}
+
+/* 무한 반복 애니메이션 정지 (CPU 렌더트리 지속 갱신 방지) */
+body.low-perf-mode .trophy-badge,
+body.low-perf-mode .pulse-dot,
+body.low-perf-mode .btn-gold-glow {
   animation: none !important;
 }
 
-/* 블러가 빠져도 구조와 디자인이 또렷하게 보이도록 솔리드 다크 배경 + 테두리 제공 */
-body.low-perf-mode .app-header {
-  background: #0e111a !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+body.low-perf-mode .trophy-badge {
+  filter: none !important;
 }
 
+/* 과도한 네온 글로우 / 거대 블러 그림자를 CPU 친화적인 가벼운 그림자로 축소하여 입체감과 여백감 보존 */
 body.low-perf-mode .glass-panel,
 body.low-perf-mode .setup-card,
 body.low-perf-mode .battle-card,
 body.low-perf-mode .modal-dialog,
-body.low-perf-mode .modal-card,
-body.low-perf-mode .ranking-container,
-body.low-perf-mode .live-ranking-modal-card {
-  background: #121622 !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+body.low-perf-mode .app-header {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
 }
 
-body.low-perf-mode .candidate-item,
-body.low-perf-mode .candidate-list-container,
-body.low-perf-mode .setup-box,
-body.low-perf-mode .mode-card,
-body.low-perf-mode .bracket-node-match,
-body.low-perf-mode .tier-drop-zone {
-  background: #171c2b !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-body.low-perf-mode .mode-card.selected {
-  background: #20273c !important;
-  border-color: var(--gold-primary) !important;
-}
-
-body.low-perf-mode .vs-glow-circle {
-  background: #1c2234 !important;
-  border: 2px solid var(--gold-primary) !important;
-}
-
-body.low-perf-mode .btn-primary {
-  background: var(--gold-primary) !important;
-  color: #08090d !important;
-}
-
-body.low-perf-mode .btn-vote-cyan {
-  background: #00f2fe !important;
-  color: #08090d !important;
-}
-
-body.low-perf-mode .btn-vote-gold {
-  background: #f5b041 !important;
-  color: #08090d !important;
-}
-
-body.low-perf-mode #btn-toggle-perf-mode.active {
-  background: #00f2fe !important;
-  color: #08090d !important;
-}
-
-body.low-perf-mode #btn-toggle-perf-mode.active svg {
-  stroke: #08090d !important;
+body.low-perf-mode .btn-primary,
+body.low-perf-mode .btn-vote,
+body.low-perf-mode .vs-glow-circle,
+body.low-perf-mode .win-prob-box {
+  box-shadow: none !important;
 }

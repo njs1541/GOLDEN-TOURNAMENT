@@ -6,6 +6,7 @@
  */
 
 const STORAGE_CHZZK_CHANNEL_KEY = 'GOLDEN_TOURNAMENT_CHZZK_CHANNEL';
+const STORAGE_CHZZK_POLL_SCOPE_KEY = 'GOLDEN_TOURNAMENT_CHZZK_POLL_SCOPE';
 
 class ChzzkChatManager {
   constructor(app) {
@@ -19,23 +20,30 @@ class ChzzkChatManager {
     this.isConnected = false;
     this.isConnecting = false;
 
+    // 투표 진행 범위 설정: 'all' (전체 토너먼트) | 'final_only' (4강전 & 결승전에서만)
+    this.pollScope = 'all';
+
     // 투표 상태
     this.isPolling = false;
     this.votes = { A: 0, B: 0 };
-    this.voters = new Map(); // userId -> 'A' | 'B' (중복 투표 방지 및 변경 허용)
+    this.voters = new Set(); // 1대결당 1인 1회 투표 엄격 보장 (Set으로 관리)
 
     // UI 업데이트 콜백
     this.onVoteUpdate = null;
     this.onStatusChange = null;
 
-    this.loadSavedChannel();
+    this.loadSavedSettings();
   }
 
-  loadSavedChannel() {
+  loadSavedSettings() {
     try {
-      const saved = localStorage.getItem(STORAGE_CHZZK_CHANNEL_KEY);
-      if (saved) {
-        this.channelId = saved;
+      const savedChannel = localStorage.getItem(STORAGE_CHZZK_CHANNEL_KEY);
+      if (savedChannel) {
+        this.channelId = savedChannel;
+      }
+      const savedScope = localStorage.getItem(STORAGE_CHZZK_POLL_SCOPE_KEY);
+      if (savedScope === 'final_only' || savedScope === 'all') {
+        this.pollScope = savedScope;
       }
     } catch (e) {}
   }
@@ -45,6 +53,24 @@ class ChzzkChatManager {
     try {
       localStorage.setItem(STORAGE_CHZZK_CHANNEL_KEY, channelId);
     } catch (e) {}
+  }
+
+  setPollScope(scope) {
+    if (scope === 'final_only' || scope === 'all') {
+      this.pollScope = scope;
+      try {
+        localStorage.setItem(STORAGE_CHZZK_POLL_SCOPE_KEY, scope);
+      } catch (e) {}
+    }
+  }
+
+  /**
+   * 현재 단계(스위스/Elo 래더 vs 4강전/결승전)에서 시청자 투표가 허용되는지 판별
+   */
+  isPollAllowedForCurrentPhase(isFinalPhase = false) {
+    if (this.pollScope === 'all') return true;
+    if (this.pollScope === 'final_only') return Boolean(isFinalPhase);
+    return true;
   }
 
   /**
@@ -267,16 +293,13 @@ class ChzzkChatManager {
   }
 
   recordVote(userId, side) {
-    const prevVote = this.voters.get(userId);
-    if (prevVote === side) return; // 이미 같은 곳에 투표함
-
-    if (prevVote) {
-      // 기존 투표 취소 후 재투표
-      this.votes[prevVote] = Math.max(0, this.votes[prevVote] - 1);
+    // [사용자 요구사항]: 1대결당 1인당 1회만 투표 가능 (이미 투표한 사용자는 재투표/표 변경 차단)
+    if (this.voters.has(userId)) {
+      return; // 중복 투표 차단
     }
 
     this.votes[side] = (this.votes[side] || 0) + 1;
-    this.voters.set(userId, side);
+    this.voters.add(userId);
 
     this.notifyVoteUpdate();
   }
@@ -294,7 +317,7 @@ class ChzzkChatManager {
     this.notifyVoteUpdate();
   }
 
-  // 투표 결과 리셋
+  // 투표 결과 리셋 (새 대결 시작 시 호출되어 다시 1인 1회 투표 가능)
   resetPoll() {
     this.votes = { A: 0, B: 0 };
     this.voters.clear();

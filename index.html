@@ -347,7 +347,7 @@
             </div>
           </div>
 
-          <div class="chzzk-poll-controls">
+          <div class="chzzk-poll-controls" id="chzzk-poll-controls-wrap">
             <button id="btn-chzzk-toggle-poll" class="btn-ghost-sm btn-poll-toggle" type="button">
               <span id="chzzk-poll-btn-icon">▶</span>
               <span id="chzzk-poll-btn-text">투표 시작</span>
@@ -358,6 +358,12 @@
             <button id="btn-open-chzzk-setup" class="btn-ghost-sm" type="button" title="치지직 방송 채널 연동 설정">
               ⚙️ 연동 설정
             </button>
+          </div>
+
+          <!-- 4강전 전용 모드 적용 시 래더 리그 중 노출할 잠금 안내 문구 -->
+          <div class="chzzk-poll-locked-notice" id="chzzk-poll-locked-notice" style="display: none;">
+            <span class="lock-icon">🔒</span>
+            <span>현재 <strong>[4강전 & 결승전 전용]</strong> 설정이 적용 중입니다. 래더 리그 종료 후 4강전 진출 시 시청자 투표가 자동 활성화됩니다.</span>
           </div>
         </div>
 
@@ -685,6 +691,32 @@
               <input type="text" id="input-chzzk-channel" placeholder="예: https://chzzk.naver.com/live/671295... 또는 32자리 채널 ID" class="input-field">
             </div>
             <p class="chzzk-input-tip">치지직 방송국 주소창의 <code>/live/</code> 뒤에 있는 영문/숫자 조합을 복사해 붙여넣으세요.</p>
+          </div>
+
+          <!-- 시청자 투표 적용 범위 설정 옵션 (전체 vs 4강&결승) -->
+          <div class="chzzk-scope-box">
+            <label class="setup-label">시청자 투표 적용 범위 설정</label>
+            <div class="chzzk-scope-options">
+              <label class="scope-option-card selected" id="label-scope-all">
+                <input type="radio" name="chzzk-poll-scope" value="all" checked>
+                <div class="scope-option-body">
+                  <div class="scope-title-row">
+                    <span class="scope-name">🔥 전체 토너먼트 진행</span>
+                    <span class="badge-scope-rec">기본</span>
+                  </div>
+                  <span class="scope-desc">스위스-Elo 래더 리그부터 4강전 & 결승전까지 전 과정 시청자 투표 참여</span>
+                </div>
+              </label>
+              <label class="scope-option-card" id="label-scope-final">
+                <input type="radio" name="chzzk-poll-scope" value="final_only">
+                <div class="scope-option-body">
+                  <div class="scope-title-row">
+                    <span class="scope-name">🏆 4강전 & 결승전에서만 진행</span>
+                  </div>
+                  <span class="scope-desc">래더 리그는 스트리머 단독 진행, 4강전 및 결승전 돌입 시에만 시청자 투표 활성화</span>
+                </div>
+              </label>
+            </div>
           </div>
 
           <div class="chzzk-status-box">

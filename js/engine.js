@@ -260,8 +260,11 @@ class TournamentEngine {
     // 9. 되돌리기(Undo) 버튼 활성화 상태 갱신
     this.updateUndoButtonState();
 
-    // 10. 치지직 실시간 투표가 켜져 있다면 새 매치에 맞춰 리셋
-    if (this.app && this.app.chzzkChat && this.app.chzzkChat.isPolling) {
+    // 10. 치지직 실시간 투표 가시성(전체 vs 4강 전용) 적용 & 리셋
+    if (this.app && typeof this.app.applyPollScopeVisibility === 'function') {
+      this.app.applyPollScopeVisibility(false); // 래더 리그 단계
+    }
+    if (this.app && this.app.chzzkChat) {
       this.app.chzzkChat.resetPoll();
     }
   }

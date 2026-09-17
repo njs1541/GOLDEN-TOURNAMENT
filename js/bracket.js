@@ -360,6 +360,14 @@ class GoldenBracketManager {
       window.dualPlayer.loadMatch(candA, candB);
     }
 
+    // 치지직 실시간 투표 가시성(4강/결승 단계: true) 적용 & 리셋
+    if (this.app && typeof this.app.applyPollScopeVisibility === 'function') {
+      this.app.applyPollScopeVisibility(true); // 4강 및 결승전
+    }
+    if (this.app && this.app.chzzkChat) {
+      this.app.chzzkChat.resetPoll();
+    }
+
     // 투표 버튼 일회성 바인딩 (타격감 플래시 포함)
     const btnA = document.getElementById('btn-vote-a');
     const btnB = document.getElementById('btn-vote-b');

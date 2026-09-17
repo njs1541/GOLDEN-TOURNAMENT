@@ -282,6 +282,24 @@ class AppController {
     if (btnSimB) btnSimB.addEventListener('click', () => this.chzzkChat?.simulateVote('B', 5));
     if (btnSimReset) btnSimReset.addEventListener('click', () => this.chzzkChat?.resetPoll());
 
+    // 치지직 투표 적용 범위(전체 vs 4강/결승 전용) 선택 라디오 카드 이벤트
+    const scopeCards = document.querySelectorAll('.scope-option-card');
+    scopeCards.forEach(card => {
+      card.addEventListener('click', () => {
+        scopeCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const radio = card.querySelector('input[name="chzzk-poll-scope"]');
+        if (radio) {
+          radio.checked = true;
+          if (this.chzzkChat) {
+            this.chzzkChat.setPollScope(radio.value);
+            const isFinal = this.currentView === 'final' || Boolean(document.getElementById('match-phase-badge')?.classList.contains('pill-final'));
+            this.applyPollScopeVisibility(isFinal);
+          }
+        }
+      });
+    });
+
     // 치지직 투표 토글 및 다수결 반영 버튼
     const btnTogglePoll = document.getElementById('btn-chzzk-toggle-poll');
     const btnApplyMajority = document.getElementById('btn-chzzk-apply-majority');
@@ -1362,6 +1380,43 @@ class AppController {
     const inputEl = document.getElementById('input-chzzk-channel');
     if (inputEl && this.chzzkChat.channelId) {
       inputEl.value = this.chzzkChat.channelId;
+    }
+
+    // 투표 적용 범위 라디오 버튼 상태 동기화
+    const scope = this.chzzkChat.pollScope || 'all';
+    const radioScope = document.querySelector(`input[name="chzzk-poll-scope"][value="${scope}"]`);
+    if (radioScope) {
+      radioScope.checked = true;
+      document.querySelectorAll('.scope-option-card').forEach(card => card.classList.remove('selected'));
+      radioScope.closest('.scope-option-card')?.classList.add('selected');
+    }
+  }
+
+  /**
+   * 치지직 시청자 투표 패널 표시 범위 제어
+   * (전체 모드 vs 4강전&결승전 전용 모드에 따른 잠금/노출 처리)
+   */
+  applyPollScopeVisibility(isFinalPhase = false) {
+    if (!this.chzzkChat) return;
+    const isAllowed = this.chzzkChat.isPollAllowedForCurrentPhase(isFinalPhase);
+
+    const lockedNotice = document.getElementById('chzzk-poll-locked-notice');
+    const barWrap = document.querySelector('.chzzk-poll-bar-wrapper');
+    const controlsWrap = document.getElementById('chzzk-poll-controls-wrap');
+
+    if (!isAllowed) {
+      // 4강전 전용 모드이고 현재 래더 리그인 경우 -> 잠금 안내 노출 및 투표 비활성화
+      if (lockedNotice) lockedNotice.style.display = 'flex';
+      if (barWrap) barWrap.style.display = 'none';
+      if (controlsWrap) controlsWrap.style.display = 'none';
+      if (this.chzzkChat.isPolling) {
+        this.chzzkChat.stopPoll();
+      }
+    } else {
+      // 투표 허용 구간인 경우 -> 정상 활성화
+      if (lockedNotice) lockedNotice.style.display = 'none';
+      if (barWrap) barWrap.style.display = 'block';
+      if (controlsWrap) controlsWrap.style.display = 'flex';
     }
   }
 

@@ -365,7 +365,6 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  overflow: hidden;
   width: 100%;
 }
 
@@ -375,6 +374,8 @@ body {
   align-items: center;
   margin-bottom: 12px;
   gap: 12px;
+  padding-top: 4px;
+  padding-bottom: 2px;
 }
 
 .setup-title-group {
@@ -401,6 +402,7 @@ body {
   padding: 4px 10px;
   border-radius: var(--radius-sm);
   cursor: pointer;
+  position: relative;
   transition: all var(--transition-fast);
 }
 
@@ -409,6 +411,7 @@ body {
   border-color: rgba(245, 176, 65, 0.4);
   color: var(--gold-primary);
   transform: translateY(-1px);
+  z-index: 5;
 }
 
 .btn-text-action.btn-accent-action:hover {
@@ -423,6 +426,32 @@ body {
   border-color: rgba(255, 65, 108, 0.4);
   color: var(--accent-rose);
   transform: translateY(-1px);
+}
+
+/* 참가 영상 목록 하단 액션 툴바 */
+.candidate-bottom-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-glass);
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.btn-bottom-action {
+  flex: 1;
+  min-width: 80px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 /* 빈 목록 안내 (Empty State) */

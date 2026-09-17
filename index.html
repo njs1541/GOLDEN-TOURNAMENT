@@ -459,6 +459,35 @@
       </div>
     </div>
 
+    <!-- 백그라운드 임베드 검사용 숨김 컨테이너 (브라우저 스로틀링 방지 및 Zero-Lag 단일 재활용 러너) -->
+    <div id="embed-check-runner-container" style="position:fixed;top:0;left:0;width:240px;height:135px;z-index:-9999;opacity:0.01;pointer-events:none;" aria-hidden="true">
+      <div id="embed-check-runner"></div>
+    </div>
+
+    <!-- 영상 빠른 미리보기 모달 다이얼로그 -->
+    <div class="modal-backdrop" id="modal-video-preview">
+      <div class="modal-dialog glass-panel preview-modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-title-icon">🎬</span>
+            <h3 id="preview-modal-title">영상 미리보기</h3>
+          </div>
+          <button class="modal-close" id="btn-close-preview-modal">&times;</button>
+        </div>
+        <div class="modal-body preview-modal-body">
+          <div class="preview-player-wrap">
+            <div id="preview-player-iframe"></div>
+          </div>
+          <div class="preview-modal-footer">
+            <span class="preview-status-tip" id="preview-status-tip">임베드 재생 상태를 실시간으로 확인합니다.</span>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary btn-sm" id="preview-yt-link">
+              YouTube에서 열기 ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 참가 영상 목록 붙여넣기 / 가져오기 모달 다이얼로그 -->
     <div class="modal-backdrop" id="modal-paste-candidates">
       <div class="modal-dialog glass-panel paste-modal-dialog">

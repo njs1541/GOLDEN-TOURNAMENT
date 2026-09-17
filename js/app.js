@@ -29,6 +29,8 @@ class AppController {
     this.tierMaker = null; // tiermaker.js에서 초기화
     this.chzzkChat = null; // chzzkChat.js에서 초기화
     this.embedCheckStatus = {}; // videoId -> 'ok' | 'warn' | 'checking'
+    this.previewPlayerInstance = null; // 미리보기 모달 YT.Player
+    this.isCheckingEmbeds = false;
   }
 
   init() {
@@ -135,6 +137,18 @@ class AppController {
     if (modalPaste) {
       modalPaste.addEventListener('click', (e) => {
         if (e.target === modalPaste) this.closePasteModal();
+      });
+    }
+
+    // 영상 빠른 미리보기 모달 닫기
+    const btnClosePreview = document.getElementById('btn-close-preview-modal');
+    const modalPreview = document.getElementById('modal-video-preview');
+    if (btnClosePreview) {
+      btnClosePreview.addEventListener('click', () => this.closePreviewModal());
+    }
+    if (modalPreview) {
+      modalPreview.addEventListener('click', (e) => {
+        if (e.target === modalPreview) this.closePreviewModal();
       });
     }
 
@@ -421,9 +435,10 @@ class AppController {
 
   // 유튜브 oEmbed API를 이용해 원본 영상 제목 및 채널명 자동 추출
   async fetchYouTubeInfo(videoId) {
+    // 1순위: CORS 허용 엔드포인트 (noembed)
     try {
-      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-      const res = await fetch(oembedUrl);
+      const noembedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
+      const res = await fetch(noembedUrl);
       if (res.ok) {
         const data = await res.json();
         if (data && data.title) {
@@ -433,22 +448,23 @@ class AppController {
           };
         }
       }
-    } catch (err) {
-      // 백업 noembed 시도
-      try {
-        const noembedUrl = `https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`;
-        const res2 = await fetch(noembedUrl);
-        if (res2.ok) {
-          const data2 = await res2.json();
-          if (data2 && data2.title) {
-            return {
-              title: data2.title,
-              author_name: data2.author_name || 'YouTube'
-            };
-          }
+    } catch (err) {}
+
+    // 2순위: 유튜브 공식 oEmbed (CORS 프록시 또는 브라우저 환경에 따라 시도)
+    try {
+      const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+      const res2 = await fetch(oembedUrl);
+      if (res2.ok) {
+        const data2 = await res2.json();
+        if (data2 && data2.title) {
+          return {
+            title: data2.title,
+            author_name: data2.author_name || 'YouTube'
+          };
         }
-      } catch (err2) {}
-    }
+      }
+    } catch (err2) {}
+
     return null;
   }
 
@@ -850,6 +866,7 @@ class AppController {
     this.candidates.forEach((cand, idx) => {
       const itemEl = document.createElement('div');
       itemEl.className = 'candidate-item';
+      itemEl.setAttribute('data-youtube-id', cand.youtubeId);
       const thumbUrl = `https://img.youtube.com/vi/${cand.youtubeId}/mqdefault.jpg`;
       const numStr = String(idx + 1).padStart(2, '0');
 
@@ -866,7 +883,7 @@ class AppController {
       itemEl.innerHTML = `
         <div class="item-left-area">
           <span class="item-index-badge">${numStr}</span>
-          <div class="item-thumb-wrapper">
+          <div class="item-thumb-wrapper" title="클릭하여 영상 미리보기 및 재생 테스트">
             <img class="item-thumb" src="${thumbUrl}" alt="썸네일" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'80\\' height=\\'45\\' fill=\\'%23222\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'">
             <div class="thumb-overlay-play">▶</div>
           </div>
@@ -891,6 +908,15 @@ class AppController {
           </svg>
         </button>
       `;
+
+      // 썸네일 클릭 시 빠른 영상 미리보기 모달 오픈
+      const thumbWrapper = itemEl.querySelector('.item-thumb-wrapper');
+      if (thumbWrapper) {
+        thumbWrapper.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.openPreviewModal(cand);
+        });
+      }
 
       // 제목 클릭 또는 수정 버튼 클릭 시 인라인 편집 모드 전환
       const titleRow = itemEl.querySelector('.item-title-row');
@@ -1291,49 +1317,248 @@ class AppController {
   }
 
   // ================= 2. 등록 영상 임베드 재생 가능 여부 사전 점검 =================
+
+  // 단일 아이템 뱃지 실시간 부분 갱신 (Zero-Lag 60FPS: 전체 리스트 재렌더링 방지)
+  updateSingleEmbedBadge(youtubeId, status, customTitle = '') {
+    this.embedCheckStatus[youtubeId] = status;
+    const itemEl = document.querySelector(`.candidate-item[data-youtube-id="${youtubeId}"]`);
+    if (!itemEl) return;
+
+    const titleRow = itemEl.querySelector('.item-title-row');
+    if (!titleRow) return;
+
+    let badgeEl = titleRow.querySelector('.badge-embed-status');
+    if (!badgeEl) {
+      badgeEl = document.createElement('span');
+      badgeEl.className = 'badge-embed-status';
+      const editBtn = titleRow.querySelector('.btn-edit-title');
+      if (editBtn) {
+        titleRow.insertBefore(badgeEl, editBtn);
+      } else {
+        titleRow.appendChild(badgeEl);
+      }
+    }
+
+    badgeEl.className = 'badge-embed-status';
+    if (status === 'ok') {
+      badgeEl.classList.add('badge-embed-ok');
+      badgeEl.innerHTML = '✅ 정상';
+      badgeEl.title = customTitle || '유튜브 외부 재생 가능';
+    } else if (status === 'warn') {
+      badgeEl.classList.add('badge-embed-warn');
+      badgeEl.innerHTML = '⚠️ 임베드 주의';
+      badgeEl.title = customTitle || '외부 재생 차단(오류 150/101) 또는 비공개/삭제 영상일 수 있습니다';
+    } else if (status === 'checking') {
+      badgeEl.classList.add('badge-embed-checking');
+      badgeEl.innerHTML = '⏳ 점검 중';
+      badgeEl.title = '임베드 재생 가능 여부를 점검하는 중입니다...';
+    }
+  }
+
+  // YouTube IFrame API 준비 보장 헬퍼
+  async ensureYouTubeApiReady() {
+    if (window.YT && window.YT.Player) {
+      return true;
+    }
+    if (window.dualPlayer && typeof window.dualPlayer.init === 'function') {
+      await window.dualPlayer.init();
+    } else {
+      await new Promise((resolve) => {
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if ((window.YT && window.YT.Player) || attempts > 50) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 100);
+      });
+    }
+    return !!(window.YT && window.YT.Player);
+  }
+
+  // 유튜브 썸네일 이미지 크기 유효성 검사 (보조 빠른 사전 필터)
+  checkThumbnailValidity(videoId) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      let timedOut = false;
+      const timer = setTimeout(() => {
+        timedOut = true;
+        resolve(true); // 타임아웃 시 보수적으로 통과
+      }, 2000);
+
+      img.onload = () => {
+        if (timedOut) return;
+        clearTimeout(timer);
+        if (img.naturalWidth === 120 && img.naturalHeight === 90) {
+          resolve(false); // 삭제 또는 미존재 영상
+        } else {
+          resolve(true); // 정상 유효 영상
+        }
+      };
+      img.onerror = () => {
+        if (timedOut) return;
+        clearTimeout(timer);
+        resolve(false);
+      };
+      img.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+    });
+  }
+
+  // 단일 영상 IFrame Player 테스트 (미리보기 모달과 동일한 videoId 직접 생성 방식)
+  checkSingleVideoEmbed(videoId) {
+    return new Promise((resolve) => {
+      const container = document.getElementById('embed-check-runner-container');
+      if (!container || !window.YT || !window.YT.Player) {
+        this.checkThumbnailValidity(videoId).then(isValid => {
+          resolve({ ok: isValid, reason: isValid ? '정상' : '영상 미존재 또는 삭제' });
+        });
+        return;
+      }
+
+      // 고유 타겟 div 주입
+      const targetId = `embed-test-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      container.innerHTML = `<div id="${targetId}" style="width:240px;height:135px;"></div>`;
+
+      let isSettled = false;
+      let checkTimeout = null;
+      let playerInstance = null;
+
+      const finish = (result) => {
+        if (isSettled) return;
+        isSettled = true;
+        if (checkTimeout) clearTimeout(checkTimeout);
+        if (playerInstance && typeof playerInstance.destroy === 'function') {
+          try {
+            playerInstance.pauseVideo?.();
+            playerInstance.destroy();
+          } catch (e) {}
+          playerInstance = null;
+        }
+        if (container) container.innerHTML = '';
+        resolve(result);
+      };
+
+      // 타임아웃 2.5초: 시간 내에 에러 또는 재생 신호가 없으면 실패 판정
+      checkTimeout = setTimeout(() => {
+        finish({ ok: false, reason: '외부 임베드 응답 시간 초과 (재생 제한)' });
+      }, 2500);
+
+      const isHttp = window.location.protocol.startsWith('http');
+      const origin = (isHttp && window.location.origin && window.location.origin !== 'null') ? window.location.origin : undefined;
+
+      const playerOptions = {
+        height: '135',
+        width: '240',
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          rel: 0,
+          playsinline: 1
+        },
+        events: {
+          onReady: (e) => {
+            try {
+              e.target.mute();
+              e.target.playVideo();
+            } catch (err) {}
+          },
+          onError: (e) => {
+            const code = e ? e.data : 0;
+            let reason = '임베드 재생 불가';
+            if (code === 101 || code === 150) {
+              reason = '원작자의 외부 임베드 차단 (Error 150/101)';
+            } else if (code === 100) {
+              reason = '삭제 또는 비공개 영상 (Error 100)';
+            } else if (code === 2) {
+              reason = '잘못된 영상 ID (Error 2)';
+            }
+            finish({ ok: false, errorCode: code, reason });
+          },
+          onStateChange: (e) => {
+            const state = e ? e.data : -1;
+            // 1: PLAYING, 3: BUFFERING -> 실제 비디오 스트림 수신 성공!
+            if (state === 1 || state === 3) {
+              finish({ ok: true, reason: '정상 재생 가능' });
+            }
+          }
+        }
+      };
+      if (origin) {
+        playerOptions.playerVars.origin = origin;
+      }
+
+      try {
+        playerInstance = new YT.Player(targetId, playerOptions);
+      } catch (err) {
+        finish({ ok: false, reason: '플레이어 생성 실패' });
+      }
+    });
+  }
+
+  // 전체 영상 순차 점검
   async checkAllEmbeds() {
+    if (this.isCheckingEmbeds) {
+      return;
+    }
     if (!this.candidates || this.candidates.length === 0) {
       alert("점검할 참가 영상이 없습니다. 영상을 먼저 등록해 주세요.");
       return;
     }
 
+    this.isCheckingEmbeds = true;
     const btn = document.getElementById('btn-check-embed-all');
     let originalHtml = '';
     if (btn) {
       originalHtml = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = `<span>⏳</span> 점검 중...`;
+      btn.innerHTML = `<span>⏳</span> 점검 준비 중...`;
     }
 
-    this.showPerfToast('🎬 임베드 점검 시작', `등록된 ${this.candidates.length}개 영상의 유튜브 외부 재생 허용 여부를 점검합니다...`, 'info', 3000);
+    this.showPerfToast('🎬 임베드 점검 시작', `등록된 ${this.candidates.length}개 영상의 유튜브 외부 재생 허용 여부(오류 150/101 및 삭제)를 점검합니다...`, 'info', 3000);
 
-    let okCount = 0;
-    let warnCount = 0;
+    // YouTube API 준비 확인
+    await this.ensureYouTubeApiReady();
 
+    // 초기 상태: 전체를 'checking'으로 표시
     for (const cand of this.candidates) {
       this.embedCheckStatus[cand.youtubeId] = 'checking';
     }
     this.renderCandidateList();
 
-    // 순차적 oEmbed 점검
-    for (const cand of this.candidates) {
-      try {
-        const info = await this.fetchYouTubeInfo(cand.youtubeId);
-        if (info && info.title) {
-          this.embedCheckStatus[cand.youtubeId] = 'ok';
-          okCount++;
-        } else {
-          this.embedCheckStatus[cand.youtubeId] = 'warn';
-          warnCount++;
-        }
-      } catch (e) {
-        this.embedCheckStatus[cand.youtubeId] = 'warn';
+    let okCount = 0;
+    let warnCount = 0;
+    const total = this.candidates.length;
+
+    // 순차적 실시간 점검 (Zero-Lag: 한 곡씩 점검하면서 즉시 뱃지와 진행률 갱신)
+    for (let i = 0; i < total; i++) {
+      const cand = this.candidates[i];
+      if (btn) {
+        btn.innerHTML = `<span>⏳</span> 점검 중 (${i + 1}/${total})...`;
+      }
+
+      // 1단계: 썸네일 이미지 삭제/비공개 검사 (초고속)
+      const isThumbValid = await this.checkThumbnailValidity(cand.youtubeId);
+      if (!isThumbValid) {
+        this.updateSingleEmbedBadge(cand.youtubeId, 'warn', '삭제되었거나 비공개된 영상입니다');
+        warnCount++;
+        continue;
+      }
+
+      // 2단계: 플레이어 임베드 및 퍼가기 차단(150/101) 검사 (미리보기 모달과 동일한 인스턴스 정밀 검증)
+      const result = await this.checkSingleVideoEmbed(cand.youtubeId);
+
+      if (result.ok) {
+        this.updateSingleEmbedBadge(cand.youtubeId, 'ok', '유튜브 외부 재생 정상 확인');
+        okCount++;
+      } else {
+        this.updateSingleEmbedBadge(cand.youtubeId, 'warn', result.reason || '임베드 재생 주의');
         warnCount++;
       }
     }
 
-    this.renderCandidateList();
-
+    this.isCheckingEmbeds = false;
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = originalHtml;
@@ -1342,7 +1567,7 @@ class AppController {
     if (warnCount > 0) {
       this.showPerfToast(
         '⚠️ 재생 주의 영상 발견',
-        `정상 재생: ${okCount}곡 / 임베드 주의: ${warnCount}곡. [임베드 주의] 뱃지가 붙은 영상을 확인해 주세요.`,
+        `정상 재생: ${okCount}곡 / 임베드 주의: ${warnCount}곡. [임베드 주의] 뱃지가 붙은 영상을 확인하고 교체해 주세요.`,
         'warning',
         7000
       );
@@ -1353,6 +1578,129 @@ class AppController {
         'info',
         4500
       );
+    }
+  }
+
+  // 영상 빠른 미리보기 모달 열기 (YT.Player 기반 실시간 에러 감지 및 뱃지 자동 동기화)
+  openPreviewModal(cand) {
+    if (!cand || !cand.youtubeId) return;
+    const modal = document.getElementById('modal-video-preview');
+    const titleEl = document.getElementById('preview-modal-title');
+    const linkEl = document.getElementById('preview-yt-link');
+    const playerWrap = document.getElementById('preview-player-iframe');
+    const tipEl = document.getElementById('preview-status-tip');
+
+    if (titleEl) titleEl.textContent = cand.title || '영상 미리보기';
+    if (linkEl) linkEl.href = `https://www.youtube.com/watch?v=${cand.youtubeId}`;
+    if (tipEl) {
+      const state = this.embedCheckStatus[cand.youtubeId];
+      if (state === 'ok') {
+        tipEl.innerHTML = `<span style="color:#10b981;font-weight:bold;">✅ 외부 임베드 재생 정상 확인됨</span>`;
+      } else if (state === 'warn') {
+        tipEl.innerHTML = `<span style="color:#f87171;font-weight:bold;">⚠️ 원작자의 외부 임베드 재생 차단 (Error 150/101)</span>`;
+      } else {
+        tipEl.innerHTML = `<span>영상 로딩 및 임베드 상태를 확인하는 중...</span>`;
+      }
+    }
+
+    if (playerWrap) {
+      if (this.previewPlayerInstance && typeof this.previewPlayerInstance.destroy === 'function') {
+        try { this.previewPlayerInstance.destroy(); } catch (e) {}
+        this.previewPlayerInstance = null;
+      }
+      playerWrap.innerHTML = '<div id="preview-yt-embed-target" style="width:100%;height:100%;"></div>';
+
+      const isHttp = window.location.protocol.startsWith('http');
+      const origin = (isHttp && window.location.origin && window.location.origin !== 'null') ? window.location.origin : undefined;
+
+      const playerOptions = {
+        height: '100%',
+        width: '100%',
+        videoId: cand.youtubeId,
+        playerVars: {
+          autoplay: 1,
+          controls: 1,
+          rel: 0,
+          playsinline: 1
+        },
+        events: {
+          onReady: (e) => {
+            try { e.target.playVideo(); } catch (err) {}
+          },
+          onError: (e) => {
+            const code = e ? e.data : 0;
+            let reason = '임베드 재생 불가';
+            if (code === 101 || code === 150) {
+              reason = '원작자의 외부 임베드 차단 (Error 150/101)';
+            } else if (code === 100) {
+              reason = '삭제 또는 비공개 영상 (Error 100)';
+            } else if (code === 2) {
+              reason = '잘못된 영상 ID (Error 2)';
+            }
+            if (tipEl) {
+              tipEl.innerHTML = `<span style="color:#f87171;font-weight:bold;">⚠️ ${reason} - 다른 영상으로 교체 권장</span>`;
+            }
+            this.updateSingleEmbedBadge(cand.youtubeId, 'warn', reason);
+          },
+          onStateChange: (e) => {
+            if (e && (e.data === 1 || e.data === 3)) {
+              if (tipEl) {
+                tipEl.innerHTML = `<span style="color:#10b981;font-weight:bold;">✅ 외부 임베드 재생 정상 확인됨</span>`;
+              }
+              this.updateSingleEmbedBadge(cand.youtubeId, 'ok', '유튜브 외부 재생 정상 확인');
+            }
+          }
+        }
+      };
+      if (origin) {
+        playerOptions.playerVars.origin = origin;
+      }
+
+      try {
+        if (window.YT && window.YT.Player) {
+          this.previewPlayerInstance = new YT.Player('preview-yt-embed-target', playerOptions);
+        } else {
+          playerWrap.innerHTML = `
+            <iframe
+              src="https://www.youtube.com/embed/${cand.youtubeId}?autoplay=1&rel=0&playsinline=1"
+              title="${cand.title || 'YouTube video'}"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              style="width: 100%; height: 100%; border: none;">
+            </iframe>
+          `;
+        }
+      } catch (err) {
+        playerWrap.innerHTML = `
+          <iframe
+            src="https://www.youtube.com/embed/${cand.youtubeId}?autoplay=1&rel=0&playsinline=1"
+            title="${cand.title || 'YouTube video'}"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            style="width: 100%; height: 100%; border: none;">
+          </iframe>
+        `;
+      }
+    }
+
+    if (modal) {
+      modal.classList.add('active');
+    }
+  }
+
+  // 영상 빠른 미리보기 모달 닫기
+  closePreviewModal() {
+    const modal = document.getElementById('modal-video-preview');
+    if (this.previewPlayerInstance && typeof this.previewPlayerInstance.destroy === 'function') {
+      try { this.previewPlayerInstance.destroy(); } catch (e) {}
+      this.previewPlayerInstance = null;
+    }
+    const playerWrap = document.getElementById('preview-player-iframe');
+    if (playerWrap) {
+      playerWrap.innerHTML = '';
+    }
+    if (modal) {
+      modal.classList.remove('active');
     }
   }
 

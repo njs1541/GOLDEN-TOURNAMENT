@@ -3730,4 +3730,293 @@ body.low-perf-mode .win-prob-box {
   display: flex;
   gap: 10px;
   margin-left: auto;
-}
+}
+
+/* ==========================================================================
+   스위스 ➔ Elo 래더 단계 전환 스플래시 모달 (Stage 2 Transition Modal)
+   ========================================================================== */
+.modal-phase-transition {
+  position: fixed !important;
+  inset: 0 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(4, 7, 16, 0.88) !important;
+  z-index: 10000 !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-phase-transition.active {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.phase-trans-card {
+  position: relative;
+  width: 90%;
+  max-width: 580px;
+  background: linear-gradient(135deg, rgba(16, 24, 40, 0.95), rgba(8, 12, 22, 0.98));
+  border: 1px solid rgba(245, 176, 65, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px 30px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8),
+              0 0 40px rgba(245, 176, 65, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+  transform: scale(0.92) translateY(12px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-phase-transition.active .phase-trans-card {
+  transform: scale(1) translateY(0);
+}
+
+.trans-glow-halo {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(245, 176, 65, 0.35) 0%, rgba(255, 107, 107, 0.15) 50%, transparent 75%);
+  pointer-events: none;
+  filter: blur(24px);
+}
+
+.trans-badge-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.trans-tag-swiss {
+  color: var(--accent-cyan);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.trans-arrow {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.trans-tag-elo {
+  color: var(--gold-primary);
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(245, 176, 65, 0.5);
+}
+
+.trans-emblem-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trans-emblem-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(245, 176, 65, 0.5);
+  background: radial-gradient(circle, rgba(245, 176, 65, 0.25) 0%, rgba(245, 176, 65, 0.05) 70%);
+  box-shadow: 0 0 24px rgba(245, 176, 65, 0.4), inset 0 0 12px rgba(245, 176, 65, 0.3);
+  animation: emblemPulse 2s infinite ease-in-out;
+}
+
+@keyframes emblemPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 24px rgba(245, 176, 65, 0.4), inset 0 0 12px rgba(245, 176, 65, 0.3);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 36px rgba(245, 176, 65, 0.7), inset 0 0 18px rgba(245, 176, 65, 0.5);
+  }
+}
+
+.trans-emblem-icon {
+  font-size: 34px;
+  z-index: 2;
+  filter: drop-shadow(0 0 10px rgba(245, 176, 65, 0.8));
+  animation: emblemIconFloat 2s infinite ease-in-out;
+}
+
+@keyframes emblemIconFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.06); }
+}
+
+.trans-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #ffffff 30%, var(--gold-light) 70%, var(--gold-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 20px rgba(245, 176, 65, 0.3);
+}
+
+.trans-subtitle {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.trans-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.trans-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s;
+}
+
+.trans-info-card.card-highlight {
+  background: rgba(245, 176, 65, 0.06);
+  border-color: rgba(245, 176, 65, 0.3);
+}
+
+.trans-info-card .info-icon {
+  font-size: 20px;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+.trans-info-card .info-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trans-info-card .info-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.trans-info-card.card-highlight .info-title {
+  color: var(--gold-primary);
+}
+
+.trans-info-card .info-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.trans-progress-wrap {
+  margin-bottom: 20px;
+}
+
+.trans-progress-track {
+  height: 4px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.trans-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+  border-radius: 999px;
+  transform-origin: left center;
+  transition: transform 0.1s linear;
+}
+
+.trans-timer-text {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.btn-trans-start {
+  width: 100%;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 20px rgba(245, 176, 65, 0.4);
+}
+
+.btn-trans-start .key-hint {
+  margin-left: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 11px;
+}
+
+/* ==========================================================================
+   헤더 뱃지 및 중앙 인디케이터 전환 강조 효과 (Glow Pulse)
+   ========================================================================== */
+@keyframes phaseGlowPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 176, 65, 0.8), 0 2px 10px rgba(0, 0, 0, 0.2);
+    transform: scale(1);
+  }
+  30% {
+    box-shadow: 0 0 24px 6px rgba(245, 176, 65, 0.7), 0 2px 10px rgba(0, 0, 0, 0.2);
+    transform: scale(1.08);
+  }
+  60% {
+    box-shadow: 0 0 16px 3px rgba(245, 176, 65, 0.5), 0 2px 10px rgba(0, 0, 0, 0.2);
+    transform: scale(1.03);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 176, 65, 0), 0 2px 10px rgba(0, 0, 0, 0.2);
+    transform: scale(1);
+  }
+}
+
+.pill-transition-glow {
+  animation: phaseGlowPulse 1.8s ease-out 2 !important;
+}
+
+.match-indicator-elo {
+  background: rgba(245, 176, 65, 0.12) !important;
+  border-color: rgba(245, 176, 65, 0.4) !important;
+  color: var(--gold-light) !important;
+  box-shadow: 0 0 12px rgba(245, 176, 65, 0.25);
+}
+

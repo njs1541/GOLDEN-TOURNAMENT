@@ -331,6 +331,7 @@ class AppController {
     window.addEventListener('keydown', (e) => {
       if (this.currentView !== 'battle') return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (document.querySelector('.modal-backdrop.active, .modal-overlay.active')) return;
 
       // 투표 취소 단축키: Z 또는 Ctrl+Z
       if ((e.key === 'z' || e.key === 'Z') && !e.shiftKey) {

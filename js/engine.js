@@ -68,6 +68,9 @@ class TournamentEngine {
     this.currentMatch = null; // { candA, candB, phase }
     this.isProcessingVote = false;
     this.matchHistory = []; // 투표 취소(Undo)를 위한 스냅샷 스택
+    this.hasShownEloTransition = false; // 스위스 -> Elo 래더 단계 전환 안내 노출 여부
+    this.transTimerId = null;
+    this.transKeyHandler = null;
   }
 
   start() {
@@ -164,9 +167,10 @@ class TournamentEngine {
     const progressLabel = document.getElementById('progress-text');
     const matchIndicator = document.getElementById('current-match-indicator');
 
+    const isSwiss = phase.includes('스위스');
     if (phaseText) phaseText.textContent = phase;
     if (phasePill) {
-      if (phase.includes('스위스')) {
+      if (isSwiss) {
         phasePill.className = 'phase-pill pill-swiss';
       } else {
         phasePill.className = 'phase-pill pill-elo';
@@ -178,7 +182,13 @@ class TournamentEngine {
     if (progressLabel) progressLabel.textContent = `진행도: ${this.currentMatchIndex} / ${this.totalLadderMatches} 매치 (${progressPercent}%)`;
     if (matchIndicator) {
       matchIndicator.classList.remove('badge-multiline');
-      matchIndicator.textContent = `MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
+      if (isSwiss) {
+        matchIndicator.classList.remove('match-indicator-elo');
+        matchIndicator.textContent = `MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
+      } else {
+        matchIndicator.classList.add('match-indicator-elo');
+        matchIndicator.textContent = `⚡ ELO RIVAL MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
+      }
     }
 
     // 2. 카드 A 메타데이터 렌더링
@@ -267,6 +277,102 @@ class TournamentEngine {
     if (this.app && this.app.chzzkChat) {
       this.app.chzzkChat.resetPoll();
     }
+
+    // 11. 스위스 ➔ Elo 래더 전환 안내 스플래시 모달 트리거
+    if (!isSwiss && !this.hasShownEloTransition) {
+      this.hasShownEloTransition = true;
+      this.showPhaseTransitionNotice();
+    }
+  }
+
+  /**
+   * 스위스 균등 노출 ➔ Elo 래더 리그 단계 전환 스플래시 모달 표시
+   */
+  showPhaseTransitionNotice() {
+    const modal = document.getElementById('modal-phase-transition');
+    if (!modal) return;
+
+    this.closePhaseTransitionNotice(); // 기존 타이머/리스너 정리
+
+    const btnStart = document.getElementById('btn-start-elo-match');
+    const timerBar = document.getElementById('trans-countdown-bar');
+    const timerText = document.getElementById('trans-timer-text');
+
+    modal.classList.add('active');
+
+    const totalDuration = 3500; // 3.5초 자동 진행
+    const startTime = performance.now();
+
+    const updateCountdown = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const remaining = Math.max(0, totalDuration - elapsed);
+      const ratio = remaining / totalDuration;
+
+      if (timerBar) {
+        timerBar.style.transform = `scaleX(${ratio})`;
+      }
+      if (timerText) {
+        const sec = (remaining / 1000).toFixed(1);
+        timerText.textContent = `${sec}초 후 대결이 자동으로 시작됩니다...`;
+      }
+
+      if (remaining > 0) {
+        this.transTimerId = requestAnimationFrame(updateCountdown);
+      } else {
+        this.closePhaseTransitionNotice();
+      }
+    };
+
+    this.transTimerId = requestAnimationFrame(updateCountdown);
+
+    // 시작 버튼 및 키보드(Space, Enter, Escape) 리스너
+    const handleClose = () => {
+      this.closePhaseTransitionNotice();
+    };
+
+    if (btnStart) {
+      btnStart.onclick = handleClose;
+    }
+
+    this.transKeyHandler = (e) => {
+      if (e.code === 'Space' || e.code === 'Enter' || e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', this.transKeyHandler);
+  }
+
+  /**
+   * 단계 전환 모달 닫기 및 상단 뱃지/토스트 피드백 활성화
+   */
+  closePhaseTransitionNotice() {
+    if (this.transTimerId) {
+      cancelAnimationFrame(this.transTimerId);
+      this.transTimerId = null;
+    }
+    if (this.transKeyHandler) {
+      window.removeEventListener('keydown', this.transKeyHandler);
+      this.transKeyHandler = null;
+    }
+
+    const modal = document.getElementById('modal-phase-transition');
+    if (modal && modal.classList.contains('active')) {
+      modal.classList.remove('active');
+
+      // 헤더 뱃지에 글로우 애니메이션 부여
+      const phasePill = document.getElementById('match-phase-badge');
+      if (phasePill) {
+        phasePill.classList.remove('pill-transition-glow');
+        void phasePill.offsetWidth; // CSS 애니메이션 재시작 트리거
+        phasePill.classList.add('pill-transition-glow');
+      }
+
+      // 토스트 알림 연동
+      if (this.app && typeof this.app.showPerfToast === 'function') {
+        this.app.showPerfToast('⚡ 실시간 Elo 래더 리그 돌입', '이제 레이팅이 비슷한 라이벌끼리 매칭됩니다!', 'info', 3000);
+      }
+    }
   }
 
   bindVoteButtons() {
@@ -338,6 +444,12 @@ class TournamentEngine {
     const candA = this.candidates.find(c => c.id === lastSnapshot.currentMatch.candAId);
     const candB = this.candidates.find(c => c.id === lastSnapshot.currentMatch.candBId);
     this.currentMatch = { candA, candB, phase: lastSnapshot.currentMatch.phase };
+
+    // 스위스 단계로 되돌아갔다면 단계 전환 노출 플래그 복원
+    this.closePhaseTransitionNotice();
+    if (lastSnapshot.currentMatch.phase && lastSnapshot.currentMatch.phase.includes('스위스')) {
+      this.hasShownEloTransition = false;
+    }
 
     // 3. 화면 재렌더링
     this.renderBattleMatch();
@@ -468,6 +580,7 @@ class TournamentEngine {
       totalLadderMatches: this.totalLadderMatches,
       minExposure: this.minExposure,
       maxSwissMatches: this.maxSwissMatches,
+      hasShownEloTransition: this.hasShownEloTransition,
       currentMatch: this.currentMatch ? {
         candAId: this.currentMatch.candA.id,
         candBId: this.currentMatch.candB.id,
@@ -491,6 +604,7 @@ class TournamentEngine {
     this.totalLadderMatches = data.totalLadderMatches || this.totalLadderMatches;
     this.minExposure = data.minExposure || 2;
     this.maxSwissMatches = data.maxSwissMatches || Math.ceil((this.candidates.length * 2) / 2);
+    this.hasShownEloTransition = Boolean(data.hasShownEloTransition);
     this.matchHistory = data.matchHistory || [];
 
     if (Array.isArray(data.candidates)) {

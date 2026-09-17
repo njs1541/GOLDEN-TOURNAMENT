@@ -97,33 +97,48 @@ class ChzzkChatManager {
 
   /**
    * 다중 프록시 및 로컬 서버를 활용한 범용 API 요청 헬퍼
-   * 1순위: 로컬 서버 프록시 (/api/proxy?url=...) -> 한국 IP 직접 호출로 100% 성공 & 초고속
-   * 2순위: 브라우저 직접 fetch
-   * 3순위: AllOrigins 공용 프록시
-   * 4순위: Codetabs 공용 프록시
+   * - 현재 접속 오리진의 프록시뿐만 아니라 8000번 로컬 서버(start.bat)도 크로스 탐색
+   * - VSCode Live Server(포트 5500 등) 사용 시에도 start.bat이 켜져 있으면 자동 연동
    */
   async fetchWithProxyFallback(targetUrl) {
     const urlsToTry = [];
+    const encodedTarget = encodeURIComponent(targetUrl);
 
-    // 1. 로컬 개발/실행 서버 프록시 (start.bat / server.py 구동 환경)
+    // 1. 현재 브라우저 접속 오리진의 프록시 (/api/proxy)
     if (window.location.protocol.startsWith('http')) {
-      const localProxyUrl = `${window.location.origin}/api/proxy?url=${encodeURIComponent(targetUrl)}`;
-      urlsToTry.push({ type: 'local-proxy', url: localProxyUrl });
+      urlsToTry.push({
+        type: 'current-origin-proxy',
+        url: `${window.location.origin}/api/proxy?url=${encodedTarget}`,
+        timeout: 1500
+      });
     }
 
-    // 2. 브라우저 직접 요청
-    urlsToTry.push({ type: 'direct', url: targetUrl });
+    // 2. 만약 현재 포트가 8000이 아닌 경우 (예: VSCode Live Server 5500), 8000번 로컬 프록시 직접 연결 시도
+    if (window.location.port !== '8000') {
+      urlsToTry.push({
+        type: 'local-8000-ip',
+        url: `http://127.0.0.1:8000/api/proxy?url=${encodedTarget}`,
+        timeout: 1500
+      });
+      urlsToTry.push({
+        type: 'local-8000-host',
+        url: `http://localhost:8000/api/proxy?url=${encodedTarget}`,
+        timeout: 1500
+      });
+    }
 
-    // 3. AllOrigins 공용 프록시 (Raw)
+    // 3. 브라우저 직접 요청 (CORS 지원 여부 테스트)
     urlsToTry.push({
-      type: 'allorigins',
-      url: `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+      type: 'direct',
+      url: targetUrl,
+      timeout: 2000
     });
 
-    // 4. Codetabs 공용 프록시
+    // 4. AllOrigins 공용 프록시 (최후의 수단)
     urlsToTry.push({
-      type: 'codetabs',
-      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+      type: 'allorigins',
+      url: `https://api.allorigins.win/raw?url=${encodedTarget}`,
+      timeout: 3500
     });
 
     let lastError = null;
@@ -131,7 +146,7 @@ class ChzzkChatManager {
     for (const attempt of urlsToTry) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6초 타임아웃
+        const timeoutId = setTimeout(() => controller.abort(), attempt.timeout);
 
         const res = await fetch(attempt.url, {
           mode: 'cors',
@@ -147,12 +162,25 @@ class ChzzkChatManager {
         }
       } catch (err) {
         lastError = err;
-        // 다음 프록시로 fallback 진행
       }
     }
 
-    throw lastError || new Error('네트워크 프록시 연결에 실패했습니다.');
+    // 모든 시도 실패 시 사용자 친화적 에러 메시지 생성
+    const isLiveServer = window.location.port === '5500' || (window.location.port && window.location.port !== '8000');
+    if (isLiveServer) {
+      throw new Error(
+        `로컬 프록시 서버(start.bat)가 실행되어 있지 않습니다.\n\n` +
+        `* 현재 [${window.location.host}] 환경에서 접속 중이십니다.\n` +
+        `* 폴더 안의 [start.bat]을 더블 클릭하여 실행해 두시면 현재 화면에서도 치지직 실시간 연동이 즉시 가능합니다.`
+      );
+    } else {
+      throw new Error(
+        `로컬 프록시 서버(start.bat)를 실행해 주세요.\n` +
+        `* [start.bat]을 실행하시면 치지직 실시간 채팅 서버에 CORS 차단 없이 즉시 연결됩니다.`
+      );
+    }
   }
+
 
   /**
    * 1단계: 채널 생방송 상세 정보 조회 (chatChannelId 획득 및 방송 상태 판별)

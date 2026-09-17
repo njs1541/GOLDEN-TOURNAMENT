@@ -29,6 +29,10 @@
           <span class="pulse-dot"></span>
           <span id="phase-text">준비 단계</span>
         </div>
+        <button id="btn-header-chzzk" class="btn-ghost btn-chzzk-header" title="치지직(CHZZK) 실시간 채팅 투표 연동 설정">
+          <span class="chzzk-dot" id="header-chzzk-dot"></span>
+          <span>📺 치지직 연동</span>
+        </button>
         <button id="btn-show-live-ranking" class="btn-ghost" title="현재 Elo 랭킹 보기">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 20V10M12 20V4M6 20v-6"></path>
@@ -56,6 +60,23 @@
 
       <!-- ================= 1. 셋업 화면 (SETUP VIEW) ================= -->
       <section id="view-setup" class="view-panel active">
+        <!-- 이전 세션 복원 배너 (저장된 세션이 있을 때만 활성화) -->
+        <div id="session-resume-banner" class="resume-session-banner glass-panel" style="display: none;">
+          <div class="resume-banner-content">
+            <span class="resume-banner-icon">⚡</span>
+            <div class="resume-banner-text">
+              <h4 id="resume-banner-title">진행 중이던 토너먼트 세션이 있습니다!</h4>
+              <p id="resume-banner-desc">이전에 진행 중이던 매치 및 ELO 전적이 안전하게 보관되어 있습니다.</p>
+            </div>
+          </div>
+          <div class="resume-banner-actions">
+            <button id="btn-discard-session" class="btn-ghost-sm" type="button">새로 시작</button>
+            <button id="btn-resume-session" class="btn-primary btn-gold-glow btn-sm" type="button">
+              이어서 진행하기 ⏩
+            </button>
+          </div>
+        </div>
+
         <div class="setup-card glass-panel">
           <div class="setup-header">
             <h2 class="view-title">유튜브 토너먼트 설정</h2>
@@ -71,6 +92,10 @@
                   <span class="badge-count"><span id="candidate-count">16</span>개 등록됨</span>
                 </div>
                 <div class="header-action-group">
+                  <button id="btn-check-embed-all" class="btn-text-action btn-inspect-action" title="등록된 영상들의 유튜브 임베드 재생 가능 여부를 점검합니다">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    재생 점검
+                  </button>
                   <button id="btn-copy-candidates" class="btn-text-action" title="현재 참가 영상 목록을 복사하여 다른 사람에게 공유합니다">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     목록 복사
@@ -118,7 +143,7 @@
                     <div class="mode-card-indicator"></div>
                     <div class="mode-card-body">
                       <div class="mode-title-row">
-                        <span class="mode-name">⚡ 퀵 코스 (16매치)</span>
+                        <span class="mode-name">⚡ 퀵 코스 (<span id="course-match-quick">16</span>매치)</span>
                       </div>
                       <span class="mode-desc">모든 영상 2회씩 균등 대결 후 즉시 4강전 돌입</span>
                     </div>
@@ -128,7 +153,7 @@
                     <div class="mode-card-indicator"></div>
                     <div class="mode-card-body">
                       <div class="mode-title-row">
-                        <span class="mode-name">⚖️ 표준 밸런스 (28매치)</span>
+                        <span class="mode-name">⚖️ 표준 밸런스 (<span id="course-match-standard">28</span>매치)</span>
                         <span class="badge-recommend">추천</span>
                       </div>
                       <span class="mode-desc">스위스 2회 균등 노출 + 정밀 Elo 라이벌 매칭</span>
@@ -139,7 +164,7 @@
                     <div class="mode-card-indicator"></div>
                     <div class="mode-card-body">
                       <div class="mode-title-row">
-                        <span class="mode-name">🎯 마스터 래더 (45매치)</span>
+                        <span class="mode-name">🎯 마스터 래더 (<span id="course-match-deep">45</span>매치)</span>
                       </div>
                       <span class="mode-desc">정밀한 Elo 레이팅과 세부 티어 산출을 위한 심층 리그</span>
                     </div>
@@ -296,8 +321,52 @@
           </div>
         </div>
 
+        <!-- 치지직 실시간 시청자 투표 패널 -->
+        <div class="chzzk-poll-panel glass-panel" id="chzzk-poll-panel">
+          <div class="chzzk-poll-header">
+            <div class="chzzk-live-tag">
+              <span class="chzzk-pulse-dot" id="chzzk-live-dot"></span>
+              <span class="chzzk-brand-label">CHZZK</span>
+              <span>실시간 시청자 투표</span>
+            </div>
+            <div class="chzzk-poll-meta">
+              <span class="chzzk-cmd-hint">시청자 채팅: <strong>1/A</strong> 또는 <strong>2/B</strong></span>
+              <button id="btn-chzzk-status-badge" class="badge-chzzk-status" title="치지직 채팅 연결 상태 확인">대기 중</button>
+            </div>
+          </div>
+          
+          <div class="chzzk-poll-bar-wrapper">
+            <div class="chzzk-poll-labels">
+              <span class="poll-label-a">[A] <strong id="chzzk-votes-a">0</strong>표 (<span id="chzzk-pct-a">50%</span>)</span>
+              <span class="poll-status-indicator" id="chzzk-poll-status-text">투표 대기</span>
+              <span class="poll-label-b">(<span id="chzzk-pct-b">50%</span>) <strong id="chzzk-votes-b">0</strong>표 [B]</span>
+            </div>
+            <div class="chzzk-poll-track">
+              <div id="chzzk-bar-a" class="chzzk-fill-a" style="width: 50%"></div>
+              <div id="chzzk-bar-b" class="chzzk-fill-b" style="width: 50%"></div>
+            </div>
+          </div>
+
+          <div class="chzzk-poll-controls">
+            <button id="btn-chzzk-toggle-poll" class="btn-ghost-sm btn-poll-toggle" type="button">
+              <span id="chzzk-poll-btn-icon">▶</span>
+              <span id="chzzk-poll-btn-text">투표 시작</span>
+            </button>
+            <button id="btn-chzzk-apply-majority" class="btn-primary btn-gold-glow btn-sm btn-apply-majority" type="button" disabled title="더 많은 표를 얻은 쪽으로 자동 투표합니다">
+              👑 시청자 다수결 반영
+            </button>
+            <button id="btn-open-chzzk-setup" class="btn-ghost-sm" type="button" title="치지직 방송 채널 연동 설정">
+              ⚙️ 연동 설정
+            </button>
+          </div>
+        </div>
+
         <!-- 하단 보조 플로팅 툴바 -->
         <div class="battle-toolbar">
+          <button id="btn-battle-undo" class="btn-ghost-sm btn-undo-glow disabled" disabled title="직전 투표 취소 및 복원 (단축키: Z 또는 Ctrl+Z)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+            이전 투표 취소 (Z)
+          </button>
           <button id="btn-battle-skip" class="btn-ghost-sm" title="승패 없이 다음 매칭 진행">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
             스킵 (무승부)
@@ -593,6 +662,58 @@
         </div>
       </div>
     </div>
+
+    <!-- 치지직(CHZZK) 실시간 채팅 투표 연동 모달 다이얼로그 -->
+    <div class="modal-backdrop" id="modal-chzzk-settings">
+      <div class="modal-dialog glass-panel chzzk-modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-title-icon">📺</span>
+            <h3>치지직(CHZZK) 채팅 투표 연동</h3>
+          </div>
+          <button class="modal-close" id="btn-close-chzzk-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="chzzk-modal-banner">
+            <p>스트리머의 치지직 방송 채널과 연결하여, 시청자가 채팅창에 <strong>1/A</strong> 또는 <strong>2/B</strong>를 입력하면 실시간으로 투표율 게이지에 집계됩니다.</p>
+          </div>
+
+          <div class="chzzk-input-group">
+            <label class="setup-label" for="input-chzzk-channel">치지직 채널 ID 또는 방송 URL</label>
+            <div class="input-group">
+              <span class="input-icon">🔗</span>
+              <input type="text" id="input-chzzk-channel" placeholder="예: https://chzzk.naver.com/live/671295... 또는 32자리 채널 ID" class="input-field">
+            </div>
+            <p class="chzzk-input-tip">치지직 방송국 주소창의 <code>/live/</code> 뒤에 있는 영문/숫자 조합을 복사해 붙여넣으세요.</p>
+          </div>
+
+          <div class="chzzk-status-box">
+            <div class="status-row">
+              <span class="status-label">현재 연결 상태:</span>
+              <span id="chzzk-conn-status-badge" class="badge-status-disconnected">연결 안 됨</span>
+            </div>
+            <p id="chzzk-conn-status-msg" class="status-subtext">채널 주소를 입력하고 [연결하기] 버튼을 눌러주세요.</p>
+          </div>
+
+          <div class="chzzk-test-box">
+            <span class="test-label">🧪 스트리머 모의 투표 테스트 (기능 사전 검증)</span>
+            <div class="test-btns">
+              <button id="btn-chzzk-sim-a" class="btn-ghost-sm btn-sim-a" type="button">+ A(1) 5표</button>
+              <button id="btn-chzzk-sim-b" class="btn-ghost-sm btn-sim-b" type="button">+ B(2) 5표</button>
+              <button id="btn-chzzk-sim-reset" class="btn-ghost-sm" type="button">투표 리셋</button>
+            </div>
+          </div>
+
+          <div class="chzzk-modal-footer">
+            <button id="btn-chzzk-disconnect" class="btn-ghost btn-sm" type="button" style="display:none;">연결 끊기</button>
+            <div class="chzzk-footer-right">
+              <button id="btn-close-chzzk-confirm" class="btn-secondary btn-sm" type="button">닫기</button>
+              <button id="btn-chzzk-connect" class="btn-primary btn-gold-glow btn-sm" type="button">연결하기 🚀</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 성능 알림 토스트 알림창 -->
@@ -601,6 +722,7 @@
   <!-- 핵심 스크립트 모음 -->
   <script src="js/defaultData.js"></script>
   <script src="js/player.js"></script>
+  <script src="js/chzzkChat.js"></script>
   <script src="js/engine.js"></script>
   <script src="js/bracket.js"></script>
   <script src="js/tiermaker.js"></script>

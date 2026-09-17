@@ -40,32 +40,34 @@ class TournamentEngine {
     this.candidates = candidates.map((c, index) => ({
       ...c,
       originalIndex: index,
-      elo: 1200,
-      matches: 0,
-      wins: 0,
-      losses: 0,
-      streak: 0,
-      opponents: new Set() // 중복 대결 방지용
+      elo: c.elo !== undefined ? c.elo : 1200,
+      matches: c.matches !== undefined ? c.matches : 0,
+      wins: c.wins !== undefined ? c.wins : 0,
+      losses: c.losses !== undefined ? c.losses : 0,
+      streak: c.streak !== undefined ? c.streak : 0,
+      opponents: c.opponents instanceof Set ? c.opponents : new Set(c.opponents || [])
     }));
 
-    // 설정 파라미터
+    // 설정 파라미터 (후보자 수 N 비례 동적 인터락)
+    const N = this.candidates.length;
     this.minExposure = 2; // 모든 영상 최소 2회 노출 보장 (스위스 단계)
-    this.maxSwissMatches = Math.ceil((this.candidates.length * this.minExposure) / 2);
+    this.maxSwissMatches = Math.ceil((N * this.minExposure) / 2); // N 매치
 
     if (mode === 'quick') {
-      // 퀵 코스: 스위스 기본 노출만 마치고 즉시 4강 진출 (16개 기준 16매치)
+      // 퀵 코스: 스위스 기본 노출만 마치고 즉시 4강 진출 (N 매치)
       this.totalLadderMatches = this.maxSwissMatches;
     } else if (mode === 'deep') {
-      // 마스터 래더: 충분한 라이벌 매칭 진행 (16개 기준 약 45매치)
-      this.totalLadderMatches = Math.floor(this.candidates.length * 2.8);
+      // 마스터 래더: 충분한 라이벌 매칭 진행 (약 N * 2.8 매치)
+      this.totalLadderMatches = Math.max(Math.ceil(N * 2.8), this.maxSwissMatches + 12);
     } else {
-      // 표준 밸런스: 스위스 균등 + 적절한 라이벌 매치 (16개 기준 약 28매치)
-      this.totalLadderMatches = Math.max(this.maxSwissMatches + 12, Math.floor(this.candidates.length * 1.75));
+      // 표준 밸런스: 스위스 균등 + 적절한 라이벌 매치 (약 N * 1.75 매치)
+      this.totalLadderMatches = Math.max(Math.ceil(N * 1.75), this.maxSwissMatches + 6);
     }
     
     this.currentMatchIndex = 0;
     this.currentMatch = null; // { candA, candB, phase }
     this.isProcessingVote = false;
+    this.matchHistory = []; // 투표 취소(Undo)를 위한 스냅샷 스택
   }
 
   start() {
@@ -254,6 +256,14 @@ class TournamentEngine {
 
     // 8. 투표 버튼 리스너 바인딩
     this.bindVoteButtons();
+
+    // 9. 되돌리기(Undo) 버튼 활성화 상태 갱신
+    this.updateUndoButtonState();
+
+    // 10. 치지직 실시간 투표가 켜져 있다면 새 매치에 맞춰 리셋
+    if (this.app && this.app.chzzkChat && this.app.chzzkChat.isPolling) {
+      this.app.chzzkChat.resetPoll();
+    }
   }
 
   bindVoteButtons() {
@@ -269,11 +279,96 @@ class TournamentEngine {
   }
 
   /**
+   * 투표 직전 상태 스냅샷 저장 (Undo 전용)
+   */
+  recordSnapshot(actionType, winnerSide = null) {
+    if (!this.currentMatch) return;
+    const snapshot = {
+      actionType,
+      winnerSide,
+      matchIndex: this.currentMatchIndex,
+      currentMatch: {
+        candAId: this.currentMatch.candA.id,
+        candBId: this.currentMatch.candB.id,
+        phase: this.currentMatch.phase
+      },
+      candidates: this.candidates.map(c => ({
+        id: c.id,
+        elo: c.elo,
+        matches: c.matches,
+        wins: c.wins,
+        losses: c.losses,
+        streak: c.streak,
+        opponents: Array.from(c.opponents)
+      }))
+    };
+    this.matchHistory.push(snapshot);
+    // 최대 30개까지 보관
+    if (this.matchHistory.length > 30) {
+      this.matchHistory.shift();
+    }
+    this.updateUndoButtonState();
+  }
+
+  /**
+   * 직전 투표 되돌리기 (Undo)
+   */
+  undoVote() {
+    if (this.matchHistory.length === 0 || this.isProcessingVote) return false;
+    const lastSnapshot = this.matchHistory.pop();
+
+    // 1. 후보자 상태 복원
+    lastSnapshot.candidates.forEach(saved => {
+      const target = this.candidates.find(c => c.id === saved.id);
+      if (target) {
+        target.elo = saved.elo;
+        target.matches = saved.matches;
+        target.wins = saved.wins;
+        target.losses = saved.losses;
+        target.streak = saved.streak;
+        target.opponents = new Set(saved.opponents);
+      }
+    });
+
+    // 2. 매치 인덱스 및 현재 매치 복원
+    this.currentMatchIndex = lastSnapshot.matchIndex;
+    const candA = this.candidates.find(c => c.id === lastSnapshot.currentMatch.candAId);
+    const candB = this.candidates.find(c => c.id === lastSnapshot.currentMatch.candBId);
+    this.currentMatch = { candA, candB, phase: lastSnapshot.currentMatch.phase };
+
+    // 3. 화면 재렌더링
+    this.renderBattleMatch();
+    this.updateUndoButtonState();
+
+    // 4. 세션 실시간 갱신 & 토스트 알림
+    if (this.app && typeof this.app.saveTournamentSession === 'function') {
+      this.app.saveTournamentSession();
+    }
+    if (this.app && typeof this.app.showPerfToast === 'function') {
+      this.app.showPerfToast('↺ 직전 투표 취소됨', '이전 매치 및 ELO 변동이 정상 복구되었습니다.', 'info', 2500);
+    }
+    return true;
+  }
+
+  updateUndoButtonState() {
+    const btnUndo = document.getElementById('btn-battle-undo');
+    if (btnUndo) {
+      const canUndo = this.matchHistory.length > 0;
+      btnUndo.disabled = !canUndo;
+      btnUndo.classList.toggle('disabled', !canUndo);
+      btnUndo.title = canUndo ? `직전 투표 취소 및 복원 (단축키: Z 또는 Ctrl+Z)` : `되돌릴 이전 매치가 없습니다`;
+    }
+  }
+
+  /**
    * 투표 처리 및 Elo 점수 계산
    */
   handleVote(winnerSide) {
     if (this.isProcessingVote || !this.currentMatch) return;
     this.isProcessingVote = true;
+
+    // 1. 투표 직전 스냅샷 저장
+    this.recordSnapshot('vote', winnerSide);
 
     const { candA, candB } = this.currentMatch;
     const isWinnerA = winnerSide === 'A';
@@ -318,6 +413,11 @@ class TournamentEngine {
       candA.streak = 0;
     }
 
+    // 세션 자동 저장 훅
+    if (this.app && typeof this.app.saveTournamentSession === 'function') {
+      this.app.saveTournamentSession();
+    }
+
     // 다음 매치로 전환
     setTimeout(() => {
       this.isProcessingVote = false;
@@ -330,11 +430,18 @@ class TournamentEngine {
    */
   skipMatch() {
     if (!this.currentMatch) return;
+    this.recordSnapshot('skip');
+
     const { candA, candB } = this.currentMatch;
     candA.matches++;
     candB.matches++;
     candA.opponents.add(candB.id);
     candB.opponents.add(candA.id);
+
+    if (this.app && typeof this.app.saveTournamentSession === 'function') {
+      this.app.saveTournamentSession();
+    }
+
     this.nextMatch();
   }
 
@@ -346,6 +453,57 @@ class TournamentEngine {
       if (b.elo !== a.elo) return b.elo - a.elo;
       return b.wins - a.wins;
     });
+  }
+
+  /**
+   * 현재 래더 진행 상태 직렬화 (세션 저장용)
+   */
+  exportState() {
+    return {
+      mode: this.mode,
+      currentMatchIndex: this.currentMatchIndex,
+      totalLadderMatches: this.totalLadderMatches,
+      minExposure: this.minExposure,
+      maxSwissMatches: this.maxSwissMatches,
+      currentMatch: this.currentMatch ? {
+        candAId: this.currentMatch.candA.id,
+        candBId: this.currentMatch.candB.id,
+        phase: this.currentMatch.phase
+      } : null,
+      candidates: this.candidates.map(c => ({
+        ...c,
+        opponents: Array.from(c.opponents)
+      })),
+      matchHistory: this.matchHistory
+    };
+  }
+
+  /**
+   * 저장된 세션 상태로부터 복원
+   */
+  importState(data) {
+    if (!data) return;
+    this.mode = data.mode || this.mode;
+    this.currentMatchIndex = data.currentMatchIndex || 0;
+    this.totalLadderMatches = data.totalLadderMatches || this.totalLadderMatches;
+    this.minExposure = data.minExposure || 2;
+    this.maxSwissMatches = data.maxSwissMatches || Math.ceil((this.candidates.length * 2) / 2);
+    this.matchHistory = data.matchHistory || [];
+
+    if (Array.isArray(data.candidates)) {
+      this.candidates = data.candidates.map(c => ({
+        ...c,
+        opponents: new Set(c.opponents || [])
+      }));
+    }
+
+    if (data.currentMatch) {
+      const candA = this.candidates.find(c => c.id === data.currentMatch.candAId);
+      const candB = this.candidates.find(c => c.id === data.currentMatch.candBId);
+      if (candA && candB) {
+        this.currentMatch = { candA, candB, phase: data.currentMatch.phase };
+      }
+    }
   }
 
   /**
@@ -364,9 +522,13 @@ class TournamentEngine {
     // 단위 3 브래킷 매니저 호출
     if (window.GoldenBracketManager) {
       const bracketManager = new window.GoldenBracketManager(finalFour, sorted, this.app);
+      this.app.bracket = bracketManager;
       bracketManager.start();
+      // 브래킷 상태 저장
+      if (this.app && typeof this.app.saveTournamentSession === 'function') {
+        this.app.saveTournamentSession();
+      }
     } else {
-      // 단위 3 구현 전 fallback
       alert("골든 파이널 4강 진출자가 확정되었습니다!\n1위: " + finalFour[0].title + "\n2위: " + finalFour[1].title);
       this.app.switchView('setup');
     }

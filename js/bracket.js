@@ -249,6 +249,9 @@ class GoldenBracketManager {
           btnStart.textContent = "4강 제2경기 시작 (2위 vs 3위)";
           btnStart.onclick = () => this.runNextFinalMatch();
         }
+        if (this.app && typeof this.app.saveTournamentSession === 'function') {
+          this.app.saveTournamentSession();
+        }
       });
     } else if (this.currentFinalStep === 'semi2') {
       this.playMatch(this.semi2.candA, this.semi2.candB, '4강 제2경기 (2위 vs 3위)', (winner) => {
@@ -262,11 +265,17 @@ class GoldenBracketManager {
           btnStart.textContent = "결승전 시작하기 🏆";
           btnStart.onclick = () => this.runNextFinalMatch();
         }
+        if (this.app && typeof this.app.saveTournamentSession === 'function') {
+          this.app.saveTournamentSession();
+        }
       });
     } else if (this.currentFinalStep === 'final') {
       this.playMatch(this.grandFinal.candA, this.grandFinal.candB, '골든 파이널 결승전', (winner) => {
         this.grandFinal.winner = winner;
         this.currentFinalStep = 'done';
+        if (this.app && typeof this.app.saveTournamentSession === 'function') {
+          this.app.saveTournamentSession();
+        }
         this.finishTournament(winner);
       });
     }
@@ -377,6 +386,10 @@ class GoldenBracketManager {
     if (window.dualPlayer) {
       window.dualPlayer.stopAll();
     }
+    // 토너먼트 완료 시 세션 자동 정리
+    if (this.app && typeof this.app.clearTournamentSession === 'function') {
+      this.app.clearTournamentSession();
+    }
     // 단위 4 티어메이커 호출
     if (window.TierMakerManager) {
       const tm = new window.TierMakerManager(champion, this.allCandidates, this.app);
@@ -385,6 +398,36 @@ class GoldenBracketManager {
       alert(`🏆 최종 우승: ${champion.title}`);
       this.app.switchView('setup');
     }
+  }
+
+  exportState() {
+    return {
+      finalFour: this.finalFour,
+      currentFinalStep: this.currentFinalStep,
+      semi1: {
+        candA: this.semi1.candA,
+        candB: this.semi1.candB,
+        winner: this.semi1.winner
+      },
+      semi2: {
+        candA: this.semi2.candA,
+        candB: this.semi2.candB,
+        winner: this.semi2.winner
+      },
+      grandFinal: {
+        candA: this.grandFinal.candA,
+        candB: this.grandFinal.candB,
+        winner: this.grandFinal.winner
+      }
+    };
+  }
+
+  importState(data) {
+    if (!data) return;
+    this.currentFinalStep = data.currentFinalStep || 'semi1';
+    if (data.semi1) this.semi1 = data.semi1;
+    if (data.semi2) this.semi2 = data.semi2;
+    if (data.grandFinal) this.grandFinal = data.grandFinal;
   }
 }
 

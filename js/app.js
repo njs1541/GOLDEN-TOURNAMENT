@@ -5,6 +5,7 @@
 const STORAGE_CANDIDATES_KEY = 'GOLDEN_TOURNAMENT_CANDIDATES_LIST';
 const STORAGE_FONT_SETTINGS_KEY = 'GOLDEN_TOURNAMENT_FONT_SETTINGS';
 const STORAGE_PERF_MODE_KEY = 'GOLDEN_TOURNAMENT_PERF_MODE';
+const STORAGE_SAVED_SESSION_KEY = 'GOLDEN_TOURNAMENT_SAVED_SESSION';
 
 // 치지직/유튜브 방송 송출 가독성 최적화 권장 기본값
 const DEFAULT_FONT_SETTINGS = {
@@ -26,6 +27,8 @@ class AppController {
     this.engine = null; // engine.js에서 초기화
     this.bracket = null; // bracket.js에서 초기화
     this.tierMaker = null; // tiermaker.js에서 초기화
+    this.chzzkChat = null; // chzzkChat.js에서 초기화
+    this.embedCheckStatus = {}; // videoId -> 'ok' | 'warn' | 'checking'
   }
 
   init() {
@@ -34,6 +37,9 @@ class AppController {
 
     // 0-1. 저사양 / 하드웨어 가속 환경 자동 진단 및 성능 모드 복원
     this.initPerformanceMode();
+
+    // 0-2. 치지직(CHZZK) 채팅 매니저 초기화
+    this.initChzzk();
 
     // 1. 웹 저장소의 후보 목록 복원 (저장된 상태가 없으면 기본 16선 로드)
     this.loadDefaultCandidates();
@@ -46,9 +52,15 @@ class AppController {
       window.dualPlayer.init();
     }
 
-    // 4. 초기 화면 렌더링
+    // 4. 후보자 수에 비례한 적정 코스 매치 수 자동 갱신
+    this.updateCourseMatchCounts();
+
+    // 5. 초기 화면 렌더링
     this.renderCandidateList();
     this.switchView('setup');
+
+    // 6. 진행 중이던 저장 세션 확인 및 복원 배너 표시
+    this.checkSavedSession();
   }
 
   // 후보 목록 전체를 웹 저장소(localStorage)에 실시간 동기화
@@ -89,6 +101,12 @@ class AppController {
     const btnAdd = document.getElementById('btn-add-video');
     if (btnAdd) {
       btnAdd.addEventListener('click', () => this.handleAddVideo());
+    }
+
+    // 참가영상 목록 전체 임베드 재생 점검 버튼
+    const btnCheckEmbed = document.getElementById('btn-check-embed-all');
+    if (btnCheckEmbed) {
+      btnCheckEmbed.addEventListener('click', () => this.checkAllEmbeds());
     }
 
     // 참가영상 목록 복사/공유 버튼
@@ -150,6 +168,20 @@ class AppController {
       btnStart.addEventListener('click', () => this.startTournament());
     }
 
+    // 세션 복원 배너 버튼들 (이어하기 / 새로 시작)
+    const btnResume = document.getElementById('btn-resume-session');
+    const btnDiscard = document.getElementById('btn-discard-session');
+    if (btnResume) {
+      btnResume.addEventListener('click', () => this.resumeTournamentSession());
+    }
+    if (btnDiscard) {
+      btnDiscard.addEventListener('click', () => {
+        if (confirm("이전에 진행 중이던 토너먼트 기록을 삭제하시겠습니까?")) {
+          this.clearTournamentSession();
+        }
+      });
+    }
+
     // 실시간 랭킹 모달 열기/닫기
     const btnRanking = document.getElementById('btn-show-live-ranking');
     const modalRanking = document.getElementById('modal-live-ranking');
@@ -205,6 +237,61 @@ class AppController {
       btnResetFont.addEventListener('click', () => this.resetFontSettings());
     }
 
+    // 치지직 연동 모달 열기/닫기
+    const btnHeaderChzzk = document.getElementById('btn-header-chzzk');
+    const btnOpenChzzkSetup = document.getElementById('btn-open-chzzk-setup');
+    const modalChzzk = document.getElementById('modal-chzzk-settings');
+    const btnCloseChzzk = document.getElementById('btn-close-chzzk-modal');
+    const btnCloseChzzkConfirm = document.getElementById('btn-close-chzzk-confirm');
+
+    const openChzzkModal = () => {
+      if (modalChzzk) {
+        this.syncChzzkModalUI();
+        modalChzzk.classList.add('active');
+      }
+    };
+    const closeChzzkModal = () => {
+      if (modalChzzk) modalChzzk.classList.remove('active');
+    };
+
+    if (btnHeaderChzzk) btnHeaderChzzk.addEventListener('click', openChzzkModal);
+    if (btnOpenChzzkSetup) btnOpenChzzkSetup.addEventListener('click', openChzzkModal);
+    if (btnCloseChzzk) btnCloseChzzk.addEventListener('click', closeChzzkModal);
+    if (btnCloseChzzkConfirm) btnCloseChzzkConfirm.addEventListener('click', closeChzzkModal);
+    if (modalChzzk) {
+      modalChzzk.addEventListener('click', (e) => {
+        if (e.target === modalChzzk) closeChzzkModal();
+      });
+    }
+
+    // 치지직 연결 / 연결 끊기
+    const btnConnectChzzk = document.getElementById('btn-chzzk-connect');
+    const btnDisconnectChzzk = document.getElementById('btn-chzzk-disconnect');
+    if (btnConnectChzzk) {
+      btnConnectChzzk.addEventListener('click', () => this.handleChzzkConnect());
+    }
+    if (btnDisconnectChzzk) {
+      btnDisconnectChzzk.addEventListener('click', () => this.handleChzzkDisconnect());
+    }
+
+    // 치지직 모의 투표 버튼들
+    const btnSimA = document.getElementById('btn-chzzk-sim-a');
+    const btnSimB = document.getElementById('btn-chzzk-sim-b');
+    const btnSimReset = document.getElementById('btn-chzzk-sim-reset');
+    if (btnSimA) btnSimA.addEventListener('click', () => this.chzzkChat?.simulateVote('A', 5));
+    if (btnSimB) btnSimB.addEventListener('click', () => this.chzzkChat?.simulateVote('B', 5));
+    if (btnSimReset) btnSimReset.addEventListener('click', () => this.chzzkChat?.resetPoll());
+
+    // 치지직 투표 토글 및 다수결 반영 버튼
+    const btnTogglePoll = document.getElementById('btn-chzzk-toggle-poll');
+    const btnApplyMajority = document.getElementById('btn-chzzk-apply-majority');
+    if (btnTogglePoll) {
+      btnTogglePoll.addEventListener('click', () => this.handleChzzkTogglePoll());
+    }
+    if (btnApplyMajority) {
+      btnApplyMajority.addEventListener('click', () => this.handleChzzkApplyMajority());
+    }
+
     // 각 글씨 조절 슬라이더 실시간 바인딩 (Zero-Lag 60FPS)
     this.bindFontSlider('slider-scale-global', 'val-scale-global', 'scaleGlobal', '%');
     this.bindFontSlider('slider-battle-title', 'val-battle-title', 'battleTitle', 'px');
@@ -214,10 +301,25 @@ class AppController {
     this.bindFontSlider('slider-bracket-title', 'val-bracket-title', 'bracketTitle', 'px');
     this.bindFontSlider('slider-ranking-title', 'val-ranking-title', 'rankingTitle', 'px');
 
-    // 키보드 단축키 (A / D, 좌 / 우 화살표)
+    // 투표 직전 취소(Undo) 버튼
+    const btnUndo = document.getElementById('btn-battle-undo');
+    if (btnUndo) {
+      btnUndo.addEventListener('click', () => {
+        if (this.engine) this.engine.undoVote();
+      });
+    }
+
+    // 키보드 단축키 (A / D, 좌 / 우 화살표, Z: 되돌리기)
     window.addEventListener('keydown', (e) => {
       if (this.currentView !== 'battle') return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      // 투표 취소 단축키: Z 또는 Ctrl+Z
+      if ((e.key === 'z' || e.key === 'Z') && !e.shiftKey) {
+        e.preventDefault();
+        if (this.engine) this.engine.undoVote();
+        return;
+      }
 
       if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
         const btnA = document.getElementById('btn-vote-a');
@@ -732,6 +834,16 @@ class AppController {
       const thumbUrl = `https://img.youtube.com/vi/${cand.youtubeId}/mqdefault.jpg`;
       const numStr = String(idx + 1).padStart(2, '0');
 
+      let embedBadgeHtml = '';
+      const checkState = this.embedCheckStatus[cand.youtubeId];
+      if (checkState === 'ok') {
+        embedBadgeHtml = `<span class="badge-embed-status badge-embed-ok" title="유튜브 외부 재생 가능">✅ 정상</span>`;
+      } else if (checkState === 'warn') {
+        embedBadgeHtml = `<span class="badge-embed-status badge-embed-warn" title="유튜브 외부 재생이 차단되었거나 삭제된 영상일 수 있습니다">⚠️ 임베드 주의</span>`;
+      } else if (checkState === 'checking') {
+        embedBadgeHtml = `<span class="badge-embed-status badge-embed-checking">⏳ 점검 중</span>`;
+      }
+
       itemEl.innerHTML = `
         <div class="item-left-area">
           <span class="item-index-badge">${numStr}</span>
@@ -742,6 +854,7 @@ class AppController {
           <div class="item-info">
             <div class="item-title-row" data-idx="${idx}">
               <span class="item-title" title="클릭하여 제목 수정" data-idx="${idx}">${cand.title}</span>
+              ${embedBadgeHtml}
               <button class="btn-edit-title" title="제목 직접 수정" data-idx="${idx}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               </button>
@@ -784,6 +897,9 @@ class AppController {
 
       listEl.appendChild(itemEl);
     });
+
+    // 참가자 수 변동에 따른 코스 매치 수 자동 갱신
+    this.updateCourseMatchCounts();
   }
 
   // 화면 전환 (Zero-Lag 60FPS: display + opacity 트랜지션)
@@ -1123,6 +1239,376 @@ class AppController {
     if (duration > 0) {
       setTimeout(dismiss, duration);
     }
+  }
+
+  // ================= 1. 후보자 수 비례 코스 자동 보정 인터락 =================
+  updateCourseMatchCounts() {
+    const N = this.candidates.length;
+    const quickMatches = Math.ceil((N * 2) / 2); // N
+    const standardMatches = Math.max(Math.ceil(N * 1.75), quickMatches + 6);
+    const deepMatches = Math.max(Math.ceil(N * 2.8), quickMatches + 12);
+
+    const elQuick = document.getElementById('course-match-quick');
+    const elStandard = document.getElementById('course-match-standard');
+    const elDeep = document.getElementById('course-match-deep');
+
+    if (elQuick) elQuick.textContent = quickMatches;
+    if (elStandard) elStandard.textContent = standardMatches;
+    if (elDeep) elDeep.textContent = deepMatches;
+
+    // 시작 버튼 활성화/비활성화 인터락 (최소 4개 이상)
+    const btnStart = document.getElementById('btn-start-tournament');
+    if (btnStart) {
+      if (N < 4) {
+        btnStart.disabled = true;
+        btnStart.style.opacity = '0.5';
+        btnStart.title = '토너먼트를 시작하려면 최소 4개 이상의 영상이 필요합니다.';
+      } else {
+        btnStart.disabled = false;
+        btnStart.style.opacity = '1';
+        btnStart.title = '토너먼트 시작하기';
+      }
+    }
+  }
+
+  // ================= 2. 등록 영상 임베드 재생 가능 여부 사전 점검 =================
+  async checkAllEmbeds() {
+    if (!this.candidates || this.candidates.length === 0) {
+      alert("점검할 참가 영상이 없습니다. 영상을 먼저 등록해 주세요.");
+      return;
+    }
+
+    const btn = document.getElementById('btn-check-embed-all');
+    let originalHtml = '';
+    if (btn) {
+      originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳</span> 점검 중...`;
+    }
+
+    this.showPerfToast('🎬 임베드 점검 시작', `등록된 ${this.candidates.length}개 영상의 유튜브 외부 재생 허용 여부를 점검합니다...`, 'info', 3000);
+
+    let okCount = 0;
+    let warnCount = 0;
+
+    for (const cand of this.candidates) {
+      this.embedCheckStatus[cand.youtubeId] = 'checking';
+    }
+    this.renderCandidateList();
+
+    // 순차적 oEmbed 점검
+    for (const cand of this.candidates) {
+      try {
+        const info = await this.fetchYouTubeInfo(cand.youtubeId);
+        if (info && info.title) {
+          this.embedCheckStatus[cand.youtubeId] = 'ok';
+          okCount++;
+        } else {
+          this.embedCheckStatus[cand.youtubeId] = 'warn';
+          warnCount++;
+        }
+      } catch (e) {
+        this.embedCheckStatus[cand.youtubeId] = 'warn';
+        warnCount++;
+      }
+    }
+
+    this.renderCandidateList();
+
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+
+    if (warnCount > 0) {
+      this.showPerfToast(
+        '⚠️ 재생 주의 영상 발견',
+        `정상 재생: ${okCount}곡 / 임베드 주의: ${warnCount}곡. [임베드 주의] 뱃지가 붙은 영상을 확인해 주세요.`,
+        'warning',
+        7000
+      );
+    } else {
+      this.showPerfToast(
+        '✅ 모든 영상 정상 재생 가능',
+        `총 ${okCount}개의 영상 모두 외부 사이트 임베드 재생이 원활합니다!`,
+        'info',
+        4500
+      );
+    }
+  }
+
+  // ================= 3. 치지직(CHZZK) 실시간 채팅 투표 컨트롤러 =================
+  initChzzk() {
+    if (window.ChzzkChatManager) {
+      this.chzzkChat = new window.ChzzkChatManager(this);
+
+      // 투표 변경 시 UI 실시간 동기화 콜백
+      this.chzzkChat.onVoteUpdate = (stats) => {
+        this.updateChzzkPollUI(stats);
+      };
+
+      // 연결 상태 변경 시 헤더 및 모달 뱃지 동기화 콜백
+      this.chzzkChat.onStatusChange = (statusInfo) => {
+        this.updateChzzkStatusUI(statusInfo);
+      };
+
+      // 저장된 채널이 있으면 모달 입력창에 프리셋 주입
+      this.syncChzzkModalUI();
+    }
+  }
+
+  syncChzzkModalUI() {
+    if (!this.chzzkChat) return;
+    const inputEl = document.getElementById('input-chzzk-channel');
+    if (inputEl && this.chzzkChat.channelId) {
+      inputEl.value = this.chzzkChat.channelId;
+    }
+  }
+
+  async handleChzzkConnect() {
+    const inputEl = document.getElementById('input-chzzk-channel');
+    const channelInput = inputEl ? inputEl.value.trim() : '';
+    if (!channelInput) {
+      alert("치지직 채널 ID 또는 방송 URL을 입력해 주세요.");
+      return;
+    }
+
+    const btnConnect = document.getElementById('btn-chzzk-connect');
+    let originalHtml = '';
+    if (btnConnect) {
+      originalHtml = btnConnect.innerHTML;
+      btnConnect.disabled = true;
+      btnConnect.innerHTML = `<span>⏳</span> 접속 중...`;
+    }
+
+    try {
+      await this.chzzkChat.connect(channelInput);
+      this.showPerfToast('📺 치지직 채팅 연동 완료', '치지직 실시간 채팅 서버에 성공적으로 연결되었습니다!', 'info', 4000);
+      const modal = document.getElementById('modal-chzzk-settings');
+      if (modal) modal.classList.remove('active');
+    } catch (err) {
+      alert(`치지직 채팅 연결에 실패했습니다.\n사유: ${err.message}\n\n* 채널 주소가 올바른지, 현재 생방송 중인지 확인해 주세요.`);
+    } finally {
+      if (btnConnect) {
+        btnConnect.disabled = false;
+        btnConnect.innerHTML = originalHtml;
+      }
+    }
+  }
+
+  handleChzzkDisconnect() {
+    if (this.chzzkChat) {
+      this.chzzkChat.disconnect();
+      this.showPerfToast('📺 치지직 연결 해제', '치지직 채팅 연결이 종료되었습니다.', 'info', 2500);
+    }
+  }
+
+  handleChzzkTogglePoll() {
+    if (!this.chzzkChat) return;
+    if (this.chzzkChat.isPolling) {
+      this.chzzkChat.stopPoll();
+    } else {
+      this.chzzkChat.startPoll();
+    }
+  }
+
+  handleChzzkApplyMajority() {
+    if (!this.chzzkChat) return;
+    const stats = this.chzzkChat.getPollStats();
+    if (!stats.leading) {
+      alert("현재 동점이거나 투표된 표가 없어 다수결을 판정할 수 없습니다.");
+      return;
+    }
+
+    const winnerSide = stats.leading; // 'A' | 'B'
+    const btnVote = document.getElementById(`btn-vote-${winnerSide.toLowerCase()}`);
+    if (btnVote) {
+      this.showPerfToast(
+        '👑 시청자 다수결 반영',
+        `시청자 투표 결과 [${winnerSide}] 후보 (${winnerSide === 'A' ? stats.percentA : stats.percentB}%)가 선택되었습니다!`,
+        'info',
+        2500
+      );
+      btnVote.click();
+    }
+  }
+
+  updateChzzkPollUI(stats) {
+    const votesAEl = document.getElementById('chzzk-votes-a');
+    const votesBEl = document.getElementById('chzzk-votes-b');
+    const pctAEl = document.getElementById('chzzk-pct-a');
+    const pctBEl = document.getElementById('chzzk-pct-b');
+    const barA = document.getElementById('chzzk-bar-a');
+    const barB = document.getElementById('chzzk-bar-b');
+    const btnToggle = document.getElementById('btn-chzzk-toggle-poll');
+    const btnToggleText = document.getElementById('chzzk-poll-btn-text');
+    const btnToggleIcon = document.getElementById('chzzk-poll-btn-icon');
+    const btnMajority = document.getElementById('btn-chzzk-apply-majority');
+    const statusText = document.getElementById('chzzk-poll-status-text');
+
+    if (votesAEl) votesAEl.textContent = stats.votesA;
+    if (votesBEl) votesBEl.textContent = stats.votesB;
+    if (pctAEl) pctAEl.textContent = `${stats.percentA}%`;
+    if (pctBEl) pctBEl.textContent = `${stats.percentB}%`;
+    if (barA) barA.style.width = `${stats.percentA}%`;
+    if (barB) barB.style.width = `${stats.percentB}%`;
+
+    if (btnToggle) {
+      btnToggle.classList.toggle('active', stats.isPolling);
+    }
+    if (btnToggleText) {
+      btnToggleText.textContent = stats.isPolling ? '투표 마감' : '투표 시작';
+    }
+    if (btnToggleIcon) {
+      btnToggleIcon.textContent = stats.isPolling ? '⏹' : '▶';
+    }
+    if (statusText) {
+      if (stats.isPolling) {
+        statusText.textContent = `🔴 투표 진행 중 (총 ${stats.total}표)`;
+        statusText.style.color = '#00ffa3';
+      } else {
+        statusText.textContent = stats.total > 0 ? `⏹ 투표 마감 (총 ${stats.total}표)` : '투표 대기';
+        statusText.style.color = 'var(--text-dim)';
+      }
+    }
+
+    if (btnMajority) {
+      btnMajority.disabled = !stats.leading;
+    }
+  }
+
+  updateChzzkStatusUI(statusInfo) {
+    const headerDot = document.getElementById('header-chzzk-dot');
+    const liveDot = document.getElementById('chzzk-live-dot');
+    const statusBadge = document.getElementById('btn-chzzk-status-badge');
+    const modalBadge = document.getElementById('chzzk-conn-status-badge');
+    const modalMsg = document.getElementById('chzzk-conn-status-msg');
+    const btnDisconnect = document.getElementById('btn-chzzk-disconnect');
+
+    const isConn = statusInfo.status === 'connected';
+    const isConnIng = statusInfo.status === 'connecting';
+
+    if (headerDot) {
+      headerDot.className = `chzzk-dot ${statusInfo.status}`;
+    }
+    if (liveDot) {
+      liveDot.style.background = isConn ? '#00ffa3' : '#64748b';
+      liveDot.style.animation = isConn ? 'chzzkPulse 1.5s infinite' : 'none';
+    }
+    if (statusBadge) {
+      statusBadge.textContent = isConn ? '연결됨' : (isConnIng ? '접속 중..' : '대기 중');
+      statusBadge.className = `badge-chzzk-status ${isConn ? 'connected' : ''}`;
+    }
+    if (modalBadge) {
+      modalBadge.className = isConn ? 'badge-status-connected' : (isConnIng ? 'badge-status-connecting' : 'badge-status-disconnected');
+      modalBadge.textContent = isConn ? '연결됨 ✅' : (isConnIng ? '접속 중 ⏳' : '연결 안 됨 ❌');
+    }
+    if (modalMsg) {
+      modalMsg.textContent = statusInfo.text;
+    }
+    if (btnDisconnect) {
+      btnDisconnect.style.display = isConn ? 'block' : 'none';
+    }
+  }
+
+  // ================= 4. 진행 세션 자동 저장 및 이어하기 (Save & Resume) =================
+  saveTournamentSession() {
+    if (!this.engine) return;
+
+    try {
+      const sessionData = {
+        timestamp: Date.now(),
+        currentView: this.currentView,
+        engineState: this.engine ? this.engine.exportState() : null,
+        bracketState: this.bracket ? this.bracket.exportState() : null,
+        candidates: this.candidates
+      };
+      localStorage.setItem(STORAGE_SAVED_SESSION_KEY, JSON.stringify(sessionData));
+    } catch (e) {
+      console.error('세션 저장 실패:', e);
+    }
+  }
+
+  checkSavedSession() {
+    try {
+      const raw = localStorage.getItem(STORAGE_SAVED_SESSION_KEY);
+      if (!raw) return;
+
+      const data = JSON.parse(raw);
+      if (!data || !data.engineState) return;
+
+      const banner = document.getElementById('session-resume-banner');
+      const bannerTitle = document.getElementById('resume-banner-title');
+      const bannerDesc = document.getElementById('resume-banner-desc');
+
+      if (banner && bannerTitle && bannerDesc) {
+        const eng = data.engineState;
+        const percent = Math.round((eng.currentMatchIndex / eng.totalLadderMatches) * 100) || 0;
+        const viewText = data.currentView === 'final' ? '골든 파이널 4강전' : '스위스-Elo 래더 리그';
+        
+        bannerTitle.textContent = `진행 중이던 ${viewText} 세션이 있습니다!`;
+        bannerDesc.textContent = `진행도: ${eng.currentMatchIndex} / ${eng.totalLadderMatches} 매치 (${percent}%) &bull; 언제든 바로 이어서 진행할 수 있습니다.`;
+        banner.style.display = 'flex';
+      }
+    } catch (e) {
+      console.warn('저장 세션 파싱 오류:', e);
+    }
+  }
+
+  resumeTournamentSession() {
+    try {
+      const raw = localStorage.getItem(STORAGE_SAVED_SESSION_KEY);
+      if (!raw) {
+        alert("복원할 이전 토너먼트 기록이 없습니다.");
+        return;
+      }
+
+      const data = JSON.parse(raw);
+      if (!data || !data.engineState) return;
+
+      // 후보자 복원
+      if (Array.isArray(data.candidates)) {
+        this.candidates = data.candidates;
+      }
+
+      // 엔진 초기화 및 상태 주입
+      this.engine = new window.TournamentEngine(this.candidates, this, data.engineState.mode || 'standard');
+      this.engine.importState(data.engineState);
+
+      // 브래킷 상태 복원
+      if (data.bracketState && window.GoldenBracketManager) {
+        const sorted = this.engine.getSortedRankings();
+        this.bracket = new window.GoldenBracketManager(data.bracketState.finalFour || sorted.slice(0, 4), sorted, this);
+        this.bracket.importState(data.bracketState);
+      }
+
+      // 화면 라우팅 복원
+      if (data.currentView === 'final' && this.bracket) {
+        this.bracket.renderBracketView();
+        this.switchView('final');
+      } else {
+        this.engine.renderBattleMatch();
+        this.switchView('battle');
+      }
+
+      // 배너 숨김
+      const banner = document.getElementById('session-resume-banner');
+      if (banner) banner.style.display = 'none';
+
+      this.showPerfToast('⏩ 토너먼트 이어하기 완료', '이전 진행 매치와 ELO 점수가 성공적으로 복원되었습니다!', 'info', 3000);
+    } catch (e) {
+      console.error('세션 복원 실패:', e);
+      alert("세션 복원 중 오류가 발생했습니다. 새로 시작해 주세요.");
+    }
+  }
+
+  clearTournamentSession() {
+    try {
+      localStorage.removeItem(STORAGE_SAVED_SESSION_KEY);
+    } catch (e) {}
+
+    const banner = document.getElementById('session-resume-banner');
+    if (banner) banner.style.display = 'none';
   }
 }
 

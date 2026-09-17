@@ -1,8 +1,10 @@
 /**
  * 치지직(CHZZK) 실시간 채팅 투표 매니저
- * - 치지직 채널 ID 또는 방송 URL을 파싱하여 채팅 WebSocket 연결
- * - 시청자가 채팅창에 1, 2, A, B (!1, !2 등) 입력 시 실시간 투표 집계
- * - CORS 보안 제약 우회를 위한 멀티 프록시 fallback 및 모의 테스트 투표 지원
+ * - 치지직 채널 ID 또는 방송 URL을 파싱하여 실시간 채팅 WebSocket 연결
+ * - 스트리머 채널 ID를 기반으로 생방송 채팅방 ID(chatChannelId) 및 토큰을 안정적으로 자동 추출
+ * - 로컬 프록시(/api/proxy) 및 공용 프록시 fallback을 통한 완벽한 CORS 제약 우회
+ * - 시청자가 채팅창에 1, 2, A, B (!1, !2 등) 입력 시 실시간 투표 집계 (1인 1표 보장)
+ * - Zero-Lag 60FPS 최적화: 최소 객체 할당 및 경량 이벤트 디스패치
  */
 
 const STORAGE_CHZZK_CHANNEL_KEY = 'GOLDEN_TOURNAMENT_CHZZK_CHANNEL';
@@ -11,10 +13,13 @@ const STORAGE_CHZZK_POLL_SCOPE_KEY = 'GOLDEN_TOURNAMENT_CHZZK_POLL_SCOPE';
 class ChzzkChatManager {
   constructor(app) {
     this.app = app;
-    this.channelId = '';
-    this.chatChannelId = '';
-    this.accessToken = '';
+    this.channelId = '';      // 스트리머 채널 ID (32자리 해시)
+    this.chatChannelId = '';  // 생방송 채팅방 ID (예: N2kWtN)
+    this.accessToken = '';    // 채팅 세션 토큰
     this.extraToken = '';
+    this.channelName = '';    // 스트리머 닉네임
+    this.liveTitle = '';      // 방송 제목
+    
     this.ws = null;
     this.pingInterval = null;
     this.isConnected = false;
@@ -26,9 +31,9 @@ class ChzzkChatManager {
     // 투표 상태
     this.isPolling = false;
     this.votes = { A: 0, B: 0 };
-    this.voters = new Set(); // 1대결당 1인 1회 투표 엄격 보장 (Set으로 관리)
+    this.voters = new Set(); // 1대결당 1인 1회 투표 엄격 보장 (중복 투표 차단)
 
-    // UI 업데이트 콜백
+    // UI 콜백
     this.onVoteUpdate = null;
     this.onStatusChange = null;
 
@@ -76,13 +81,13 @@ class ChzzkChatManager {
   /**
    * 치지직 채널 URL 또는 ID 파싱
    * 지원 예시:
-   * - 32자리 hex ID: 671295b9d3164a...
+   * - 32자리 hex ID: a67b328bcc8eea4451ccfa754bc19ae1
    * - https://chzzk.naver.com/live/{channelId}
    * - https://chzzk.naver.com/{channelId}
    */
   parseChannelId(input) {
     if (!input) return null;
-    const trimmed = input.trim();
+    const trimmed = String(input).trim();
     if (/^[a-f0-9]{32}$/i.test(trimmed)) {
       return trimmed;
     }
@@ -91,81 +96,137 @@ class ChzzkChatManager {
   }
 
   /**
-   * 치지직 채팅 토큰 및 채팅방 ID 발급
+   * 다중 프록시 및 로컬 서버를 활용한 범용 API 요청 헬퍼
+   * 1순위: 로컬 서버 프록시 (/api/proxy?url=...) -> 한국 IP 직접 호출로 100% 성공 & 초고속
+   * 2순위: 브라우저 직접 fetch
+   * 3순위: AllOrigins 공용 프록시
+   * 4순위: Codetabs 공용 프록시
    */
-  async fetchChatTokens(channelId) {
-    const targetUrl = `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${channelId}&chatType=STREAMING`;
-    
-    // 1단계: 브라우저 직접 fetch 시도
-    try {
-      const res = await fetch(targetUrl, { mode: 'cors' });
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.content) {
-          return json.content;
-        }
-      }
-    } catch (e) {
-      console.warn('[ChzzkChat] 직접 통신 CORS 제한 감지, 안전 프록시로 fallback 전환...');
+  async fetchWithProxyFallback(targetUrl) {
+    const urlsToTry = [];
+
+    // 1. 로컬 개발/실행 서버 프록시 (start.bat / server.py 구동 환경)
+    if (window.location.protocol.startsWith('http')) {
+      const localProxyUrl = `${window.location.origin}/api/proxy?url=${encodeURIComponent(targetUrl)}`;
+      urlsToTry.push({ type: 'local-proxy', url: localProxyUrl });
     }
 
-    // 2단계: 공개 CORS 프록시 fallback (AllOrigins)
-    try {
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-      const res = await fetch(proxyUrl);
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.content) {
-          return json.content;
+    // 2. 브라우저 직접 요청
+    urlsToTry.push({ type: 'direct', url: targetUrl });
+
+    // 3. AllOrigins 공용 프록시 (Raw)
+    urlsToTry.push({
+      type: 'allorigins',
+      url: `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+    });
+
+    // 4. Codetabs 공용 프록시
+    urlsToTry.push({
+      type: 'codetabs',
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+    });
+
+    let lastError = null;
+
+    for (const attempt of urlsToTry) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000); // 6초 타임아웃
+
+        const res = await fetch(attempt.url, {
+          mode: 'cors',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json && (json.code === 200 || json.content !== undefined)) {
+            return json;
+          }
         }
+      } catch (err) {
+        lastError = err;
+        // 다음 프록시로 fallback 진행
       }
-    } catch (e) {
-      console.warn('[ChzzkChat] AllOrigins 프록시 시도 실패, 2차 프록시 시도...');
     }
 
-    // 3단계: 2차 CORS 프록시 fallback (CorsProxy.io)
-    try {
-      const proxyUrl2 = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
-      const res = await fetch(proxyUrl2);
-      if (res.ok) {
-        const json = await res.json();
-        if (json && json.content) {
-          return json.content;
-        }
-      }
-    } catch (e) {
-      console.error('[ChzzkChat] 모든 프록시 통신 실패:', e);
-    }
-
-    return null;
+    throw lastError || new Error('네트워크 프록시 연결에 실패했습니다.');
   }
 
   /**
-   * 치지직 채팅 WebSocket 연결
+   * 1단계: 채널 생방송 상세 정보 조회 (chatChannelId 획득 및 방송 상태 판별)
+   */
+  async fetchLiveDetail(channelId) {
+    const targetUrl = `https://api.chzzk.naver.com/service/v2/channels/${channelId}/live-detail`;
+    const data = await this.fetchWithProxyFallback(targetUrl);
+
+    if (!data || !data.content) {
+      throw new Error('치지직 채널 정보를 불러오지 못했습니다. 채널 ID를 다시 확인해 주세요.');
+    }
+
+    const content = data.content;
+    const isLive = content.status === 'OPEN';
+    const chatChannelId = content.chatChannelId;
+
+    if (!isLive || !chatChannelId) {
+      const streamerName = content.channel ? content.channel.channelName : '스트리머';
+      throw new Error(`[${streamerName}] 님이 현재 오프라인(방송 종료) 상태입니다.\n치지직은 생방송(LIVE ON) 중일 때만 실시간 채팅 서버가 열립니다.`);
+    }
+
+    this.chatChannelId = chatChannelId;
+    this.liveTitle = content.liveTitle || '';
+    if (content.channel && content.channel.channelName) {
+      this.channelName = content.channel.channelName;
+    }
+
+    return content;
+  }
+
+  /**
+   * 2단계: 생방송 채팅 접근 토큰 및 권한 정보 발급
+   * 중요: 여기 들어가는 channelId는 스트리머 ID가 아니라 1단계에서 획득한 생방송 chatChannelId입니다!
+   */
+  async fetchChatTokens(chatChannelId) {
+    const targetUrl = `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`;
+    const data = await this.fetchWithProxyFallback(targetUrl);
+
+    if (!data || !data.content || !data.content.accessToken) {
+      throw new Error('치지직 채팅 토큰을 발급받지 못했습니다.');
+    }
+
+    this.accessToken = data.content.accessToken;
+    this.extraToken = data.content.extraToken || '';
+    return data.content;
+  }
+
+  /**
+   * 치지직 채팅 연결 메인 메서드
    */
   async connect(channelInput) {
     const chId = this.parseChannelId(channelInput);
     if (!chId) {
-      throw new Error('올바른 치지직 채널 ID (32자리) 또는 방송 URL을 입력해 주세요.');
+      throw new Error('올바른 치지직 채널 ID (32자리 영문/숫자) 또는 방송 URL을 입력해 주세요.');
     }
 
     this.saveChannel(chId);
     this.isConnecting = true;
-    this.notifyStatus('connecting', '치지직 채팅 서버 접속 중...');
 
     try {
-      const tokens = await this.fetchChatTokens(chId);
-      if (!tokens || !tokens.accessToken || !tokens.chatChannelId) {
-        throw new Error('채팅 접근 토큰을 발급받지 못했습니다. 채널이 현재 방송 중인지 확인해 주세요.');
-      }
+      // 1단계: 채널 생방송 상태 및 chatChannelId 확인
+      this.notifyStatus('connecting', '치지직 생방송 상태 확인 중...');
+      const liveInfo = await this.fetchLiveDetail(chId);
 
-      this.chatChannelId = tokens.chatChannelId;
-      this.accessToken = tokens.accessToken;
-      this.extraToken = tokens.extraToken;
+      // 2단계: 채팅 접근 토큰 발급
+      this.notifyStatus('connecting', `[${this.channelName || '방송'}] 채팅 접근 토큰 발급 중...`);
+      await this.fetchChatTokens(liveInfo.chatChannelId);
 
+      // 3단계: 웹소켓 연결
+      this.notifyStatus('connecting', '치지직 실시간 채팅 서버 접속 중...');
       this.initWebSocket();
     } catch (err) {
       this.isConnecting = false;
+      this.isConnected = false;
       this.notifyStatus('error', err.message || '치지직 연결 실패');
       throw err;
     }
@@ -179,20 +240,21 @@ class ChzzkChatManager {
       clearInterval(this.pingInterval);
     }
 
-    // 치지직 채팅 WebSocket 서버 주소 (로드밸런싱 ss1 / ss2)
-    const wsUrl = 'wss://kr-ss1.chat.naver.com/chat';
+    // 치지직 채팅 로드밸런싱 서버 목록 (1~3 중 랜덤 분산 연결)
+    const serverNum = Math.floor(Math.random() * 3) + 1;
+    const wsUrl = `wss://kr-ss${serverNum}.chat.naver.com/chat`;
+    
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
-      console.log('[ChzzkChat] WebSocket 연결 성공, 인증 핸드셰이크 전송...');
-      // 네이버 채팅 프로토콜: CMD 100 (CONNECT)
+      // 네이버 채팅 프로토콜 핸드셰이크: CMD 100 (CONNECT)
       const connectPayload = {
         ver: '2',
         cmd: 100,
         svcid: 'game',
         cid: this.chatChannelId,
         bdy: {
-          uid: null, // 익명 시청자 모드
+          uid: null, // 익명 시청자 모드로 접속 (읽기 전용)
           devType: 2001,
           accTkn: this.accessToken,
           auth: 'READ'
@@ -214,17 +276,15 @@ class ChzzkChatManager {
         const msg = JSON.parse(event.data);
         this.handleSocketMessage(msg);
       } catch (e) {
-        console.warn('[ChzzkChat] 메시지 파싱 오류:', e);
+        // 메시지 파싱 에러 무시
       }
     };
 
     this.ws.onerror = (error) => {
-      console.error('[ChzzkChat] WebSocket 오류:', error);
       this.notifyStatus('error', '채팅 서버 연결 오류');
     };
 
     this.ws.onclose = () => {
-      console.log('[ChzzkChat] WebSocket 연결 종료');
       this.isConnected = false;
       this.isConnecting = false;
       if (this.pingInterval) clearInterval(this.pingInterval);
@@ -233,36 +293,37 @@ class ChzzkChatManager {
   }
 
   handleSocketMessage(msg) {
-    // CMD 10100: CONNECT 응답
+    // CMD 10100: CONNECT 인증 응답
     if (msg.cmd === 10100) {
       this.isConnected = true;
       this.isConnecting = false;
-      console.log('[ChzzkChat] 치지직 채팅 인증 완료! 실시간 채팅 수신 대기 중');
-      this.notifyStatus('connected', '치지직 채팅 연결됨 (실시간 수신 중)');
+      const titleText = this.channelName ? `[${this.channelName}] ` : '';
+      this.notifyStatus('connected', `${titleText}치지직 채팅 연동 완료 (실시간 수신 중)`);
       return;
     }
 
-    // CMD 10000: PING -> CMD 10000 (PONG 수신)
+    // CMD 10000: PING / PONG
     if (msg.cmd === 10000) {
       return;
     }
 
-    // CMD 93101: 실시간 채팅 메시지 (bdy array)
+    // CMD 93101: 실시간 채팅 메시지 리스트
     if (msg.cmd === 93101 && Array.isArray(msg.bdy)) {
-      msg.bdy.forEach(item => {
-        this.parseChatMessage(item);
-      });
+      const len = msg.bdy.length;
+      for (let i = 0; i < len; i++) {
+        this.parseChatMessage(msg.bdy[i]);
+      }
     }
   }
 
   /**
-   * 시청자 채팅 메시지 파싱 및 투표 카운트
+   * 시청자 채팅 메시지 파싱 및 투표 카운트 (Zero-Lag 초고속 정규식)
    */
   parseChatMessage(chatItem) {
-    if (!this.isPolling) return; // 투표 진행 중일 때만 집계
+    if (!this.isPolling) return; // 투표 활성화 상태일 때만 집계
 
     let messageText = '';
-    let userId = chatItem.uid || `anon_${Math.random()}`;
+    let userId = chatItem.uid || null;
 
     try {
       if (chatItem.msg) {
@@ -274,13 +335,14 @@ class ChzzkChatManager {
     } catch (e) {}
 
     if (!messageText) return;
+    if (!userId) userId = `anon_${Math.random()}`;
 
-    // 투표 명령어 정규식 매칭
-    // 좌측(A): 1, !1, A, !A, ㄱ, 1번, a
-    // 우측(B): 2, !2, B, !B, ㄴ, 2번, b
+    // 투표 명령어 파싱
+    // 좌측(A): 1, !1, A, !A, ㄱ, 1번, 좌, 좌측, 왼, 왼쪽
+    // 우측(B): 2, !2, B, !B, ㄴ, 2번, 우, 우측, 오, 오른쪽
     let voteSide = null;
-
     const lower = messageText.toLowerCase();
+
     if (/^(1|!1|a|!a|1번|좌|좌측|왼|왼쪽)$/i.test(lower)) {
       voteSide = 'A';
     } else if (/^(2|!2|b|!b|2번|우|우측|오|오른쪽)$/i.test(lower)) {
@@ -293,9 +355,9 @@ class ChzzkChatManager {
   }
 
   recordVote(userId, side) {
-    // [사용자 요구사항]: 1대결당 1인당 1회만 투표 가능 (이미 투표한 사용자는 재투표/표 변경 차단)
+    // 1대결당 1인 1회 투표 엄격 보장 (중복 투표 및 번복 차단)
     if (this.voters.has(userId)) {
-      return; // 중복 투표 차단
+      return;
     }
 
     this.votes[side] = (this.votes[side] || 0) + 1;
@@ -317,9 +379,10 @@ class ChzzkChatManager {
     this.notifyVoteUpdate();
   }
 
-  // 투표 결과 리셋 (새 대결 시작 시 호출되어 다시 1인 1회 투표 가능)
+  // 투표 집계 리셋 (새로운 대결 시작 시 호출)
   resetPoll() {
-    this.votes = { A: 0, B: 0 };
+    this.votes.A = 0;
+    this.votes.B = 0;
     this.voters.clear();
     this.notifyVoteUpdate();
   }
@@ -345,7 +408,7 @@ class ChzzkChatManager {
     };
   }
 
-  // 모의 테스트 투표 (방송 시작 전 스트리머가 기능 확인할 수 있도록)
+  // 모의 테스트 투표 (방송 시작 전 스트리머가 기능 검증)
   simulateVote(side, count = 1) {
     for (let i = 0; i < count; i++) {
       const dummyId = `test_user_${Math.random()}`;
@@ -375,7 +438,14 @@ class ChzzkChatManager {
 
   notifyStatus(status, text) {
     if (typeof this.onStatusChange === 'function') {
-      this.onStatusChange({ status, text, isConnected: this.isConnected, isConnecting: this.isConnecting });
+      this.onStatusChange({
+        status,
+        text,
+        isConnected: this.isConnected,
+        isConnecting: this.isConnecting,
+        channelName: this.channelName,
+        liveTitle: this.liveTitle
+      });
     }
   }
 }

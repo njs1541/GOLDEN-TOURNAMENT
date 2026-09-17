@@ -7,4 +7,8 @@ echo 종료하시려면 이 창을 닫아주세요.
 echo ===================================================
 
 start http://localhost:8000
-python -m http.server 8000
+if exist server.py (
+    python server.py
+) else (
+    python -m http.server 8000
+)

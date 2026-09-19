@@ -1069,6 +1069,16 @@
             • <strong>4강전 &amp; 결승전 전용</strong>: 래더 리그는 단독 진행하고, 4강 챔피언십부터 시청자 투표 활성화.<br>
             4. <kbd>연결하기</kbd>를 누르면 실시간 시청자 채팅 <kbd>1</kbd> 또는 <kbd>A</kbd>, <kbd>2</kbd> 또는 <kbd>B</kbd> 가 즉시 투표로 누적 집계됩니다.
           </p>
+
+          <div class="info-box" style="margin-top: 14px;">
+            <strong>🌐 GitHub Pages(웹 호스팅) 배포 환경에서 치지직 연동 안내</strong><br>
+            • <strong>원인</strong>: 네이버 치지직 REST API는 보안상 웹 브라우저의 직접 호출(CORS)을 차단합니다.<br>
+            • <strong>해결 방안</strong>:
+            <ol style="margin: 6px 0 0 18px; padding: 0;">
+              <li><strong>로컬 실행 (가장 추천)</strong>: 다운로드 후 <code>start.bat</code>을 실행하면 내장 로컬 프록시가 CORS를 100% 자동 해결합니다.</li>
+              <li><strong>무료 Cloudflare Worker 연결</strong>: Cloudflare 무료 Worker를 생성하여 모달 내 <code>[⚙️ 고급: 치지직 CORS 프록시 설정]</code>에 등록하시면 웹에서도 외부 서버 없이 즉시 작동합니다.</li>
+            </ol>
+          </div>
         </div>
 
         <!-- 2.5 테마 & 폰트 설정 -->

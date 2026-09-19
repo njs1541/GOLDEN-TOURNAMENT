@@ -9,6 +9,7 @@
 
 const STORAGE_CHZZK_CHANNEL_KEY = 'GOLDEN_TOURNAMENT_CHZZK_CHANNEL';
 const STORAGE_CHZZK_POLL_SCOPE_KEY = 'GOLDEN_TOURNAMENT_CHZZK_POLL_SCOPE';
+const STORAGE_CHZZK_CUSTOM_PROXY_KEY = 'GOLDEN_TOURNAMENT_CHZZK_CUSTOM_PROXY';
 
 class ChzzkChatManager {
   constructor(app) {
@@ -19,6 +20,7 @@ class ChzzkChatManager {
     this.extraToken = '';
     this.channelName = '';    // 스트리머 닉네임
     this.liveTitle = '';      // 방송 제목
+    this.customProxyUrl = ''; // 사용자 지정 CORS 프록시 URL
     
     this.ws = null;
     this.pingInterval = null;
@@ -50,6 +52,10 @@ class ChzzkChatManager {
       if (savedScope === 'final_only' || savedScope === 'all') {
         this.pollScope = savedScope;
       }
+      const savedProxy = localStorage.getItem(STORAGE_CHZZK_CUSTOM_PROXY_KEY);
+      if (savedProxy) {
+        this.customProxyUrl = savedProxy;
+      }
     } catch (e) {}
   }
 
@@ -67,6 +73,21 @@ class ChzzkChatManager {
         localStorage.setItem(STORAGE_CHZZK_POLL_SCOPE_KEY, scope);
       } catch (e) {}
     }
+  }
+
+  saveCustomProxy(proxyUrl) {
+    this.customProxyUrl = (proxyUrl || '').trim();
+    try {
+      if (this.customProxyUrl) {
+        localStorage.setItem(STORAGE_CHZZK_CUSTOM_PROXY_KEY, this.customProxyUrl);
+      } else {
+        localStorage.removeItem(STORAGE_CHZZK_CUSTOM_PROXY_KEY);
+      }
+    } catch (e) {}
+  }
+
+  getCustomProxy() {
+    return this.customProxyUrl || '';
   }
 
   /**
@@ -97,15 +118,35 @@ class ChzzkChatManager {
 
   /**
    * 다중 프록시 및 로컬 서버를 활용한 범용 API 요청 헬퍼
-   * - 현재 접속 오리진의 프록시뿐만 아니라 8000번 로컬 서버(start.bat)도 크로스 탐색
-   * - VSCode Live Server(포트 5500 등) 사용 시에도 start.bat이 켜져 있으면 자동 연동
+   * - 사용자 정의 프록시 (Cloudflare Worker 등) 최우선 지원
+   * - GitHub Pages(HTTPS) 환경 감지 및 안전한 다중 CORS 폴백 풀 구성
+   * - HTTP 환경에서는 로컬 8000번 서버(start.bat) 자동 연결
    */
   async fetchWithProxyFallback(targetUrl) {
     const urlsToTry = [];
     const encodedTarget = encodeURIComponent(targetUrl);
+    const isHttps = window.location.protocol === 'https:';
+    const isGitHubPages = window.location.hostname.endsWith('github.io');
 
-    // 1. 현재 브라우저 접속 오리진의 프록시 (/api/proxy)
-    if (window.location.protocol.startsWith('http')) {
+    // 0. 사용자가 직접 등록한 커스텀 프록시 (최우선)
+    if (this.customProxyUrl) {
+      let customUrl = this.customProxyUrl;
+      if (customUrl.endsWith('=') || customUrl.includes('url=')) {
+        customUrl = `${customUrl}${encodedTarget}`;
+      } else if (customUrl.endsWith('/')) {
+        customUrl = `${customUrl}${encodedTarget}`;
+      } else {
+        customUrl = `${customUrl}?url=${encodedTarget}`;
+      }
+      urlsToTry.push({
+        type: 'custom-proxy',
+        url: customUrl,
+        timeout: 4000
+      });
+    }
+
+    // 1. 현재 접속 오리진의 프록시 (/api/proxy) - 로컬 서버나 자체 호스팅 환경
+    if (window.location.protocol.startsWith('http') && !isGitHubPages) {
       urlsToTry.push({
         type: 'current-origin-proxy',
         url: `${window.location.origin}/api/proxy?url=${encodedTarget}`,
@@ -113,32 +154,38 @@ class ChzzkChatManager {
       });
     }
 
-    // 2. 만약 현재 포트가 8000이 아닌 경우 (예: VSCode Live Server 5500), 8000번 로컬 프록시 직접 연결 시도
-    if (window.location.port !== '8000') {
+    // 2. HTTP 환경에서 로컬 8000번 서버(start.bat) 탐색 (HTTPS에서는 Mixed Content 차단 방지를 위해 제외)
+    if (!isHttps && window.location.port !== '8000') {
       urlsToTry.push({
         type: 'local-8000-ip',
         url: `http://127.0.0.1:8000/api/proxy?url=${encodedTarget}`,
-        timeout: 1500
+        timeout: 1200
       });
       urlsToTry.push({
         type: 'local-8000-host',
         url: `http://localhost:8000/api/proxy?url=${encodedTarget}`,
-        timeout: 1500
+        timeout: 1200
       });
     }
 
-    // 3. 브라우저 직접 요청 (CORS 지원 여부 테스트)
+    // 3. 안정적인 공개 HTTPS CORS 프록시 게이트웨이들 순차 시도
+    urlsToTry.push({
+      type: 'codetabs-proxy',
+      url: `https://api.codetabs.com/v1/proxy?quest=${encodedTarget}`,
+      timeout: 3000
+    });
+
+    urlsToTry.push({
+      type: 'allorigins-raw',
+      url: `https://api.allorigins.win/raw?url=${encodedTarget}`,
+      timeout: 3000
+    });
+
+    // 4. 브라우저 직접 요청 (네이버 API가 차후 직접 허용하거나 로컬 확장 프로그램 사용 시)
     urlsToTry.push({
       type: 'direct',
       url: targetUrl,
       timeout: 2000
-    });
-
-    // 4. AllOrigins 공용 프록시 (최후의 수단)
-    urlsToTry.push({
-      type: 'allorigins',
-      url: `https://api.allorigins.win/raw?url=${encodedTarget}`,
-      timeout: 3500
     });
 
     let lastError = null;
@@ -165,19 +212,29 @@ class ChzzkChatManager {
       }
     }
 
-    // 모든 시도 실패 시 사용자 친화적 에러 메시지 생성
-    const isLiveServer = window.location.port === '5500' || (window.location.port && window.location.port !== '8000');
-    if (isLiveServer) {
+    // 모든 시도 실패 시 환경에 맞춘 친절하고 구체적인 해결 가이드 메시지 생성
+    if (isGitHubPages || isHttps) {
       throw new Error(
-        `로컬 프록시 서버(start.bat)가 실행되어 있지 않습니다.\n\n` +
-        `* 현재 [${window.location.host}] 환경에서 접속 중이십니다.\n` +
-        `* 폴더 안의 [start.bat]을 더블 클릭하여 실행해 두시면 현재 화면에서도 치지직 실시간 연동이 즉시 가능합니다.`
+        `[GitHub Pages 환경 치지직 연동 안내]\n` +
+        `GitHub 웹사이트(정적 호스팅)에서는 네이버의 보안 정책(CORS)으로 인해 브라우저 단독 호출이 차단됩니다.\n\n` +
+        `💡 해결 방법 (2가지 중 택 1):\n` +
+        `1. [추천] 치지직 연동 창의 [⚙️ 프록시 설정]을 열고 무료 Cloudflare Worker 프록시 주소를 입력하세요.\n` +
+        `2. 프로그램을 다운로드 받아 내 PC에서 [start.bat]으로 실행하시면 별도 설정 없이 즉시 연동됩니다.`
       );
     } else {
-      throw new Error(
-        `로컬 프록시 서버(start.bat)를 실행해 주세요.\n` +
-        `* [start.bat]을 실행하시면 치지직 실시간 채팅 서버에 CORS 차단 없이 즉시 연결됩니다.`
-      );
+      const isLiveServer = window.location.port === '5500' || (window.location.port && window.location.port !== '8000');
+      if (isLiveServer) {
+        throw new Error(
+          `로컬 프록시 서버(start.bat)가 실행되어 있지 않습니다.\n\n` +
+          `* 현재 [${window.location.host}] 환경에서 접속 중이십니다.\n` +
+          `* 폴더 안의 [start.bat]을 더블 클릭하여 실행해 두시면 현재 화면에서도 치지직 실시간 연동이 즉시 가능합니다.`
+        );
+      } else {
+        throw new Error(
+          `로컬 프록시 서버(start.bat)를 실행해 주세요.\n` +
+          `* [start.bat]을 실행하시면 치지직 실시간 채팅 서버에 CORS 차단 없이 즉시 연결됩니다.`
+        );
+      }
     }
   }
 

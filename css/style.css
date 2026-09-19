@@ -3327,12 +3327,27 @@ body[data-current-view="battle"] {
   scrollbar-color: var(--gold-primary) rgba(0, 0, 0, 0.3);
 }
 
+/* 실시간 순위표 모달 창 크기 및 뷰포트 최적화 */
+.ranking-modal-dialog {
+  max-width: 780px !important;
+  width: 95% !important;
+  max-height: 88vh !important;
+}
+
+.ranking-modal-dialog .modal-body {
+  max-height: 72vh !important;
+  gap: 8px !important;
+  padding-right: 8px;
+}
+
 /* 실시간 순위표 모달 항목 좌우 스크롤 차단 및 디자인 */
 .ranking-item {
   width: 100% !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
   transform: none !important;
+  padding: 12px 16px !important;
+  min-height: calc(var(--fs-ranking-title, 16px) * 2.6 + 18px) !important;
 }
 
 .ranking-item:hover {
@@ -3345,11 +3360,40 @@ body[data-current-view="battle"] {
 .ranking-item .item-thumb-title {
   min-width: 0;
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ranking-item .rank-badge {
+  font-size: calc(var(--fs-ranking-title, 16px) * 0.95);
+  font-weight: 800;
+  width: 32px;
+  min-width: 32px;
+  text-align: center;
+  font-family: 'Outfit', monospace;
+  flex-shrink: 0;
+}
+
+.ranking-item .ranking-thumb {
+  width: 60px;
+  height: 36px;
+  min-width: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #000;
+  flex-shrink: 0;
 }
 
 .ranking-item .item-info {
   min-width: 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
 }
 
 /* 참가 영상 목록 붙여넣기 모달 */
@@ -3562,10 +3606,45 @@ body[data-current-view="battle"] {
 .ranking-item .item-title {
   font-size: var(--fs-ranking-title, 16px) !important;
   font-weight: 700;
+  line-height: 1.35 !important;
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  word-break: break-word !important;
+  margin: 0 !important;
+  cursor: default;
 }
 
 .ranking-item .item-channel {
-  font-size: calc(var(--fs-ranking-title, 16px) * 0.85) !important;
+  font-size: calc(var(--fs-ranking-title, 16px) * 0.82) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  line-height: 1.25 !important;
+  margin-top: 2px;
+}
+
+.ranking-record-badge {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.ranking-elo-badge {
+  font-weight: 800;
+  color: var(--gold-primary);
+  background: rgba(245, 176, 65, 0.12);
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-family: 'Outfit', monospace;
+  letter-spacing: 0.5px;
+}
+
+html[data-theme="white-theme"] .ranking-elo-badge {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
 }
 
 /* ================= 화면 & 글씨 크기 설정 모달 전용 스타일 ================= */
@@ -4542,8 +4621,78 @@ body.low-perf-mode .win-prob-box {
   line-height: 1.4;
   margin-top: 6px;
 }
-.chzzk-poll-locked-notice .lock-icon {
-  font-size: 16px;
+/* 치지직 CORS 프록시 아코디언 설정 박스 */
+.chzzk-proxy-details {
+  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: var(--transition-fast);
+}
+
+.chzzk-proxy-details[open] {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(0, 255, 163, 0.3);
+}
+
+.chzzk-proxy-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.chzzk-proxy-summary::-webkit-details-marker {
+  display: none;
+}
+
+.chzzk-proxy-details[open] .proxy-summary-arrow {
+  transform: rotate(180deg);
+}
+
+.proxy-summary-arrow {
+  font-size: 10px;
+  color: var(--text-dim);
+  transition: transform var(--transition-fast);
+}
+
+.chzzk-proxy-content {
+  padding: 10px 14px 14px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.proxy-guide-text {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.proxy-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-field-sm {
+  padding: 7px 10px !important;
+  font-size: 12px !important;
+  flex: 1;
+}
+
+.proxy-sub-tip {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: 0;
 }
 
 .chzzk-status-box {

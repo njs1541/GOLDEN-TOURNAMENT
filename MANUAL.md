@@ -110,6 +110,34 @@ graph LR
    - **4강전 & 결승전 전용**: 래더 리그는 스트리머 단독 진행 후, 4강부터 시청자 투표 활성화.
 4. `연결하기` 버튼을 누르면 실시간 웹소켓으로 시청자의 `1/A` 또는 `2/B` 채팅이 즉시 투표로 집계됩니다.
 
+> [!TIP]
+> **🌐 GitHub Pages(웹 호스팅) 배포 환경에서 치지직 연동 가이드**
+> 
+> - **배경**: 네이버 치지직의 방송 상태 확인 및 토큰 발급 REST API는 보안 정책상 브라우저 직접 호출(CORS)을 차단합니다.
+> - **해결 방법 (2가지 중 선택)**:
+>   1. **로컬 실행 (가장 추천 & 간편)**: 프로그램을 다운로드하여 `start.bat`을 실행하면 내장 로컬 프록시가 CORS를 100% 자동 해결합니다.
+>   2. **무료 Cloudflare Worker 프록시 연결 (웹 배포 시)**:
+>      - [Cloudflare](https://dash.cloudflare.com/) 무료 가입 후 **Workers & Pages ➔ Create Worker** 생성
+>      - 코드 창에 아래 5줄 코드를 붙여넣고 [Deploy] 완료:
+>      ```javascript
+>      export default {
+>        async fetch(request) {
+>          const url = new URL(request.url).searchParams.get("url");
+>          if (!url) return new Response("Missing url", { status: 400 });
+>          const res = await fetch(url, {
+>            headers: {
+>              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+>              "Referer": "https://chzzk.naver.com/"
+>            }
+>          });
+>          const headers = new Headers(res.headers);
+>          headers.set("Access-Control-Allow-Origin", "*");
+>          return new Response(res.body, { status: res.status, headers });
+>        }
+>      };
+>      ```
+>      - 발급된 Worker URL(예: `https://my-proxy.workers.dev/?url=`)을 복사하여 치지직 모달 내 `[⚙️ 고급: 치지직 CORS 프록시 설정]` 입력창에 붙여넣고 [저장]하면 GitHub Pages에서도 외부 서버 설치 없이 100% 작동합니다.
+
 ---
 
 ### 2.5 테마 & 방송 송출용 글씨/화면 설정
@@ -170,7 +198,8 @@ OBS/방송 송출 환경이나 모니터 크기에 맞게 1픽셀 단위로 UI�
 
 ![실시간 Elo 순위표 모달](docs/images/06_modal_live_ranking.png)
 
-대결 도중 헤더의 `📊 실시간 랭킹` 버튼을 누르면 현재까지의 1~16위 전체 순위, 실시간 ELO 점수, 승/패 전적을 모달 창에서 실시간으로 확인할 수 있습니다.
+대결 도중 헤더의 `📊 실시간 랭킹` 버튼을 누르면 현재까지의 전체 순위, 실시간 ELO 점수, 승/패 전적을 모달 창에서 실시간으로 확인할 수 있습니다.
+- **와이드 반응형 뷰포트**: 글씨 크기(12px~24px)를 크게 키워도 긴 영상 제목과 16:9 와이드 썸네일, 승패/ELO 배지가 시원하게 표시되며 잘림 없이 온전히 표시됩니다.
 
 ---
 

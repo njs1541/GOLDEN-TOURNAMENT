@@ -351,6 +351,28 @@ class AppController {
       btnApplyMajority.addEventListener('click', () => this.handleChzzkApplyMajority());
     }
 
+    // 치지직 커스텀 CORS 프록시 저장 버튼
+    const btnSaveProxy = document.getElementById('btn-save-chzzk-proxy');
+    const inputProxy = document.getElementById('input-chzzk-proxy');
+    const msgProxyStatus = document.getElementById('msg-chzzk-proxy-status');
+    if (btnSaveProxy && inputProxy) {
+      btnSaveProxy.addEventListener('click', () => {
+        const val = inputProxy.value.trim();
+        if (this.chzzkChat) {
+          this.chzzkChat.saveCustomProxy(val);
+          if (msgProxyStatus) {
+            msgProxyStatus.style.color = '#00ffa3';
+            msgProxyStatus.textContent = val ? '✓ 프록시 설정이 저장되었습니다.' : '✓ 프록시 설정이 초기화되었습니다.';
+            setTimeout(() => {
+              msgProxyStatus.style.color = '';
+              msgProxyStatus.textContent = '미설정 시 공용 프록시 및 로컬 서버 자동 탐색이 적용됩니다.';
+            }, 3000);
+          }
+          this.showPerfToast('⚙️ 프록시 설정 저장', val ? 'CORS 프록시 주소가 저장되었습니다.' : '프록시가 기본값으로 초기화되었습니다.', 'info', 2500);
+        }
+      });
+    }
+
     // 각 글씨 조절 슬라이더 실시간 바인딩 (Zero-Lag 60FPS)
     this.bindFontSlider('slider-scale-global', 'val-scale-global', 'scaleGlobal', '%');
     this.bindFontSlider('slider-battle-title', 'val-battle-title', 'battleTitle', 'px');
@@ -1041,13 +1063,27 @@ class AppController {
     sorted.forEach((item, idx) => {
       const row = document.createElement('div');
       row.className = 'candidate-item ranking-item';
+
+      let rankColor = 'var(--text-dim)';
+      if (idx === 0) rankColor = 'var(--gold-primary)';
+      else if (idx === 1) rankColor = '#94a3b8';
+      else if (idx === 2) rankColor = '#d97706';
+
+      const safeTitle = (item.title || '제목 없음').replace(/"/g, '&quot;');
+      const wins = item.wins || 0;
+      const losses = item.losses || 0;
+      const elo = Math.round(item.elo || 1200);
+
       row.innerHTML = `
         <div class="item-thumb-title">
-          <span style="font-weight: 800; width: 24px; color: ${idx < 3 ? 'var(--gold-primary)' : 'var(--text-dim)'};">${idx + 1}</span>
-          <img class="item-thumb" src="https://img.youtube.com/vi/${item.youtubeId}/mqdefault.jpg" style="width:36px;height:36px;">
+          <span class="rank-badge" style="color: ${rankColor};">${idx + 1}</span>
+          <img class="ranking-thumb" src="https://img.youtube.com/vi/${item.youtubeId}/mqdefault.jpg" alt="${safeTitle}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2236%22 fill=%22%23222%22%3E%3Crect width=%22100%25%22 height=%22100%25%22/%3E%3C/svg%3E';">
           <div class="item-info">
-            <span class="item-title">${item.title}</span>
-            <span class="item-channel">${item.wins || 0}승 ${item.losses || 0}패 &bull; ELO: ${Math.round(item.elo || 1200)}</span>
+            <span class="item-title" title="${safeTitle}">${safeTitle}</span>
+            <div class="item-channel">
+              <span class="ranking-record-badge">${wins}승 ${losses}패</span>
+              <span class="ranking-elo-badge">ELO ${elo}</span>
+            </div>
           </div>
         </div>
       `;
@@ -1836,6 +1872,12 @@ class AppController {
       document.querySelectorAll('.scope-option-card').forEach(card => card.classList.remove('selected'));
       radioScope.closest('.scope-option-card')?.classList.add('selected');
     }
+
+    // 커스텀 프록시 주소 동기화
+    const proxyInput = document.getElementById('input-chzzk-proxy');
+    if (proxyInput) {
+      proxyInput.value = this.chzzkChat.getCustomProxy();
+    }
   }
 
   /**
@@ -1888,7 +1930,7 @@ class AppController {
       const modal = document.getElementById('modal-chzzk-settings');
       if (modal) modal.classList.remove('active');
     } catch (err) {
-      alert(`치지직 채팅 연결에 실패했습니다.\n사유: ${err.message}\n\n* 채널 주소가 올바른지, 현재 생방송 중인지 확인해 주세요.`);
+      alert(`[치지직 연결 실패]\n\n${err.message}`);
     } finally {
       if (btnConnect) {
         btnConnect.disabled = false;

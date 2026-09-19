@@ -452,7 +452,7 @@
 
     <!-- 실시간 랭킹 모달 다이얼로그 -->
     <div class="modal-backdrop" id="modal-live-ranking">
-      <div class="modal-dialog glass-panel">
+      <div class="modal-dialog glass-panel ranking-modal-dialog">
         <div class="modal-header">
           <h3>📊 실시간 Elo 순위표</h3>
           <button class="modal-close" id="btn-close-modal">&times;</button>
@@ -836,6 +836,24 @@
               </label>
             </div>
           </div>
+
+          <!-- CORS 프록시 고급 설정 (GitHub Pages 등 웹 호스팅 지원) -->
+          <details class="chzzk-proxy-details" id="details-chzzk-proxy">
+            <summary class="chzzk-proxy-summary">
+              <span>⚙️ 고급: 치지직 CORS 프록시 설정 (웹 배포/GitHub Pages용)</span>
+              <span class="proxy-summary-arrow">▼</span>
+            </summary>
+            <div class="chzzk-proxy-content">
+              <p class="proxy-guide-text">
+                GitHub Pages 등 정적 웹 호스팅 환경에서는 네이버의 CORS 차단을 우회하기 위해 프록시(Cloudflare Workers 등)를 등록할 수 있습니다. (로컬 start.bat 실행 시에는 비워두셔도 자동 작동합니다.)
+              </p>
+              <div class="proxy-input-row">
+                <input type="text" id="input-chzzk-proxy" placeholder="예: https://my-chzzk-proxy.workers.dev/?url=" class="input-field input-field-sm">
+                <button type="button" id="btn-save-chzzk-proxy" class="btn-secondary btn-sm">저장</button>
+              </div>
+              <p class="proxy-sub-tip" id="msg-chzzk-proxy-status">미설정 시 공용 프록시 및 로컬 서버 자동 탐색이 적용됩니다.</p>
+            </div>
+          </details>
 
           <div class="chzzk-status-box">
             <div class="status-row">

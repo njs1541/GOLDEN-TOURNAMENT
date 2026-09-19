@@ -1989,10 +1989,14 @@ class AppController {
 title Golden Tournament - Local Proxy Server
 cls
 echo ========================================================
-echo  [Golden Tournament] Local Proxy Server (Port 8000)
-echo  http://localhost:8000
+echo  [Golden Tournament] Chzzk Proxy Server (Port 8000)
+echo  https://njs1541.github.io/GOLDEN-TOURNAMENT/
+echo  Keep this window open while using Chzzk integration.
 echo ========================================================
 echo.
+
+rem 브라우저 자동 실행 (창이 뜨는 것을 원치 않으시면 아래 줄 맨 앞에 rem을 입력하세요)
+start https://njs1541.github.io/GOLDEN-TOURNAMENT/
 
 if exist server.py goto run_server
 
@@ -2002,12 +2006,10 @@ powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.Security
 if exist server.py goto run_server
 
 echo [Warning] Using fallback HTTP server...
-start http://localhost:8000
 python -m http.server 8000
 goto end
 
 :run_server
-start http://localhost:8000
 python server.py
 goto end
 

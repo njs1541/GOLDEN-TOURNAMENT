@@ -17,10 +17,11 @@ PORT = 8000
 
 class TournamentRequestHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
-        # 모든 정적 파일 및 응답에 CORS 허용 헤더 기본 주입
+        # 모든 정적 파일 및 응답에 CORS 및 로컬 사설 네트워크 허용 헤더 주입
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', '*')
+        self.send_header('Access-Control-Allow-Private-Network', 'true')
         super().end_headers()
 
     def do_OPTIONS(self):

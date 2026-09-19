@@ -154,17 +154,18 @@ class ChzzkChatManager {
       });
     }
 
-    // 2. HTTP 환경에서 로컬 8000번 서버(start.bat) 탐색 (HTTPS에서는 Mixed Content 차단 방지를 위해 제외)
-    if (!isHttps && window.location.port !== '8000') {
+    // 2. 로컬 8000번 프록시 서버(start.bat) 탐색 (HTTP 및 HTTPS 공통 지원)
+    // Chrome/Edge 등 최신 브라우저는 127.0.0.1/localhost를 안전한 로컬 사설 출처로 허용함
+    if (window.location.port !== '8000') {
       urlsToTry.push({
         type: 'local-8000-ip',
         url: `http://127.0.0.1:8000/api/proxy?url=${encodedTarget}`,
-        timeout: 1200
+        timeout: 1800
       });
       urlsToTry.push({
         type: 'local-8000-host',
         url: `http://localhost:8000/api/proxy?url=${encodedTarget}`,
-        timeout: 1200
+        timeout: 1800
       });
     }
 

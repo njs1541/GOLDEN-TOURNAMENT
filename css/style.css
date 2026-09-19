@@ -4501,7 +4501,14 @@ body.low-perf-mode .win-prob-box {
 
 /* 6. 치지직 모달 전용 스타일 */
 .chzzk-modal-dialog {
-  max-width: 520px !important;
+  max-width: 580px !important;
+  width: 95% !important;
+  max-height: 90vh !important;
+}
+
+.chzzk-modal-dialog .modal-body {
+  max-height: 76vh !important;
+  padding-right: 8px;
 }
 
 .chzzk-modal-banner {
@@ -4621,78 +4628,69 @@ body.low-perf-mode .win-prob-box {
   line-height: 1.4;
   margin-top: 6px;
 }
-/* 치지직 CORS 프록시 아코디언 설정 박스 */
-.chzzk-proxy-details {
+/* 치지직 Cloudflare Worker / CORS 프록시 상시 노출 설정 박스 */
+.chzzk-proxy-box {
   margin-bottom: 18px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--border-glass);
+  background: rgba(0, 255, 163, 0.04);
+  border: 1px solid rgba(0, 255, 163, 0.25);
   border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: var(--transition-fast);
-}
-
-.chzzk-proxy-details[open] {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(0, 255, 163, 0.3);
-}
-
-.chzzk-proxy-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-main);
-  cursor: pointer;
-  user-select: none;
-  list-style: none;
-}
-.chzzk-proxy-summary::-webkit-details-marker {
-  display: none;
-}
-
-.chzzk-proxy-details[open] .proxy-summary-arrow {
-  transform: rotate(180deg);
-}
-
-.proxy-summary-arrow {
-  font-size: 10px;
-  color: var(--text-dim);
-  transition: transform var(--transition-fast);
-}
-
-.chzzk-proxy-content {
-  padding: 10px 14px 14px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  transition: var(--transition-fast);
 }
 
-.proxy-guide-text {
-  font-size: 11.5px;
-  color: var(--text-muted);
-  line-height: 1.45;
-  margin: 0;
+.chzzk-proxy-box:hover {
+  background: rgba(0, 255, 163, 0.06);
+  border-color: rgba(0, 255, 163, 0.4);
+}
+
+.chzzk-proxy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chzzk-proxy-header .setup-label {
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge-proxy-tag {
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 255, 163, 0.15);
+  color: #00ffa3;
+  border: 1px solid rgba(0, 255, 163, 0.3);
+  letter-spacing: 0.3px;
 }
 
 .proxy-input-row {
   display: flex;
   gap: 8px;
   align-items: center;
+  width: 100%;
 }
 
-.input-field-sm {
-  padding: 7px 10px !important;
-  font-size: 12px !important;
+.proxy-input-row .input-field {
   flex: 1;
 }
 
-.proxy-sub-tip {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin: 0;
+html[data-theme="white-theme"] .chzzk-proxy-box {
+  background: #f0fdf4 !important;
+  border-color: #86efac !important;
+}
+
+html[data-theme="white-theme"] .badge-proxy-tag {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #86efac !important;
 }
 
 .chzzk-status-box {

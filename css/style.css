@@ -4682,6 +4682,72 @@ body.low-perf-mode .win-prob-box {
   flex: 1;
 }
 
+.proxy-method-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.proxy-method-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.proxy-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2px 0;
+}
+.proxy-divider::before,
+.proxy-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.proxy-divider span {
+  padding: 0 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.proxy-download-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.proxy-download-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-download-bat {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 8px 14px !important;
+  white-space: nowrap;
+  background: rgba(245, 176, 65, 0.15) !important;
+  color: var(--gold-primary) !important;
+  border: 1px solid rgba(245, 176, 65, 0.35) !important;
+  transition: var(--transition-fast);
+}
+
+.btn-download-bat:hover {
+  background: rgba(245, 176, 65, 0.28) !important;
+  border-color: var(--gold-primary) !important;
+  box-shadow: 0 0 12px rgba(245, 176, 65, 0.3) !important;
+}
+
 html[data-theme="white-theme"] .chzzk-proxy-box {
   background: #f0fdf4 !important;
   border-color: #86efac !important;
@@ -4691,6 +4757,15 @@ html[data-theme="white-theme"] .badge-proxy-tag {
   background: #dcfce7 !important;
   color: #15803d !important;
   border-color: #86efac !important;
+}
+
+html[data-theme="white-theme"] .proxy-download-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .proxy-divider::before,
+html[data-theme="white-theme"] .proxy-divider::after {
+  border-bottom-color: #cbd5e1 !important;
 }
 
 .chzzk-status-box {

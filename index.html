@@ -811,21 +811,43 @@
             <p class="chzzk-input-tip">치지직 방송국 주소창의 <code>/live/</code> 뒤에 있는 영문/숫자 조합을 복사해 붙여넣으세요.</p>
           </div>
 
-          <!-- Cloudflare Worker / CORS 프록시 설정 (상시 노출 박스) -->
+          <!-- Cloudflare Worker / 로컬 프록시 설정 (상시 노출 박스) -->
           <div class="chzzk-proxy-box" id="chzzk-proxy-box">
             <div class="chzzk-proxy-header">
-              <label class="setup-label" for="input-chzzk-proxy">
-                <span>🌐 Cloudflare Worker 프록시 주소</span>
-                <span class="badge-proxy-tag">웹사이트 / GitHub Pages 필수</span>
+              <label class="setup-label">
+                <span>🌐 치지직 CORS 프록시 우회 설정</span>
+                <span class="badge-proxy-tag">웹사이트 / GitHub Pages 환경</span>
               </label>
             </div>
-            <div class="proxy-input-row">
-              <input type="text" id="input-chzzk-proxy" placeholder="예: https://my-chzzk-proxy.workers.dev/?url=" class="input-field">
-              <button type="button" id="btn-save-chzzk-proxy" class="btn-primary btn-sm" style="flex-shrink: 0; padding: 0 16px;">저장</button>
+
+            <!-- 방법 1: Cloudflare Worker 입력 -->
+            <div class="proxy-method-block">
+              <span class="proxy-method-title">옵션 A. 무료 Cloudflare Worker 주소 등록 (무설치 웹 전용)</span>
+              <div class="proxy-input-row">
+                <input type="text" id="input-chzzk-proxy" placeholder="예: https://my-chzzk-proxy.workers.dev/?url=" class="input-field">
+                <button type="button" id="btn-save-chzzk-proxy" class="btn-primary btn-sm" style="flex-shrink: 0; padding: 0 16px;">저장</button>
+              </div>
+              <p class="chzzk-input-tip" id="msg-chzzk-proxy-status">
+                Worker 주소를 입력하고 [저장]을 누르면 브라우저에 저장되어 자동 연동됩니다.
+              </p>
             </div>
-            <p class="chzzk-input-tip" id="msg-chzzk-proxy-status">
-              GitHub Pages 배포 시 무료 Cloudflare Worker 주소를 입력하세요. (로컬 <code>start.bat</code> 실행 시 비워두셔도 자동 작동)
-            </p>
+
+            <div class="proxy-divider">
+              <span>또는</span>
+            </div>
+
+            <!-- 방법 2: start.bat 다운로드 -->
+            <div class="proxy-method-block proxy-download-card">
+              <div class="proxy-download-text">
+                <span class="proxy-method-title">옵션 B. 로컬 프록시 실행 (start.bat 다운로드)</span>
+                <p class="chzzk-input-tip" style="margin-top: 2px;">
+                  PC에 다운로드하여 더블 클릭해 두시면 웹 화면에서도 치지직이 즉시 연동됩니다.
+                </p>
+              </div>
+              <button type="button" id="btn-download-start-bat" class="btn-secondary btn-sm btn-download-bat">
+                <span>📥 start.bat 다운로드</span>
+              </button>
+            </div>
           </div>
 
           <!-- 시청자 투표 적용 범위 설정 옵션 (전체 vs 4강&결승) -->

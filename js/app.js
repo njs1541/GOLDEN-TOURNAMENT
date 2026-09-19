@@ -373,11 +373,11 @@ class AppController {
       });
     }
 
-    // start.bat 다운로드 버튼
+    // start.bat 다운로드 안내 토스트 바인딩
     const btnDownloadBat = document.getElementById('btn-download-start-bat');
     if (btnDownloadBat) {
       btnDownloadBat.addEventListener('click', () => {
-        this.downloadStartBat();
+        this.showPerfToast('📥 start.bat 다운로드 시작', '다운로드된 start.bat 파일을 실행해 두시면 치지직이 즉시 연동됩니다.', 'info', 4000);
       });
     }
 

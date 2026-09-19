@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>골든 토너먼트(GOLDEN TOURNAMENT) - 공식 인터랙티브 사용 설명서</title>
+  <meta name="description" content="조기 탈락 없는 공정한 스위스 균등 노출, 실시간 Elo 래더, 골든 파이널 4강 챔피언십이 결합된 골든 토너먼트의 스크린샷 포함 전체 공식 사용 매뉴얼입니다.">
+  
+  <!-- Google Fonts: Outfit & Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS Variables & Design System
+       ========================================================================== */
+    :root {
+      --bg-dark: #07090e;
+      --bg-surface: #0e121a;
+      --bg-card: rgba(18, 23, 34, 0.75);
+      --bg-card-hover: rgba(24, 31, 46, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(245, 158, 11, 0.35);
+      
+      --gold-primary: #f59e0b;
+      --gold-glow: rgba(245, 158, 11, 0.25);
+      --gold-gradient: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+      
+      --cyan-player: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --rose-player: #f43f5e;
+      --rose-glow: rgba(244, 63, 94, 0.25);
+      
+      --chzzk-neon: #00ffa3;
+      --chzzk-glow: rgba(0, 255, 163, 0.2);
+
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      
+      --sidebar-width: 300px;
+      --header-height: 72px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 158, 11, 0.05);
+      --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+      line-height: 1.7;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(245, 158, 11, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.04) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+      background-attachment: fixed;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-primary);
+    }
+
+    /* ==========================================================================
+       Header Layout
+       ========================================================================== */
+    .app-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: rgba(7, 9, 14, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 1000;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+
+    .brand-trophy {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.1));
+      border: 1px solid var(--border-accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      background: var(--gold-gradient);
+      color: #000;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      transition: var(--transition-smooth);
+      cursor: pointer;
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: var(--gold-gradient);
+      border: 1px solid #f59e0b;
+      color: #050505;
+      box-shadow: 0 4px 15px var(--gold-glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    /* ==========================================================================
+       Main Layout (Sidebar + Content)
+       ========================================================================== */
+    .app-container {
+      display: flex;
+      max-width: 1560px;
+      margin: 0 auto;
+      padding-top: var(--header-height);
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      position: sticky;
+      top: var(--header-height);
+      height: calc(100vh - var(--header-height));
+      padding: 32px 20px 40px;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      padding-left: 8px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+    }
+
+    .nav-item a:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .nav-item.active a {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--gold-primary);
+      font-weight: 700;
+      border-left: 3px solid var(--gold-primary);
+    }
+
+    .nav-sub-list {
+      list-style: none;
+      padding-left: 20px;
+      margin-top: 2px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nav-sub-item a {
+      font-size: 0.82rem;
+      padding: 6px 10px;
+      color: var(--text-dim);
+    }
+    .nav-sub-item a:hover {
+      color: var(--text-main);
+    }
+    .nav-sub-item.active a {
+      color: var(--gold-primary);
+      font-weight: 600;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      padding: 48px 60px 120px;
+      max-width: calc(100% - var(--sidebar-width));
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(6, 182, 212, 0.05) 50%, rgba(18, 23, 34, 0.4) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      margin-bottom: 56px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-premium);
+    }
+
+    .hero-banner::after {
+      content: '🏆';
+      position: absolute;
+      right: 30px;
+      bottom: -15px;
+      font-size: 130px;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .hero-subtitle {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--gold-primary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hero-title {
+      font-size: 2.3rem;
+      font-weight: 900;
+      line-height: 1.3;
+      margin-bottom: 14px;
+      background: linear-gradient(to right, #ffffff, #e5e7eb, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 820px;
+      line-height: 1.75;
+    }
+
+    /* Section Components */
+    .doc-section {
+      margin-bottom: 72px;
+      scroll-margin-top: 100px;
+    }
+
+    .section-header {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 18px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .section-badge-num {
+      width: 36px;
+      height: 36px;
+      background: var(--gold-gradient);
+      color: #000;
+      font-weight: 900;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px var(--gold-glow);
+    }
+
+    .section-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .subsection {
+      margin-bottom: 48px;
+      scroll-margin-top: 100px;
+    }
+
+    .subsection-title {
+      font-size: 1.22rem;
+      font-weight: 700;
+      color: #f3f4f6;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subsection-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: var(--gold-primary);
+      border-radius: 2px;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: #d1d5db;
+    }
+
+    /* Feature Process Flow Cards */
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin: 24px 0 32px;
+    }
+
+    .process-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+    .process-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .process-step {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--gold-primary);
+      margin-bottom: 6px;
+    }
+
+    .process-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .process-detail {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Screenshot Card Frame */
+    .screenshot-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin: 24px 0 32px;
+      box-shadow: var(--shadow-premium);
+      transition: var(--transition-smooth);
+    }
+
+    .screenshot-card:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 30px rgba(245, 158, 11, 0.1);
+    }
+
+    .screenshot-header {
+      background: rgba(10, 13, 19, 0.95);
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .screenshot-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .screenshot-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .screenshot-caption {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .screenshot-img-wrap {
+      position: relative;
+      cursor: zoom-in;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .screenshot-img-wrap:hover .screenshot-img {
+      transform: scale(1.015);
+    }
+
+    .zoom-hint-badge {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .screenshot-img-wrap:hover .zoom-hint-badge {
+      opacity: 1;
+    }
+
+    /* Comparison & Table Styles */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      margin: 20px 0 28px;
+    }
+
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    .styled-table th {
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      font-weight: 700;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .styled-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: #d1d5db;
+    }
+
+    .styled-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .styled-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Keycaps & Shortcut UI */
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #2b3548 0%, #171e2c 100%);
+      border: 1px solid #475569;
+      border-bottom: 3px solid #1e293b;
+      color: #f1f5f9;
+      padding: 2px 8px;
+      font-family: 'Outfit', monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+      margin: 0 2px;
+    }
+
+    /* Callout Alerts */
+    .callout {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--gold-primary);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      padding: 18px 24px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+    }
+
+    .callout-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+      font-size: 0.98rem;
+    }
+
+    .callout-desc {
+      font-size: 0.9rem;
+      color: #d1d5db;
+      margin-bottom: 0;
+    }
+
+    .callout-cyan {
+      background: rgba(6, 182, 212, 0.08);
+      border-left-color: var(--cyan-player);
+    }
+
+    .callout-chzzk {
+      background: rgba(0, 255, 163, 0.08);
+      border-left-color: var(--chzzk-neon);
+    }
+
+    /* Back to top floating button */
+    .btn-top {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 48px;
+      height: 48px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      border-radius: 50%;
+      color: var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition-smooth);
+      z-index: 900;
+    }
+
+    .btn-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .btn-top:hover {
+      background: var(--gold-primary);
+      color: #000;
+      transform: translateY(-3px);
+    }
+
+    /* ==========================================================================
+       Image Lightbox Modal
+       ========================================================================== */
+    .lightbox-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(4, 6, 10, 0.92);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 30px;
+    }
+
+    .lightbox-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-content-wrap {
+      max-width: 95vw;
+      max-height: 88vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 82vh;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-accent);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(245, 158, 11, 0.2);
+    }
+
+    .lightbox-caption {
+      margin-top: 14px;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -45px;
+      right: 0;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 32px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 6px;
+      transition: transform 0.2s ease;
+    }
+    .lightbox-close:hover {
+      transform: scale(1.15) rotate(90deg);
+      color: var(--gold-primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1100px) {
+      .app-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+        padding: 20px 32px;
+      }
+      .content-area {
+        max-width: 100%;
+        padding: 32px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app-header {
+        padding: 0 16px;
+      }
+      .content-area {
+        padding: 24px 16px 80px;
+      }
+      .hero-title {
+        font-size: 1.7rem;
+      }
+      .hero-banner {
+        padding: 24px;
+      }
+      .styled-table th, .styled-table td {
+        padding: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 글로벌 네비게이션 헤더 -->
+  <header class="app-header">
+    <a href="#intro" class="brand-group">
+      <div class="brand-trophy">🏆</div>
+      <div>
+        <div class="brand-title">
+          GOLDEN TOURNAMENT
+          <span class="brand-badge">MANUAL v1.0</span>
+        </div>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <a href="http://127.0.0.1:5500/" target="_blank" class="btn-header btn-primary" title="실제 토너먼트 프로그램 바로 실행">
+        <span>🎮 토너먼트 앱 열기</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </a>
+      <button class="btn-header btn-ghost" onclick="window.print()" title="사용 설명서 인쇄 또는 PDF 저장">
+        <span>🖨️ PDF / 인쇄</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 레이아웃 -->
+  <div class="app-container">
+
+    <!-- 좌측 목차 사이드바 -->
+    <aside class="sidebar" id="doc-sidebar">
+      <div class="sidebar-title">사용 설명서 목차</div>
+      <ul class="nav-list">
+        <li class="nav-item active">
+          <a href="#intro">
+            <span>✨</span> 1. 시스템 소개 및 차별점
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#setup-view">
+            <span>⚙️</span> 2. 준비 단계: 설정 &amp; 커스텀
+          </a>
+          <ul class="nav-sub-list">
+            <li class="nav-sub-item"><a href="#setup-main">2.1 메인 설정 화면</a></li>
+            <li class="nav-sub-item"><a href="#setup-candidates">2.2 후보 관리 &amp; 점검</a></li>
+            <li class="nav-sub-item"><a href="#setup-courses">2.3 3대 코스 선택</a></li>
+            <li class="nav-sub-item"><a href="#setup-chzzk">2.4 치지직 방송 연동</a></li>
+            <li class="nav-sub-item"><a href="#setup-theme">2.5 테마 &amp; 폰트 설정</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#swiss-phase">
+            <span>🛡️</span> 3. 1단계: 스위스 균등 노출
+          </a>
+          <ul class="nav-sub-list">
+            <li class="nav-sub-item"><a href="#swiss-player">3.1 듀얼 플레이어 조작</a></li>
+            <li class="nav-sub-item"><a href="#swiss-shortcuts">3.2 단축키 &amp; 투표</a></li>
+            <li class="nav-sub-item"><a href="#swiss-undo">3.3 직전 취소 (Undo)</a></li>
+            <li class="nav-sub-item"><a href="#swiss-ranking">3.4 실시간 Elo 순위표</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#ladder-phase">
+            <span>⚔️</span> 4. 2단계: 실시간 Elo 래더
+          </a>
+          <ul class="nav-sub-list">
+            <li class="nav-sub-item"><a href="#ladder-prob">4.1 실시간 승률 예측</a></li>
+            <li class="nav-sub-item"><a href="#ladder-chzzk-poll">4.2 시청자 채팅 투표</a></li>
+            <li class="nav-sub-item"><a href="#ladder-jump">4.3 즉시 4강전 진출</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#final4-phase">
+            <span>👑</span> 5. 3단계: 골든 파이널 4강
+          </a>
+          <ul class="nav-sub-list">
+            <li class="nav-sub-item"><a href="#final4-tree">5.1 4강 브래킷 트리</a></li>
+            <li class="nav-sub-item"><a href="#final4-grand">5.2 결승전 (Grand Final)</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#result-phase">
+            <span>🏆</span> 6. 4단계: 명예의 전당 &amp; 티어표
+          </a>
+          <ul class="nav-sub-list">
+            <li class="nav-sub-item"><a href="#result-champion">6.1 최종 챔피언 헌정</a></li>
+            <li class="nav-sub-item"><a href="#result-tiermaker">6.2 드래그앤드롭 티어표</a></li>
+            <li class="nav-sub-item"><a href="#result-export">6.3 이미지 &amp; 텍스트 저장</a></li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#tech-specs">
+            <span>⚡</span> 7. 최적화 &amp; 스트리머 팁
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- 우측 본문 컨텐츠 영역 -->
+    <main class="content-area">
+
+      <!-- Hero Banner -->
+      <section class="hero-banner" id="intro">
+        <div class="hero-subtitle">Interactive User Manual</div>
+        <h1 class="hero-title">GOLDEN TOURNAMENT 전체 사용 설명서</h1>
+        <p class="hero-desc">
+          기존 이상형 월드컵의 조기 탈락 한계를 극복하고, <strong>공정한 스위스 균등 노출 ➔ 정밀 Elo 라이벌 래더 ➔ 골든 파이널 4강 챔피언십 ➔ 인터랙티브 티어표</strong>로 이어지는 완성형 유튜브 영상 토너먼트 시스템의 모든 기능과 상세 조작법을 안내합니다.
+        </p>
+      </section>
+
+      <!-- 1. 시스템 소개 및 차별점 -->
+      <section class="doc-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-badge-num">01</span>
+            <h2 class="section-title">시스템 소개 및 핵심 차별점</h2>
+          </div>
+        </div>
+
+        <p>
+          기존의 토너먼트는 <strong>"1라운드에서 강자끼리 맞붙어 패배한 후보가 다시는 등장하지 못하는 문제(대진운에 따른 조기 탈락)"</strong>가 늘 존재했습니다. 골든 토너먼트는 단계별 하이브리드 알고리즘을 통해 모든 후보가 공정하게 가치를 인정받을 수 있도록 설계되었습니다.
+        </p>
+
+        <div class="process-grid">
+          <div class="process-card">
+            <div class="process-step">PHASE 01</div>
+            <div class="process-name">🛡️ 스위스 균등 노출</div>
+            <div class="process-detail">조기 탈락 없이 모든 참가 후보가 최소 2회 이상 의무 출전하여 기초 전적과 레이팅을 수립합니다.</div>
+          </div>
+          <div class="process-card">
+            <div class="process-step">PHASE 02</div>
+            <div class="process-name">⚔️ 실시간 Elo 래더</div>
+            <div class="process-detail">현재 레이팅이 비슷한 라이벌끼리 맞붙으며, 실시간 승률 예측 게이지를 통해 긴장감 넘치는 대결을 연출합니다.</div>
+          </div>
+          <div class="process-card">
+            <div class="process-step">PHASE 03</div>
+            <div class="process-name">👑 골든 파이널 4강</div>
+            <div class="process-detail">래더 상위 1~4위 후보가 4강 브래킷에 진출하여 1위 vs 4위, 2위 vs 3위, 결승전 순으로 챔피언을 가립니다.</div>
+          </div>
+          <div class="process-card">
+            <div class="process-step">PHASE 04</div>
+            <div class="process-name">🏆 명예의 전당 &amp; 티어표</div>
+            <div class="process-detail">최종 우승곡 헌정 세션과 함께 S~D 종합 티어표를 드래그로 편집하고 고화질 이미지로 저장합니다.</div>
+          </div>
+        </div>
+
+        <div class="callout callout-cyan">
+          <span class="callout-icon">💡</span>
+          <div>
+            <div class="callout-title">Zero-Lag 60FPS 극강 최적화 아키텍처</div>
+            <div class="callout-desc">매 라운드 iframe을 재생성하지 않고 2개의 Iframe 인스턴스를 영구 재활용(Instance Reuse)하여 브라우저 메모리 누수와 프레임 드랍을 원천 차단했습니다.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 준비 단계: 설정 및 커스터마이징 -->
+      <section class="doc-section" id="setup-view">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-badge-num">02</span>
+            <h2 class="section-title">준비 단계: 설정 및 커스터마이징 (Setup View)</h2>
+          </div>
+        </div>
+
+        <!-- 2.1 메인 설정 화면 -->
+        <div class="subsection" id="setup-main">
+          <h3 class="subsection-title">2.1 메인 설정 화면 구조</h3>
+          <p>
+            토너먼트를 시작하기 전 참가 영상 목록을 점검하고, 진행 코스를 선택하며, 방송 연동을 마칠 수 있는 메인 대시보드입니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 01_main_setup.png : 토너먼트 메인 설정 대시보드 화면</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/01_main_setup.png', '토너먼트 메인 설정 대시보드 화면')">
+              <img src="docs/images/01_main_setup.png" alt="토너먼트 메인 설정 화면" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+
+          <p>
+            • <strong>상단 글로벌 헤더</strong>: 현재 단계 배지, 치지직 연동 설정, 실시간 Elo 순위표 조회, 테마/화면 크기 설정 모달이 위치합니다.<br>
+            • <strong>세션 복원 배너</strong>: 진행 중이던 세션이 있을 경우 상단에 노란색 번개 알림이 표시되며, <kbd>이어서 진행하기 ⏩</kbd> 버튼으로 즉시 복구할 수 있습니다.<br>
+            • <strong>좌측 후보 리스트</strong>: 등록된 영상의 썸네일, 제목, 채널명 확인 및 개별 수정/삭제 기능 제공.<br>
+            • <strong>우측 설정 컨트롤</strong>: 신규 유튜브 URL 입력 폼, 3가지 코스 선택 카드, 토너먼트 시작 버튼.
+          </p>
+        </div>
+
+        <!-- 2.2 후보 관리 & 점검 -->
+        <div class="subsection" id="setup-candidates">
+          <h3 class="subsection-title">2.2 후보 영상 관리 &amp; 재생 점검 기능</h3>
+          <p>
+            유튜브 URL이나 영상 ID를 입력해 손쉽게 후보를 추가할 수 있으며, 원작자의 보안 정책에 따른 외부 재생 차단(오류 150/101) 영상을 사전 감지할 수 있습니다.
+          </p>
+          <div class="callout">
+            <span class="callout-icon">🎬</span>
+            <div>
+              <div class="callout-title">임베드 재생 점검 기능 (방송 사고 방지)</div>
+              <div class="callout-desc">후보 목록 상단의 <kbd>재생 점검</kbd> 버튼을 누르면 모든 후보의 재생 가능 상태를 백그라운드에서 실시간 스캔하여 이상 없는 영상만 안전하게 선별할 수 있습니다.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2.3 3대 코스 선택 -->
+        <div class="subsection" id="setup-courses">
+          <h3 class="subsection-title">2.3 진행 코스 선택 (퀵 / 표준 / 마스터)</h3>
+          <p>
+            참가 영상 수(N)에 비례하여 최적의 매치 수가 자동 연산되며, 방송 시간이나 목적에 따라 3가지 코스를 지원합니다:
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 04_setup_course_options.png : 토너먼트 3대 진행 코스 선택 카드</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/04_setup_course_options.png', '토너먼트 3대 진행 코스 선택 카드')">
+              <img src="docs/images/04_setup_course_options.png" alt="토너먼트 코스 선택" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>코스 명칭</th>
+                  <th>16선 기준 매치</th>
+                  <th>진행 방식 및 특징</th>
+                  <th>추천 상황</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>⚡ 퀵 코스</strong></td>
+                  <td>16 매치</td>
+                  <td>모든 영상 2회씩 균등 출전 후 즉시 4강 파이널 돌입</td>
+                  <td>방송 시간이 촉박하거나 빠른 승부를 원할 때</td>
+                </tr>
+                <tr>
+                  <td><strong>⚖️ 표준 밸런스 <span style="color:#f59e0b;font-weight:700;">(추천)</span></strong></td>
+                  <td>28 매치</td>
+                  <td>스위스 2회 균등 노출 + 정밀 Elo 라이벌 매칭 리그</td>
+                  <td>가장 이상적이고 객관적인 순위 산출 (기본 권장)</td>
+                </tr>
+                <tr>
+                  <td><strong>🎯 마스터 래더</strong></td>
+                  <td>45 매치</td>
+                  <td>정밀한 레이팅과 세부 티어링을 위한 장기 심층 래더</td>
+                  <td>시청자들과 호흡하며 디테일한 티어를 완성할 때</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2.4 치지직 방송 연동 -->
+        <div class="subsection" id="setup-chzzk">
+          <h3 class="subsection-title">2.4 치지직(CHZZK) 실시간 방송 연동 설정</h3>
+          <p>
+            인터넷 방송 스트리머를 위해 치지직 공식 실시간 채팅 웹소켓 투표 연동을 기본 지원합니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 02_modal_chzzk.png : 치지직(CHZZK) 채널 채팅 연동 모달 창</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/02_modal_chzzk.png', '치지직 실시간 방송 연동 설정 모달')">
+              <img src="docs/images/02_modal_chzzk.png" alt="치지직 연동 모달" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+
+          <p>
+            1. 헤더의 <kbd>📺 치지직 연동</kbd> 버튼을 클릭하여 설정 모달을 엽니다.<br>
+            2. 본인의 치지직 채널 고유 ID(32자리 영문/숫자 해시값)를 입력합니다.<br>
+            3. 투표 연동 범위를 선택합니다:
+            • <strong>전체 라운드 적용</strong>: 1단계부터 결승까지 모든 매치에서 시청자 투표 진행.<br>
+            • <strong>4강전 &amp; 결승전 전용</strong>: 래더 리그는 단독 진행하고, 4강 챔피언십부터 시청자 투표 활성화.<br>
+            4. <kbd>연결하기</kbd>를 누르면 실시간 시청자 채팅 <kbd>1</kbd> 또는 <kbd>A</kbd>, <kbd>2</kbd> 또는 <kbd>B</kbd> 가 즉시 투표로 누적 집계됩니다.
+          </p>
+        </div>
+
+        <!-- 2.5 테마 & 폰트 설정 -->
+        <div class="subsection" id="setup-theme">
+          <h3 class="subsection-title">2.5 테마 &amp; 방송 송출용 글씨/화면 설정</h3>
+          <p>
+            방송 송출 화면(OBS / XSplit) 또는 대형 모니터의 해상도에 맞춰 글자 크기와 화면 배율을 1픽셀 단위로 커스터마이징할 수 있습니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 03_modal_theme_settings.png : 5대 디자인 테마 및 방송 송출 최적화 설정</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/03_modal_theme_settings.png', '테마 및 화면 글씨 설정 모달')">
+              <img src="docs/images/03_modal_theme_settings.png" alt="테마 설정 모달" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+
+          <p>
+            • <strong>5가지 디자인 테마</strong>: 골든 옵시디언(기본), 치지직 테마, 모던 테마, 흑백 테마, 화이트 테마<br>
+            • <strong>화면 배율 슬라이더</strong>: 90% ~ 140%까지 손쉬운 스케일 조절<br>
+            • <strong>원클릭 권장 프리셋</strong>: <kbd>치지직/유튜브 최적 권장값</kbd> 버튼 클릭 시 방송 가독성이 극대화되는 황금 비율로 즉시 정렬
+          </p>
+        </div>
+      </section>
+
+      <!-- 3. 1단계: 스위스 균등 노출 -->
+      <section class="doc-section" id="swiss-phase">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-badge-num">03</span>
+            <h2 class="section-title">1단계: 스위스 균등 노출 (Fair Swiss Phase)</h2>
+          </div>
+        </div>
+
+        <!-- 3.1 듀얼 플레이어 조작 -->
+        <div class="subsection" id="swiss-player">
+          <h3 class="subsection-title">3.1 듀얼 플레이어 인터페이스 &amp; 조작</h3>
+          <p>
+            대결이 시작되면 좌측(PLAYER A, Cyan)과 우측(PLAYER B, Rose) 듀얼 플레이어 아레나가 펼쳐집니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 05_battle_swiss_round.png : 스위스 균등 노출 대결 화면</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/05_battle_swiss_round.png', '스위스 1단계 듀얼 대결 화면')">
+              <img src="docs/images/05_battle_swiss_round.png" alt="대결 화면" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+
+          <p>
+            • <strong>상단 프로그레스 바</strong>: 현재 진행 중인 매치 번호와 전체 대비 진행률(%)이 실시간 표기됩니다.<br>
+            • <strong>중앙 디바이더</strong>: MATCH 번호 및 대결 중인 두 후보의 실시간 예상 승률(%) 게이지가 시각화됩니다.<br>
+            • <strong>YouTube 새 탭 보기</strong>: 원작자의 보안 정책으로 임베드가 막힌 영상은 <kbd>YouTube에서 직접 듣기 ↗</kbd> 버튼을 통해 새 탭에서 즉시 감상할 수 있습니다.
+          </p>
+        </div>
+
+        <!-- 3.2 단축키 안내 -->
+        <div class="subsection" id="swiss-shortcuts">
+          <h3 class="subsection-title">3.2 투표 조작 및 단축키 안내</h3>
+          <p>
+            마우스 조작뿐 아니라 키보드 단축키를 통해 방송 진행자가 시청자들과 소통하며 번개처럼 빠른 투표를 진행할 수 있습니다:
+          </p>
+
+          <div class="table-container">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>단축키</th>
+                  <th>동작</th>
+                  <th>설명</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><kbd>A</kbd> 또는 <kbd>←</kbd></td>
+                  <td><strong>좌측(PLAYER A) 투표</strong></td>
+                  <td>시안 아레나 영상 승리 확정 및 Elo 레이팅 반영</td>
+                </tr>
+                <tr>
+                  <td><kbd>D</kbd> 또는 <kbd>→</kbd></td>
+                  <td><strong>우측(PLAYER B) 투표</strong></td>
+                  <td>로즈 아레나 영상 승리 확정 및 Elo 레이팅 반영</td>
+                </tr>
+                <tr>
+                  <td><kbd>Z</kbd> 또는 <kbd>Ctrl</kbd> + <kbd>Z</kbd></td>
+                  <td><strong>직전 투표 취소 (Undo)</strong></td>
+                  <td>실수 투표 시 이전 매치 및 Elo 점수로 1초 롤백</td>
+                </tr>
+                <tr>
+                  <td><kbd>Space</kbd></td>
+                  <td><strong>동시 일시정지 / 재생</strong></td>
+                  <td>양쪽 영상의 오디오/비디오 동시 컨트롤</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3.3 직전 취소 Undo -->
+        <div class="subsection" id="swiss-undo">
+          <h3 class="subsection-title">3.3 직전 투표 취소 (Undo) 및 무승부 스킵</h3>
+          <p>
+            투표 직후 하단 툴바의 <kbd>이전 투표 취소 (Z)</kbd> 버튼이 은은한 네온 빛과 함께 활성화됩니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 07_battle_swiss_voting.png : 투표 완료 후 되돌리기(Undo) 버튼 활성화 상태</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/07_battle_swiss_voting.png', '되돌리기 활성화 대결 화면')">
+              <img src="docs/images/07_battle_swiss_voting.png" alt="되돌리기 활성화 화면" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3.4 실시간 Elo 순위표 -->
+        <div class="subsection" id="swiss-ranking">
+          <h3 class="subsection-title">3.4 실시간 Elo 순위표 확인</h3>
+          <p>
+            대결 진행 중 언제라도 상단 헤더의 <kbd>📊 실시간 랭킹</kbd> 버튼을 누르면 현재까지의 전체 순위와 실시간 ELO 점수를 팝업 창으로 즉시 확인할 수 있습니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 06_modal_live_ranking.png : 실시간 Elo 순위표 모달 다이얼로그</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/06_modal_live_ranking.png', '실시간 Elo 순위표 모달 창')">
+              <img src="docs/images/06_modal_live_ranking.png" alt="실시간 Elo 순위표" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. 2단계: 실시간 Elo 래더 -->
+      <section class="doc-section" id="ladder-phase">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-badge-num">04</span>
+            <h2 class="section-title">2단계: 실시간 Elo 라이벌 래더 (Elo Ladder Phase)</h2>
+          </div>
+        </div>
+
+        <!-- 4.1 실시간 승률 예측 -->
+        <div class="subsection" id="ladder-prob">
+          <h3 class="subsection-title">4.1 실시간 승률 예측 게이지 연산</h3>
+          <p>
+            스위스 단계가 끝나면 레이팅이 비슷한 라이벌끼리 맞붙는 심층 래더가 진행됩니다. 두 후보의 점수 차이에 따라 중앙의 승률 게이지가 실시간 연산되어 시각화됩니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 09_battle_elo_ladder.png : 정밀 Elo 라이벌 매칭 및 비대칭 승률 예측 연출</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/09_battle_elo_ladder.png', 'Elo 라이벌 래더 대결 화면')">
+              <img src="docs/images/09_battle_elo_ladder.png" alt="Elo 래더 대결 화면" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+
+          <div class="callout callout-cyan">
+            <span class="callout-icon">📈</span>
+            <div>
+              <div class="callout-title">언더독의 반란과 레이팅 역전 시스템</div>
+              <div class="callout-desc">승률 예측이 낮은 약자(Underdog) 후보가 승리할 경우 훨씬 높은 Elo 보너스 포인트를 획득하여 순위가 급상승하는 래더 스포츠의 묘미를 경험할 수 있습니다.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4.2 시청자 채팅 투표 -->
+        <div class="subsection" id="ladder-chzzk-poll">
+          <h3 class="subsection-title">4.2 치지직 시청자 채팅 투표 &amp; 다수결 반영</h3>
+          <p>
+            대결 화면 하단의 치지직 시청자 투표 패널을 통해 실시간 시청자 참여 방송을 진행할 수 있습니다:
+          </p>
+          <p>
+            • <kbd>▶ 투표 시작</kbd>: 매치 시작과 함께 투표를 개시합니다.<br>
+            • 실시간 득표수와 점유율이 60FPS 애니메이션 게이지로 실시간 시각화됩니다.<br>
+            • <kbd>👑 시청자 다수결 반영</kbd>: 스트리머가 시청자의 선택에 따라 원클릭으로 해당 후보에게 자동 승리를 부여합니다.
+          </p>
+        </div>
+
+        <!-- 4.3 즉시 4강전 진출 -->
+        <div class="subsection" id="ladder-jump">
+          <h3 class="subsection-title">4.3 상위 1~4위 즉시 4강전 진출 기능</h3>
+          <p>
+            방송 시간이 부족하거나 래더 판도가 일찍 결정된 경우, 하단의 <kbd>🏆 지금 바로 4강전 진출</kbd> 버튼을 누르면 현재 시점의 상위 1~4위를 확정 짓고 즉시 결승 토너먼트로 돌입할 수 있습니다.
+          </p>
+        </div>
+      </section>
+
+      <!-- 5. 3단계: 골든 파이널 4강 -->
+      <section class="doc-section" id="final4-phase">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-badge-num">05</span>
+            <h2 class="section-title">3단계: 골든 파이널 4강 토너먼트 (Golden Final 4)</h2>
+          </div>
+        </div>
+
+        <!-- 5.1 4강 브래킷 트리 -->
+        <div class="subsection" id="final4-tree">
+          <h3 class="subsection-title">5.1 4강 대진표 트리 (1위 vs 4위, 2위 vs 3위)</h3>
+          <p>
+            래더 리그를 통과한 최상위 4개 명곡의 최종 우승 결정전 브래킷입니다. 승리한 노래 슬롯에서 결승전 슬롯으로 <strong>황금 네온 베지어 곡선(Bezier Path)</strong>이 실시간 점등됩니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 10_bracket_final4_tree.png : 골든 파이널 4강 브래킷 대진표 트리</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/10_bracket_final4_tree.png', '골든 파이널 4강 브래킷 트리')">
+              <img src="docs/images/10_bracket_final4_tree.png" alt="4강 브래킷 트리" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5.2 결승전 연출 -->
+        <div class="subsection" id="final4-grand">
+          <h3 class="subsection-title">5.2 최종 결승전(Grand Final) 챔피언 결정전</h3>
+          <p>
+            4강 1경기(1위 vs 4위)와 4강 2경기(2위 vs 3위)에서 승리한 두 후보가 최종 챔피언 자리를 놓고 격돌합니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 12_grand_final_match.png : 최종 결승전(Grand Final) 대결 인터페이스</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/12_grand_final_match.png', '최종 결승전 대결 화면')">
+              <img src="docs/images/12_grand_final_match.png" alt="최종 결승전 대결 화면" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. 4단계: 명예의 전당 & 인터랙티브 티어표 -->
+      <section class="doc-section" id="result-phase">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-badge-num">06</span>
+            <h2 class="section-title">4단계: 명예의 전당 &amp; 인터랙티브 티어표 (Tier Maker)</h2>
+          </div>
+        </div>
+
+        <!-- 6.1 최종 챔피언 헌정 -->
+        <div class="subsection" id="result-champion">
+          <h3 class="subsection-title">6.1 최종 챔피언 우승 헌정 세션</h3>
+          <p>
+            결승전 투표가 끝나는 즉시 챔피언 헌정 세리머니가 열리며, 우승곡의 최종 ELO 레이팅, 전적, 승률 및 공식 유튜브 풀버전 링크가 제공됩니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 13_result_champion_podium.png : 명예의 전당 최종 챔피언 우승 헌정 세리머니</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/13_result_champion_podium.png', '명예의 전당 우승자 헌정 세션')">
+              <img src="docs/images/13_result_champion_podium.png" alt="우승자 세리머니" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6.2 드래그앤드롭 티어표 -->
+        <div class="subsection" id="result-tiermaker">
+          <h3 class="subsection-title">6.2 마노사바 스타일 인터랙티브 드래그 &amp; 드롭 티어표</h3>
+          <p>
+            모든 참가 영상이 최종 순위와 ELO에 맞춰 <strong>S, A, B, C, D</strong> 등급 행에 자동 정렬됩니다. 마우스 드래그로 카드를 끌어다 등급을 변경하거나 순서를 마음껏 미세 조정할 수 있습니다.
+          </p>
+
+          <div class="screenshot-card">
+            <div class="screenshot-header">
+              <div class="screenshot-dots">
+                <span class="screenshot-dot dot-red"></span>
+                <span class="screenshot-dot dot-yellow"></span>
+                <span class="screenshot-dot dot-green"></span>
+              </div>
+              <span class="screenshot-caption">📷 14_result_tiermaker_board.png : 종합 티어표 및 하단 액션 툴바</span>
+            </div>
+            <div class="screenshot-img-wrap" onclick="openLightbox('docs/images/14_result_tiermaker_board.png', '마노사바 스타일 종합 티어표 화면')">
+              <img src="docs/images/14_result_tiermaker_board.png" alt="종합 티어표" class="screenshot-img" loading="lazy">
+              <span class="zoom-hint-badge">🔍 클릭하여 고화질 확대</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6.3 이미지 & 텍스트 저장 -->
+        <div class="subsection" id="result-export">
+          <h3 class="subsection-title">6.3 결과 순위표 텍스트 복사 및 고화질 PNG 이미지 저장</h3>
+          <p>
+            • <kbd>결과 순위표 텍스트 복사 📋</kbd>: 커뮤니티, 카페, 디스코드에 공유할 수 있는 마크다운 순위표 텍스트를 원클릭으로 클립보드에 복사합니다.<br>
+            • <kbd>티어표 이미지 저장 🖼️</kbd>: 브라우저의 HTML5 Canvas 렌더링 엔진을 통해 워터마크가 포함된 선명한 PNG 이미지 파일(<code>golden-tournament-tier.png</code>)로 즉시 다운로드합니다.
+          </p>
+        </div>
+      </section>
+
+      <!-- 7. 최적화 및 스트리머 팁 -->
+      <section class="doc-section" id="tech-specs">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <span class="section-badge-num">07</span>
+            <h2 class="section-title">스트리머 특화 기능 및 성능 최적화 가이드</h2>
+          </div>
+        </div>
+
+        <div class="process-grid">
+          <div class="process-card">
+            <div class="process-step">SAFETY FEATURE</div>
+            <div class="process-name">⚡ 자동 세션 저장 (Save &amp; Resume)</div>
+            <div class="process-detail">새로고침을 하거나 실수로 브라우저를 닫아도 localStorage에 매치 상태와 ELO가 실시간 보존되어 원클릭으로 100% 복구됩니다.</div>
+          </div>
+          <div class="process-card">
+            <div class="process-step">PERFORMANCE</div>
+            <div class="process-name">🚀 Zero-Lag 60FPS 하드웨어 가속</div>
+            <div class="process-detail">DOM 노드 생성/삭제를 최소화하고 GPU 합성 레이어 가속을 통해 OBS 방송 송출 중에도 시스템 부담이 0에 가깝습니다.</div>
+          </div>
+          <div class="process-card">
+            <div class="process-step">BROADCAST TOOL</div>
+            <div class="process-name">📺 치지직 네이티브 웹소켓 연동</div>
+            <div class="process-detail">별도 외부 프로그램이나 챗봇 설치 없이 웹 브라우저 자체에서 치지직 공식 실시간 채팅 서버와 직접 통신합니다.</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- 맨 위로 가기 플로팅 버튼 -->
+  <button class="btn-top" id="btn-back-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="맨 위로 이동">
+    ↑
+  </button>
+
+  <!-- 이미지 고화질 라이트박스 모달 -->
+  <div class="lightbox-modal" id="lightbox-modal" onclick="closeLightbox(event)">
+    <div class="lightbox-content-wrap">
+      <button class="lightbox-close" onclick="closeLightbox(event)">&times;</button>
+      <img id="lightbox-img" class="lightbox-image" src="" alt="확대 이미지">
+      <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- 스크롤 스파이 & 라이트박스 인터랙션 스크립트 -->
+  <script>
+    // 1. Scrollspy & Sidebar Active State
+    const navItems = document.querySelectorAll('.nav-item, .nav-sub-item');
+    const sections = document.querySelectorAll('.doc-section, .subsection, .hero-banner');
+    const btnTop = document.getElementById('btn-back-top');
+
+    window.addEventListener('scroll', () => {
+      let currentId = '';
+      const scrollPos = window.scrollY + 140;
+
+      sections.forEach(sec => {
+        if (sec.offsetTop <= scrollPos) {
+          currentId = sec.getAttribute('id');
+        }
+      });
+
+      if (currentId) {
+        navItems.forEach(item => {
+          const link = item.querySelector('a');
+          if (link && link.getAttribute('href') === `#${currentId}`) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+
+      // Back to top button visibility
+      if (window.scrollY > 300) {
+        btnTop.classList.add('visible');
+      } else {
+        btnTop.classList.remove('visible');
+      }
+    });
+
+    // 2. Image Lightbox Modal
+    const modal = document.getElementById('lightbox-modal');
+    const modalImg = document.getElementById('lightbox-img');
+    const modalCaption = document.getElementById('lightbox-caption');
+
+    function openLightbox(src, caption) {
+      modalImg.src = src;
+      modalCaption.textContent = caption || '';
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (e.target === modal || e.target.classList.contains('lightbox-close')) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
+    // Escape 키로 모달 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+</body>
+</html>

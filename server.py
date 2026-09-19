@@ -42,9 +42,10 @@ class TournamentRequestHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             try:
-                # 네이버/치지직 도메인 안전성 검증
+                # 네이버/치지직 도메인 안전성 정밀 검증
                 parsed_target = urllib.parse.urlparse(target_url)
-                if not (parsed_target.netloc.endswith('naver.com') or parsed_target.netloc.endswith('chzzk.naver.com')):
+                host = parsed_target.netloc.lower().split(':')[0]
+                if not (host == 'naver.com' or host.endswith('.naver.com')):
                     self.send_response(403)
                     self.send_header('Content-Type', 'application/json; charset=utf-8')
                     self.end_headers()

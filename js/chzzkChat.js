@@ -356,9 +356,10 @@ class ChzzkChatManager {
     try {
       if (chatItem.msg) {
         messageText = chatItem.msg.trim();
-      } else if (chatItem.profile) {
-        const profile = JSON.parse(chatItem.profile);
-        userId = profile.userIdHash || userId;
+      }
+      if (!userId && chatItem.profile) {
+        const profile = typeof chatItem.profile === 'string' ? JSON.parse(chatItem.profile) : chatItem.profile;
+        userId = profile.userIdHash || profile.nickname || null;
       }
     } catch (e) {}
 

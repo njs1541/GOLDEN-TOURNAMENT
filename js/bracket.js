@@ -42,12 +42,16 @@ class GoldenBracketManager {
       btnStart.onclick = () => this.runNextFinalMatch();
     }
 
-    // 화면 리사이즈 시 SVG 커넥터 좌표 동기화
-    window.addEventListener('resize', () => {
+    // 화면 리사이즈 시 SVG 커넥터 좌표 동기화 (중복 리스너 누적 방지)
+    if (this.resizeHandler) {
+      window.removeEventListener('resize', this.resizeHandler);
+    }
+    this.resizeHandler = () => {
       if (this.app && this.app.currentView === 'final') {
         this.updateConnectors();
       }
-    });
+    };
+    window.addEventListener('resize', this.resizeHandler);
   }
 
   // 브래킷 개별 슬롯 렌더링 헬퍼
@@ -350,10 +354,12 @@ class GoldenBracketManager {
       document.getElementById('streak-indicator').textContent = '⚡ 골든 파이널 결승 토너먼트';
     }
 
-    // 4강/결승전에서는 스킵 및 4강 바로가기 버튼 숨김
+    // 4강/결승전에서는 스킵, 되돌리기 및 4강 바로가기 버튼 숨김
     const btnSkip = document.getElementById('btn-battle-skip');
+    const btnUndo = document.getElementById('btn-battle-undo');
     const btnJump = document.getElementById('btn-jump-to-final');
     if (btnSkip) btnSkip.style.display = 'none';
+    if (btnUndo) btnUndo.style.display = 'none';
     if (btnJump) btnJump.style.display = 'none';
 
     if (window.dualPlayer) {
@@ -381,6 +387,7 @@ class GoldenBracketManager {
       setTimeout(() => {
         // 하단 버튼 원상복구
         if (btnSkip) btnSkip.style.display = '';
+        if (btnUndo) btnUndo.style.display = '';
         if (btnJump) btnJump.style.display = '';
         onWon(winnerCand);
       }, 250);

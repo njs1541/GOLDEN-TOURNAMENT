@@ -97,8 +97,8 @@ class TournamentEngine {
     let candB = null;
     let phaseName = '';
 
-    if (underExposed.length >= 2) {
-      // [1단계: 스위스 균등 노출] 노출이 적은 영상끼리 우선 매칭
+    if (underExposed.length >= 1) {
+      // [1단계: 스위스 균등 노출] 노출이 적은 영상끼리 우선 매칭 (1명만 남아도 잔여 최소 노출 엄격 보장)
       phaseName = '스위스 균등 노출';
       // 노출 수가 가장 적은 순으로 정렬 후 첫 번째 선택
       underExposed.sort((a, b) => a.matches - b.matches);
@@ -544,7 +544,8 @@ class TournamentEngine {
    * 스킵(무승부) 처리
    */
   skipMatch() {
-    if (!this.currentMatch) return;
+    if (this.isProcessingVote || !this.currentMatch) return;
+    this.isProcessingVote = true;
     this.recordSnapshot('skip');
 
     const { candA, candB } = this.currentMatch;
@@ -557,7 +558,10 @@ class TournamentEngine {
       this.app.saveTournamentSession();
     }
 
-    this.nextMatch();
+    setTimeout(() => {
+      this.isProcessingVote = false;
+      this.nextMatch();
+    }, 200);
   }
 
   /**

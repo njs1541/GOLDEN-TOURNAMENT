@@ -337,27 +337,40 @@ class AppController {
     const btnUndo = document.getElementById('btn-battle-undo');
     if (btnUndo) {
       btnUndo.addEventListener('click', () => {
+        if (this.bracket && this.bracket.currentFinalStep !== 'done') {
+          this.showPerfToast('⚠️ 결승 토너먼트 진행 중', '골든 파이널 4강 및 결승전에서는 래더 투표 취소가 불가능합니다.', 'warning', 2500);
+          return;
+        }
         if (this.engine) this.engine.undoVote();
       });
     }
 
-    // 키보드 단축키 (A / D, 좌 / 우 화살표, Z: 되돌리기)
+    // 키보드 단축키 (A / D, 좌 / 우 화살표, 1 / 2, Z: 되돌리기)
     window.addEventListener('keydown', (e) => {
       if (this.currentView !== 'battle') return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (document.querySelector('.modal-backdrop.active, .modal-overlay.active')) return;
 
+      const isInBracket = this.bracket && this.bracket.currentFinalStep !== 'done';
+
       // 투표 취소 단축키: Z 또는 Ctrl+Z
       if ((e.key === 'z' || e.key === 'Z') && !e.shiftKey) {
         e.preventDefault();
+        if (isInBracket) {
+          this.showPerfToast('⚠️ 결승 토너먼트 진행 중', '골든 파이널 4강 및 결승전에서는 래더 투표 취소가 불가능합니다.', 'warning', 2500);
+          return;
+        }
         if (this.engine) this.engine.undoVote();
         return;
       }
 
-      if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
+      // 1번 / A / 좌측 화살표 -> A 투표
+      if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft' || e.key === '1') {
         const btnA = document.getElementById('btn-vote-a');
         if (btnA) btnA.click();
-      } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
+      } 
+      // 2번 / D / 우측 화살표 -> B 투표
+      else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight' || e.key === '2') {
         const btnB = document.getElementById('btn-vote-b');
         if (btnB) btnB.click();
       }
@@ -1987,9 +2000,20 @@ class AppController {
       }
 
       // 화면 라우팅 복원
-      if (data.currentView === 'final' && this.bracket) {
+      if (this.bracket && data.bracketState && data.bracketState.currentFinalStep !== 'done') {
         this.bracket.renderBracketView();
         this.switchView('final');
+        const btnStart = document.getElementById('btn-start-final-match');
+        if (btnStart) {
+          if (this.bracket.currentFinalStep === 'semi1') {
+            btnStart.textContent = "4강 제1경기 시작 (1위 vs 4위)";
+          } else if (this.bracket.currentFinalStep === 'semi2') {
+            btnStart.textContent = "4강 제2경기 시작 (2위 vs 3위)";
+          } else if (this.bracket.currentFinalStep === 'final') {
+            btnStart.textContent = "결승전 시작하기 🏆";
+          }
+          btnStart.onclick = () => this.bracket.runNextFinalMatch();
+        }
       } else {
         this.engine.renderBattleMatch();
         this.switchView('battle');

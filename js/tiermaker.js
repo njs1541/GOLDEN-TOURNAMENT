@@ -103,7 +103,7 @@ class TierMakerManager {
     chip.dataset.title = cand.title;
 
     chip.innerHTML = `
-      <img src="https://img.youtube.com/vi/${cand.youtubeId}/default.jpg" alt="thumb">
+      <img src="https://img.youtube.com/vi/${cand.youtubeId}/mqdefault.jpg" alt="thumb" class="tier-chip-thumb">
       <span class="tier-chip-title">${cand.title}</span>
       <span class="tier-chip-elo">${Math.round(cand.elo)}</span>
     `;

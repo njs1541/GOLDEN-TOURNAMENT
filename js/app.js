@@ -6,6 +6,17 @@ const STORAGE_CANDIDATES_KEY = 'GOLDEN_TOURNAMENT_CANDIDATES_LIST';
 const STORAGE_FONT_SETTINGS_KEY = 'GOLDEN_TOURNAMENT_FONT_SETTINGS';
 const STORAGE_PERF_MODE_KEY = 'GOLDEN_TOURNAMENT_PERF_MODE';
 const STORAGE_SAVED_SESSION_KEY = 'GOLDEN_TOURNAMENT_SAVED_SESSION';
+const STORAGE_THEME_KEY = 'GOLDEN_TOURNAMENT_THEME';
+const DEFAULT_THEME = 'golden-obsidian';
+
+// 5개 디자인 테마 한글 레이블
+const THEME_LABELS = {
+  'golden-obsidian': '골든 옵시디언 (기본)',
+  'chzzk-theme': '치지직 테마',
+  'modern-theme': '모던 테마',
+  'monochrome-theme': '흑백 테마',
+  'white-theme': '화이트 테마'
+};
 
 // 치지직/유튜브 방송 송출 가독성 최적화 권장 기본값
 const DEFAULT_FONT_SETTINGS = {
@@ -21,6 +32,7 @@ const DEFAULT_FONT_SETTINGS = {
 class AppController {
   constructor() {
     this.candidates = [];
+    this.currentTheme = DEFAULT_THEME;
     this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
     this.isLowPerfMode = false;
     this.currentView = 'setup'; // 'setup' | 'battle' | 'final' | 'result'
@@ -34,13 +46,16 @@ class AppController {
   }
 
   init() {
-    // 0. 화면 및 글씨 크기 설정 복원 및 즉시 적용
+    // 0. 디자인 테마 복원 및 즉시 적용
+    this.initTheme();
+
+    // 0-1. 화면 및 글씨 크기 설정 복원 및 즉시 적용
     this.initFontSettings();
 
-    // 0-1. 저사양 / 하드웨어 가속 환경 자동 진단 및 성능 모드 복원
+    // 0-2. 저사양 / 하드웨어 가속 환경 자동 진단 및 성능 모드 복원
     this.initPerformanceMode();
 
-    // 0-2. 치지직(CHZZK) 채팅 매니저 초기화
+    // 0-3. 치지직(CHZZK) 채팅 매니저 초기화
     this.initChzzk();
 
     // 1. 웹 저장소의 후보 목록 복원 (저장된 상태가 없으면 기본 16선 로드)
@@ -230,8 +245,20 @@ class AppController {
 
     if (btnFontSettings && modalFontSettings) {
       btnFontSettings.addEventListener('click', () => {
+        this.syncThemeUI();
         this.syncFontSettingsUI();
         modalFontSettings.classList.add('active');
+      });
+    }
+
+    // 테마 선택 카드 클릭 이벤트 위임
+    const themeCardGrid = document.getElementById('theme-card-grid');
+    if (themeCardGrid) {
+      themeCardGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.theme-card');
+        if (card && card.dataset.themeId) {
+          this.applyTheme(card.dataset.themeId, true);
+        }
       });
     }
 
@@ -1028,6 +1055,62 @@ class AppController {
     });
   }
 
+  // ================= 디자인 테마 시스템 매니저 (5종 테마) =================
+  initTheme() {
+    this.loadTheme();
+    this.applyTheme(this.currentTheme, false);
+  }
+
+  loadTheme() {
+    try {
+      const stored = localStorage.getItem(STORAGE_THEME_KEY);
+      if (stored && THEME_LABELS[stored]) {
+        this.currentTheme = stored;
+        return;
+      }
+    } catch (e) {
+      console.warn('테마 설정 로드 실패, 기본 테마로 초기화:', e);
+    }
+    this.currentTheme = DEFAULT_THEME;
+  }
+
+  applyTheme(themeId, save = true) {
+    if (!THEME_LABELS[themeId]) {
+      themeId = DEFAULT_THEME;
+    }
+    this.currentTheme = themeId;
+    document.documentElement.setAttribute('data-theme', themeId);
+    this.syncThemeUI();
+    if (save) {
+      this.saveTheme();
+    }
+  }
+
+  saveTheme() {
+    try {
+      localStorage.setItem(STORAGE_THEME_KEY, this.currentTheme);
+    } catch (e) {
+      console.error('테마 설정 로컬스토리지 저장 실패:', e);
+    }
+  }
+
+  resetTheme() {
+    this.applyTheme(DEFAULT_THEME, true);
+  }
+
+  syncThemeUI() {
+    const currentNameEl = document.getElementById('current-theme-name');
+    if (currentNameEl) {
+      currentNameEl.textContent = THEME_LABELS[this.currentTheme] || '골든 옵시디언';
+    }
+
+    const cards = document.querySelectorAll('.theme-card');
+    cards.forEach(card => {
+      const isSelected = card.dataset.themeId === this.currentTheme;
+      card.classList.toggle('active', isSelected);
+    });
+  }
+
   // ================= 화면 & 글씨 크기 설정 매니저 (치지직/방송 최적화) =================
   initFontSettings() {
     this.loadFontSettings();
@@ -1084,6 +1167,7 @@ class AppController {
     this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
     this.applyFontSettings();
     this.saveFontSettings();
+    this.resetTheme();
   }
 
   syncFontSettingsUI() {

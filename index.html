@@ -39,12 +39,12 @@
           </svg>
           실시간 랭킹
         </button>
-        <button id="btn-open-font-settings" class="btn-ghost" title="화면 및 글씨 크기 설정">
+        <button id="btn-open-font-settings" class="btn-ghost" title="테마 및 화면/글씨 크기 설정">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
-          화면 설정
+          테마 & 화면 설정
         </button>
       </div>
     </header>
@@ -522,12 +522,97 @@
       <div class="modal-dialog glass-panel font-settings-modal-dialog">
         <div class="modal-header">
           <div class="modal-title-group">
-            <span class="modal-title-icon">⚙️</span>
-            <h3>화면 & 글씨 크기 설정</h3>
+            <span class="modal-title-icon">🎨</span>
+            <h3>테마 & 화면 설정</h3>
           </div>
           <button class="modal-close" id="btn-close-font-modal">&times;</button>
         </div>
         <div class="modal-body custom-scrollbar font-settings-body">
+          <!-- 0. 테마 선택 섹션 -->
+          <div class="theme-setting-box">
+            <div class="theme-setting-header">
+              <div class="setting-title-wrap">
+                <span class="setting-icon">✨</span>
+                <div>
+                  <label class="setting-label">디자인 테마 선택</label>
+                  <span class="setting-desc">원하는 방송 및 시각 분위기에 맞춰 색감을 실시간 전환합니다</span>
+                </div>
+              </div>
+              <span class="current-theme-badge" id="current-theme-name">골든 옵시디언</span>
+            </div>
+            <div class="theme-card-grid" id="theme-card-grid">
+              <!-- 1. 골든 옵시디언 (기본) -->
+              <div class="theme-card active" data-theme-id="golden-obsidian" title="챔피언십 시그니처 딥 블랙 & 네온 골드 테마">
+                <div class="theme-card-preview theme-preview-golden">
+                  <span class="theme-chip" style="background: #08090d;"></span>
+                  <span class="theme-chip" style="background: #f5b041;"></span>
+                  <span class="theme-chip" style="background: #00f2fe;"></span>
+                </div>
+                <div class="theme-card-info">
+                  <span class="theme-card-title">🏆 골든 옵시디언</span>
+                  <span class="theme-card-desc">시그니처 (기본)</span>
+                </div>
+                <div class="theme-active-check">✓</div>
+              </div>
+
+              <!-- 2. 치지직 테마 -->
+              <div class="theme-card" data-theme-id="chzzk-theme" title="치지직 스트리밍 및 채팅과 어울리는 다크 차콜 & 네온 민트 테마">
+                <div class="theme-card-preview theme-preview-chzzk">
+                  <span class="theme-chip" style="background: #0a0f0d;"></span>
+                  <span class="theme-chip" style="background: #00ffa3;"></span>
+                  <span class="theme-chip" style="background: #00e5ff;"></span>
+                </div>
+                <div class="theme-card-info">
+                  <span class="theme-card-title">📺 치지직 테마</span>
+                  <span class="theme-card-desc">네온 그린 & 민트</span>
+                </div>
+                <div class="theme-active-check">✓</div>
+              </div>
+
+              <!-- 3. 모던 테마 -->
+              <div class="theme-card" data-theme-id="modern-theme" title="미니멀하고 세련된 딥 슬레이트 & 테크 인디고 테마">
+                <div class="theme-card-preview theme-preview-modern">
+                  <span class="theme-chip" style="background: #0f172a;"></span>
+                  <span class="theme-chip" style="background: #38bdf8;"></span>
+                  <span class="theme-chip" style="background: #818cf8;"></span>
+                </div>
+                <div class="theme-card-info">
+                  <span class="theme-card-title">💻 모던 테마</span>
+                  <span class="theme-card-desc">슬레이트 & 인디고</span>
+                </div>
+                <div class="theme-active-check">✓</div>
+              </div>
+
+              <!-- 4. 흑백 테마 -->
+              <div class="theme-card" data-theme-id="monochrome-theme" title="절제된 명암 대비가 돋보이는 퓨어 누아르 모노크롬 테마">
+                <div class="theme-card-preview theme-preview-monochrome">
+                  <span class="theme-chip" style="background: #09090b;"></span>
+                  <span class="theme-chip" style="background: #ffffff;"></span>
+                  <span class="theme-chip" style="background: #71717a;"></span>
+                </div>
+                <div class="theme-card-info">
+                  <span class="theme-card-title">♟️ 흑백 테마</span>
+                  <span class="theme-card-desc">누아르 모노크롬</span>
+                </div>
+                <div class="theme-active-check">✓</div>
+              </div>
+
+              <!-- 5. 화이트 테마 -->
+              <div class="theme-card" data-theme-id="white-theme" title="맑고 화사한 고가독성 라이트 테마">
+                <div class="theme-card-preview theme-preview-white">
+                  <span class="theme-chip" style="background: #f8fafc; border: 1px solid #cbd5e1;"></span>
+                  <span class="theme-chip" style="background: #2563eb;"></span>
+                  <span class="theme-chip" style="background: #e2e8f0;"></span>
+                </div>
+                <div class="theme-card-info">
+                  <span class="theme-card-title">☀️ 화이트 테마</span>
+                  <span class="theme-card-desc">깔끔한 라이트 모드</span>
+                </div>
+                <div class="theme-active-check">✓</div>
+              </div>
+            </div>
+          </div>
+
           <div class="font-settings-banner">
             <span class="banner-badge">📺 방송 송출 가독성 최적화</span>
             <p class="banner-desc">치지직, 유튜브 등 방송 화면에 송출할 때 시청자가 제목과 스탯을 선명하게 볼 수 있도록 영역별 글씨 크기를 맞춤 조절합니다. 조절 즉시 실시간 반영되며 새로고침해도 자동 유지됩니다.</p>
@@ -686,9 +771,9 @@
           </div>
 
           <div class="font-settings-footer">
-            <button id="btn-reset-font-settings" class="btn-ghost btn-sm" type="button" title="치지직 방송 송출에 최적화된 권장 기본값으로 되돌립니다">
+            <button id="btn-reset-font-settings" class="btn-ghost btn-sm" type="button" title="화면 크기 및 골든 테마를 권장 기본값으로 되돌립니다">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-              방송 최적 기본값 복구
+              기본값 & 골든 테마 복구
             </button>
             <button id="btn-close-font-settings-confirm" class="btn-primary btn-gold-glow btn-sm" type="button">
               설정 완료 & 닫기

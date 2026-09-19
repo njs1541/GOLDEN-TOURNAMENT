@@ -55,6 +55,138 @@
   --fs-ranking-title: 16px;
 }
 
+/* ================= 5개 테마 토큰 시스템 (THEME SYSTEM) ================= */
+
+/* 1. 골든 옵시디언 (기본값) */
+html[data-theme="golden-obsidian"] {
+  --bg-base: #08090d;
+  --bg-surface: rgba(16, 18, 27, 0.78);
+  --bg-surface-elevated: rgba(25, 29, 44, 0.88);
+  --bg-card: rgba(255, 255, 255, 0.028);
+  --bg-card-hover: rgba(255, 255, 255, 0.055);
+  --border-glass: rgba(255, 255, 255, 0.07);
+  --border-glass-bright: rgba(255, 255, 255, 0.14);
+  --border-focus: rgba(245, 176, 65, 0.5);
+
+  --gold-primary: #f5b041;
+  --gold-light: #ffd700;
+  --gold-glow: rgba(245, 176, 65, 0.45);
+  --gold-glow-soft: rgba(245, 176, 65, 0.18);
+  --gold-gradient: linear-gradient(135deg, #ffe066 0%, #f5b041 50%, #d48b11 100%);
+  --accent-cyan: #00f2fe;
+  --accent-cyan-glow: rgba(0, 242, 254, 0.35);
+  --accent-rose: #ff416c;
+  --accent-violet: #a855f7;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+}
+
+/* 2. 치지직 테마 (다크 차콜 & 네온 민트) */
+html[data-theme="chzzk-theme"] {
+  --bg-base: #070d0a;
+  --bg-surface: rgba(12, 23, 18, 0.82);
+  --bg-surface-elevated: rgba(16, 32, 25, 0.90);
+  --bg-card: rgba(0, 255, 163, 0.025);
+  --bg-card-hover: rgba(0, 255, 163, 0.06);
+  --border-glass: rgba(0, 255, 163, 0.12);
+  --border-glass-bright: rgba(0, 255, 163, 0.28);
+  --border-focus: rgba(0, 255, 163, 0.6);
+
+  --gold-primary: #00ffa3;
+  --gold-light: #6effcf;
+  --gold-glow: rgba(0, 255, 163, 0.45);
+  --gold-glow-soft: rgba(0, 255, 163, 0.18);
+  --gold-gradient: linear-gradient(135deg, #7affd5 0%, #00ffa3 50%, #00b372 100%);
+  --accent-cyan: #00e5ff;
+  --accent-cyan-glow: rgba(0, 229, 255, 0.35);
+  --accent-rose: #ff3366;
+  --accent-violet: #10b981;
+
+  --text-main: #f0fdf4;
+  --text-muted: #86efac;
+  --text-dim: #4ade80;
+}
+
+/* 3. 모던 테마 (슬레이트 & 테크 인디고/블루) */
+html[data-theme="modern-theme"] {
+  --bg-base: #0a0e17;
+  --bg-surface: rgba(15, 23, 42, 0.82);
+  --bg-surface-elevated: rgba(30, 41, 59, 0.90);
+  --bg-card: rgba(255, 255, 255, 0.025);
+  --bg-card-hover: rgba(255, 255, 255, 0.055);
+  --border-glass: rgba(56, 189, 248, 0.10);
+  --border-glass-bright: rgba(56, 189, 248, 0.25);
+  --border-focus: rgba(56, 189, 248, 0.6);
+
+  --gold-primary: #38bdf8;
+  --gold-light: #7dd3fc;
+  --gold-glow: rgba(56, 189, 248, 0.45);
+  --gold-glow-soft: rgba(56, 189, 248, 0.18);
+  --gold-gradient: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 50%, #0284c7 100%);
+  --accent-cyan: #22d3ee;
+  --accent-cyan-glow: rgba(34, 211, 238, 0.35);
+  --accent-rose: #f43f5e;
+  --accent-violet: #818cf8;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+}
+
+/* 4. 흑백 테마 (누아르 모노크롬) */
+html[data-theme="monochrome-theme"] {
+  --bg-base: #050507;
+  --bg-surface: rgba(18, 18, 22, 0.85);
+  --bg-surface-elevated: rgba(28, 28, 34, 0.92);
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.07);
+  --border-glass: rgba(255, 255, 255, 0.10);
+  --border-glass-bright: rgba(255, 255, 255, 0.28);
+  --border-focus: rgba(255, 255, 255, 0.6);
+
+  --gold-primary: #ffffff;
+  --gold-light: #f4f4f5;
+  --gold-glow: rgba(255, 255, 255, 0.45);
+  --gold-glow-soft: rgba(255, 255, 255, 0.18);
+  --gold-gradient: linear-gradient(135deg, #ffffff 0%, #d4d4d8 50%, #71717a 100%);
+  --accent-cyan: #e4e4e7;
+  --accent-cyan-glow: rgba(228, 228, 231, 0.3);
+  --accent-rose: #a1a1aa;
+  --accent-violet: #71717a;
+
+  --text-main: #ffffff;
+  --text-muted: #a1a1aa;
+  --text-dim: #71717a;
+}
+
+/* 5. 화이트 테마 (맑고 화사한 고선명 라이트 모드) */
+html[data-theme="white-theme"] {
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --border-glass: #e2e8f0;
+  --border-glass-bright: #cbd5e1;
+  --border-focus: rgba(37, 99, 235, 0.6);
+
+  --gold-primary: #2563eb;
+  --gold-light: #3b82f6;
+  --gold-glow: rgba(37, 99, 235, 0.25);
+  --gold-glow-soft: rgba(37, 99, 235, 0.1);
+  --gold-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  --accent-cyan: #0284c7;
+  --accent-cyan-glow: rgba(2, 132, 199, 0.25);
+  --accent-rose: #e11d48;
+  --accent-violet: #6366f1;
+
+  --text-main: #0f172a;
+  --text-muted: #334155;
+  --text-dim: #475569;
+}
+
 /* 기본 리셋 & 타이포그래피 */
 * {
   margin: 0;
@@ -76,6 +208,658 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.2s ease;
+}
+
+/* 테마별 body 배경 오버라이드 */
+html[data-theme="golden-obsidian"] body {
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(142, 45, 226, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(245, 176, 65, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 50% 40%, rgba(0, 242, 254, 0.04) 0%, transparent 80%),
+    linear-gradient(to bottom, rgba(8, 9, 13, 0.7) 0%, #08090d 100%);
+}
+
+html[data-theme="chzzk-theme"] body {
+  background-color: #070d0a;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(0, 255, 163, 0.16) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(0, 229, 255, 0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 50% 40%, rgba(16, 185, 129, 0.06) 0%, transparent 80%),
+    linear-gradient(to bottom, rgba(7, 13, 10, 0.75) 0%, #070d0a 100%);
+}
+
+html[data-theme="modern-theme"] body {
+  background-color: #0a0e17;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(99, 102, 241, 0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(56, 189, 248, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 50% 40%, rgba(34, 211, 238, 0.05) 0%, transparent 80%),
+    linear-gradient(to bottom, rgba(10, 14, 23, 0.75) 0%, #0a0e17 100%);
+}
+
+html[data-theme="monochrome-theme"] body {
+  background-color: #050507;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255, 255, 255, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255, 255, 255, 0.04) 0%, transparent 70%),
+    linear-gradient(to bottom, rgba(5, 5, 7, 0.85) 0%, #050507 100%);
+}
+
+/* ================= 흑백 테마 (MONOCHROME THEME) 전용 디테일 보정 ================= */
+html[data-theme="monochrome-theme"] .vs-glow-circle {
+  background: #000000 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.25) !important;
+}
+html[data-theme="monochrome-theme"] .vs-text {
+  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+html[data-theme="monochrome-theme"] .tier-label.tier-s { background: #ffffff !important; color: #000 !important; }
+html[data-theme="monochrome-theme"] .tier-label.tier-a { background: #d4d4d8 !important; color: #000 !important; }
+html[data-theme="monochrome-theme"] .tier-label.tier-b { background: #a1a1aa !important; color: #000 !important; }
+html[data-theme="monochrome-theme"] .tier-label.tier-c { background: #71717a !important; color: #fff !important; }
+html[data-theme="monochrome-theme"] .tier-label.tier-d { background: #3f3f46 !important; color: #fff !important; }
+
+html[data-theme="white-theme"] body {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(37, 99, 235, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(14, 165, 233, 0.06) 0%, transparent 70%),
+    linear-gradient(to bottom, #ffffff 0%, #f1f5f9 100%);
+}
+
+/* ================= 화이트 테마 (WHITE THEME) 전역 가독성 & 카드/박스 완벽 보정 ================= */
+html[data-theme="white-theme"] .glass-panel {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.07), 0 2px 8px -2px rgba(15, 23, 42, 0.03) !important;
+}
+
+html[data-theme="white-theme"] .btn-primary {
+  color: #ffffff !important;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35) !important;
+}
+html[data-theme="white-theme"] .btn-primary:hover {
+  box-shadow: 0 6px 26px rgba(37, 99, 235, 0.5) !important;
+}
+html[data-theme="white-theme"] .btn-primary .btn-arrow {
+  color: #ffffff !important;
+}
+html[data-theme="white-theme"] .winner-card {
+  background: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15) !important;
+}
+html[data-theme="white-theme"] .winner-headline {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* 1. 타이틀 & 헤더 텍스트 */
+html[data-theme="white-theme"] .view-title {
+  background: linear-gradient(135deg, #0f172a 35%, #2563eb 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+html[data-theme="white-theme"] .brand-title {
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+html[data-theme="white-theme"] .view-desc {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .brand-sub {
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .setup-label,
+html[data-theme="white-theme"] .setting-label,
+html[data-theme="white-theme"] .mode-name {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+}
+
+/* 2. 후보 비디오 목록 및 입력 폼 (회색 박스 제거 -> 선명한 화이트 카드) */
+html[data-theme="white-theme"] .candidate-item {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04) !important;
+}
+html[data-theme="white-theme"] .candidate-item:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important;
+}
+html[data-theme="white-theme"] .item-title {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+html[data-theme="white-theme"] .item-channel {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .item-index-badge {
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .input-field,
+html[data-theme="white-theme"] .setup-input,
+html[data-theme="white-theme"] .filter-select,
+html[data-theme="white-theme"] .paste-textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+html[data-theme="white-theme"] .input-field::placeholder,
+html[data-theme="white-theme"] .setup-input::placeholder,
+html[data-theme="white-theme"] .paste-textarea::placeholder {
+  color: #94a3b8 !important;
+}
+html[data-theme="white-theme"] .input-field:focus,
+html[data-theme="white-theme"] .setup-input:focus,
+html[data-theme="white-theme"] .paste-textarea:focus {
+  background: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+html[data-theme="white-theme"] .input-icon {
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .btn-add-full {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .btn-add-full:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* 3. 모드 카드 & 규칙 설명 박스 (어두운 회색 박스 제거) */
+html[data-theme="white-theme"] .mode-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04) !important;
+}
+html[data-theme="white-theme"] .mode-card:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="white-theme"] .mode-card.selected {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 1px #2563eb, 0 4px 12px rgba(37, 99, 235, 0.1) !important;
+}
+html[data-theme="white-theme"] .mode-desc {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .mode-card.selected .mode-desc {
+  color: #1e3a8a !important;
+}
+html[data-theme="white-theme"] .rule-features-box {
+  background: #f8fafc !important;
+  border: 1px solid #bfdbfe !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.06) !important;
+}
+html[data-theme="white-theme"] .rule-box-header h4 {
+  color: #1e40af !important;
+}
+html[data-theme="white-theme"] .step-desc {
+  color: #334155 !important;
+}
+html[data-theme="white-theme"] .step-desc strong {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .step-num {
+  background: #dbeafe !important;
+  border-color: #93c5fd !important;
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .badge-count {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+
+/* 4. 대결 화면 (배틀 카드 & VS 디바이더 & 버튼) */
+html[data-theme="white-theme"] .battle-card {
+  background: #ffffff !important;
+  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08) !important;
+}
+html[data-theme="white-theme"] .card-player-a {
+  border-color: rgba(2, 132, 199, 0.4) !important;
+}
+html[data-theme="white-theme"] .card-player-b {
+  border-color: rgba(225, 29, 72, 0.4) !important;
+}
+html[data-theme="white-theme"] .candidate-title {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .candidate-channel {
+  color: #334155 !important;
+}
+html[data-theme="white-theme"] .stat-pill {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html[data-theme="white-theme"] .vs-glow-circle {
+  background: #ffffff !important;
+  border: 2px solid #2563eb !important;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.2) !important;
+}
+html[data-theme="white-theme"] .vs-text {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+html[data-theme="white-theme"] .match-indicator-badge {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+  color: #1d4ed8 !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12) !important;
+}
+html[data-theme="white-theme"] .win-prob-box {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05) !important;
+}
+html[data-theme="white-theme"] .prob-title {
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .prob-text {
+  font-weight: 800 !important;
+}
+html[data-theme="white-theme"] .prob-track {
+  background: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .key-hint {
+  background: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .btn-vote-cyan {
+  background: #f0f9ff !important;
+  color: #0284c7 !important;
+  border-color: #7dd3fc !important;
+}
+html[data-theme="white-theme"] .btn-vote-cyan:hover {
+  background: #e0f2fe !important;
+}
+html[data-theme="white-theme"] .btn-vote-rose {
+  background: #fff1f2 !important;
+  color: #e11d48 !important;
+  border-color: #fecdd3 !important;
+}
+html[data-theme="white-theme"] .btn-vote-rose:hover {
+  background: #ffe4e6 !important;
+}
+html[data-theme="white-theme"] .btn-yt-direct {
+  color: #475569 !important;
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="white-theme"] .btn-yt-direct:hover {
+  color: #0f172a !important;
+  background: #e2e8f0 !important;
+}
+
+/* 5. 4강 대진표 브래킷 & 승자 화면 (어두운 회색 박스 제거) */
+html[data-theme="white-theme"] .bracket-match-node {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06) !important;
+}
+html[data-theme="white-theme"] .bracket-slot {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .bracket-slot:hover {
+  background: #f1f5f9 !important;
+}
+html[data-theme="white-theme"] .bracket-slot .slot-title {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .bracket-slot.winner {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+}
+html[data-theme="white-theme"] .bracket-slot.winner .slot-title {
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .node-header {
+  border-bottom-color: #f1f5f9 !important;
+}
+html[data-theme="white-theme"] .node-final {
+  background: #ffffff !important;
+  border-color: #93c5fd !important;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12) !important;
+}
+html[data-theme="white-theme"] .round-header-badge {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .tier-row {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
+}
+html[data-theme="white-theme"] .tier-items-dropzone {
+  background: #f8fafc !important;
+}
+html[data-theme="white-theme"] .tier-chip {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06) !important;
+}
+html[data-theme="white-theme"] .tier-chip:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+}
+html[data-theme="white-theme"] .tier-chip-title {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .tier-chip-elo {
+  color: #2563eb !important;
+}
+
+/* 6. 헤더 및 치지직 연동 버튼 완벽 보정 */
+html[data-theme="white-theme"] .app-header {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-bottom-color: #e2e8f0 !important;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.05) !important;
+}
+html[data-theme="white-theme"] .btn-chzzk-header {
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+  background: #ecfdf5 !important;
+}
+html[data-theme="white-theme"] .btn-chzzk-header:hover {
+  background: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.2) !important;
+}
+html[data-theme="white-theme"] .chzzk-dot.connected {
+  background: #059669 !important;
+  box-shadow: 0 0 8px #059669 !important;
+}
+
+/* 7. 보조 버튼 및 인라인 에디트 인풋 보정 */
+html[data-theme="white-theme"] .btn-secondary {
+  background: #f1f5f9 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+html[data-theme="white-theme"] .btn-secondary:hover {
+  background: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .input-edit-title {
+  background: #ffffff !important;
+  border-color: #2563eb !important;
+  color: #0f172a !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+}
+
+/* 8. 치지직 실시간 투표 패널 & 모달 내부 보정 */
+html[data-theme="white-theme"] .chzzk-poll-panel {
+  background: #ffffff !important;
+  border-color: #a7f3d0 !important;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06) !important;
+}
+html[data-theme="white-theme"] .chzzk-live-tag {
+  color: #047857 !important;
+}
+html[data-theme="white-theme"] .chzzk-brand-label {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+html[data-theme="white-theme"] .chzzk-cmd-hint,
+html[data-theme="white-theme"] .poll-status-indicator {
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .badge-chzzk-status {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+html[data-theme="white-theme"] .chzzk-poll-track {
+  background: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="white-theme"] .chzzk-modal-banner {
+  background: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #065f46 !important;
+}
+html[data-theme="white-theme"] .scope-option-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .scope-option-card:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="white-theme"] .scope-option-card.selected {
+  background: #ecfdf5 !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 12px rgba(5, 150, 105, 0.15) !important;
+}
+html[data-theme="white-theme"] .scope-name {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .scope-option-card.selected .scope-name {
+  color: #047857 !important;
+}
+html[data-theme="white-theme"] .scope-desc {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .chzzk-poll-locked-notice {
+  background: #fef3c7 !important;
+  border-color: #fcd34d !important;
+  color: #92400e !important;
+}
+html[data-theme="white-theme"] .chzzk-status-box {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .chzzk-test-box {
+  background: #f8fafc !important;
+  border: 1px dashed #cbd5e1 !important;
+}
+html[data-theme="white-theme"] .test-label {
+  color: #334155 !important;
+}
+html[data-theme="white-theme"] .btn-sim-a {
+  background: #f0f9ff !important;
+  color: #0284c7 !important;
+  border-color: #bae6fd !important;
+}
+html[data-theme="white-theme"] .btn-sim-b {
+  background: #fff1f2 !important;
+  color: #e11d48 !important;
+  border-color: #fecdd3 !important;
+}
+html[data-theme="white-theme"] .btn-undo-glow {
+  color: #d97706 !important;
+  border-color: #fcd34d !important;
+}
+html[data-theme="white-theme"] .btn-undo-glow:not(:disabled):hover {
+  background: #fef3c7 !important;
+}
+
+/* 9. 미리보기 & 스위스-Elo 전환 모달 보정 */
+html[data-theme="white-theme"] .preview-modal-dialog {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.16) !important;
+}
+html[data-theme="white-theme"] .preview-status-tip {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .modal-phase-transition {
+  background: rgba(15, 23, 42, 0.6) !important;
+}
+html[data-theme="white-theme"] .phase-trans-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2) !important;
+}
+html[data-theme="white-theme"] .trans-title {
+  background: linear-gradient(135deg, #0f172a 35%, #2563eb 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+}
+html[data-theme="white-theme"] .trans-subtitle {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .trans-badge-row {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .trans-info-card {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .trans-info-title {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .trans-info-desc {
+  color: #475569 !important;
+}
+
+/* 10. 설정 모달 및 테마 선택 UI */
+html[data-theme="white-theme"] .font-setting-item,
+html[data-theme="white-theme"] .perf-setting-box,
+html[data-theme="white-theme"] .theme-setting-box {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03) !important;
+}
+html[data-theme="white-theme"] .font-settings-banner {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+html[data-theme="white-theme"] .banner-badge {
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .banner-desc {
+  color: #1e3a8a !important;
+}
+html[data-theme="white-theme"] .theme-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .theme-card:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="white-theme"] .theme-card.active {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 14px rgba(37, 99, 235, 0.2) !important;
+}
+html[data-theme="white-theme"] .theme-card-title {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .theme-card-desc {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .theme-card-preview {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .current-theme-badge {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .setting-desc {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .setting-val-badge {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .btn-ghost {
+  color: #334155 !important;
+}
+html[data-theme="white-theme"] .btn-ghost:hover {
+  background: rgba(15, 23, 42, 0.06) !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .btn-text-action {
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+  background: #f8fafc !important;
+}
+html[data-theme="white-theme"] .btn-text-action:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .progress-track {
+  background: #f1f5f9 !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .progress-label {
+  color: #0f172a !important;
+  text-shadow: none !important;
+}
+html[data-theme="white-theme"] .session-resume-banner {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+html[data-theme="white-theme"] #resume-banner-title {
+  color: #1e3a8a !important;
+}
+html[data-theme="white-theme"] #resume-banner-desc {
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .modal-dialog {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.16) !important;
+}
+html[data-theme="white-theme"] .modal-header h3 {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .modal-close {
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .modal-close:hover {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .ranking-item {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .ranking-item .item-title {
+  color: #0f172a !important;
+}
+html[data-theme="white-theme"] .ranking-item .item-channel {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .phase-pill {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
 }
 
 #app-container {
@@ -84,10 +868,10 @@ body {
   min-height: 100vh;
 }
 
-/* ================= GLOBAL SCROLLBAR (골드 네온 & 옵시디언 다크 테마) ================= */
+/* ================= GLOBAL SCROLLBAR (테마 변수 기반 동적 스크롤바) ================= */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #f5b041 rgba(10, 12, 18, 0.75);
+  scrollbar-color: var(--gold-primary) var(--bg-surface);
 }
 
 /* 화면 전체 및 기본 스크롤바 */
@@ -97,30 +881,30 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(8, 9, 13, 0.85);
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--bg-base);
+  border-left: 1px solid var(--border-glass);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #ffd700 0%, #f5b041 50%, #c47c0b 100%);
+  background: var(--gold-gradient);
   border-radius: 999px;
-  border: 2px solid rgba(8, 9, 13, 0.8);
-  box-shadow: 0 0 10px rgba(245, 176, 65, 0.35);
+  border: 2px solid var(--bg-base);
+  box-shadow: 0 0 10px var(--gold-glow);
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #fff385 0%, #ffc107 50%, #df8d0d 100%);
-  box-shadow: 0 0 14px rgba(255, 215, 0, 0.65), inset 0 0 4px rgba(255, 255, 255, 0.6);
+  filter: brightness(1.2);
+  box-shadow: 0 0 14px var(--gold-glow), inset 0 0 4px rgba(255, 255, 255, 0.6);
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(180deg, #ffc107 0%, #e69500 50%, #b36b00 100%);
-  box-shadow: 0 0 18px rgba(245, 176, 65, 0.8), inset 0 0 6px rgba(0, 0, 0, 0.3);
+  filter: brightness(0.9);
+  box-shadow: 0 0 18px var(--gold-glow), inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 ::-webkit-scrollbar-corner {
-  background: rgba(8, 9, 13, 0.95);
+  background: var(--bg-base);
 }
 
 /* 내부 컨테이너용 슬림 커스텀 스크롤바 */
@@ -547,10 +1331,10 @@ html {
   font-size: 11.5px;
   font-weight: 700;
   color: var(--gold-primary);
-  background: rgba(245, 176, 65, 0.12);
+  background: var(--gold-glow-soft);
   padding: 3px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(245, 176, 65, 0.25);
+  border: 1px solid var(--border-focus);
 }
 
 .badge-sub {
@@ -894,9 +1678,9 @@ html {
 }
 
 .mode-card.selected {
-  background: linear-gradient(90deg, rgba(245, 176, 65, 0.12) 0%, rgba(245, 176, 65, 0.04) 100%);
-  border-color: rgba(245, 176, 65, 0.45);
-  box-shadow: 0 4px 18px rgba(245, 176, 65, 0.1);
+  background: linear-gradient(90deg, var(--gold-glow-soft) 0%, transparent 100%);
+  border-color: var(--border-focus);
+  box-shadow: 0 4px 18px var(--gold-glow-soft);
 }
 
 .mode-card-body {
@@ -941,8 +1725,8 @@ html {
 
 /* 시스템 핵심 안내 박스 */
 .rule-features-box {
-  background: rgba(18, 21, 32, 0.6);
-  border: 1px solid rgba(255, 215, 0, 0.16);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-focus);
   border-radius: var(--radius-md);
   padding: 16px 18px;
   margin-bottom: 22px;
@@ -990,8 +1774,8 @@ html {
   font-size: 11px;
   font-weight: 900;
   color: var(--gold-primary);
-  background: rgba(245, 176, 65, 0.12);
-  border: 1px solid rgba(245, 176, 65, 0.25);
+  background: var(--gold-glow-soft);
+  border: 1px solid var(--border-focus);
   border-radius: 4px;
   padding: 1px 5px;
   font-family: 'Outfit', monospace;
@@ -1477,8 +2261,8 @@ body[data-current-view="battle"] {
   font-weight: 900;
   letter-spacing: 1.1px;
   color: var(--gold-primary);
-  background: rgba(245, 176, 65, 0.1);
-  border: 1px solid rgba(245, 176, 65, 0.3);
+  background: var(--gold-glow-soft);
+  border: 1px solid var(--border-focus);
   padding: 4px 14px;
   border-radius: 999px;
   box-shadow: 0 0 10px var(--gold-glow-soft);
@@ -1497,8 +2281,8 @@ body[data-current-view="battle"] {
   border-radius: 12px;
   padding: 5px 12px;
   gap: 2px;
-  background: linear-gradient(135deg, rgba(245, 176, 65, 0.14) 0%, rgba(255, 65, 108, 0.08) 100%);
-  border-color: rgba(245, 176, 65, 0.45);
+  background: linear-gradient(135deg, var(--gold-glow-soft) 0%, rgba(255, 65, 108, 0.08) 100%);
+  border-color: var(--border-focus);
   box-shadow: 0 0 14px var(--gold-glow-soft);
 }
 
@@ -1511,7 +2295,7 @@ body[data-current-view="battle"] {
 .match-indicator-badge .match-sub-text {
   font-size: 0.85em;
   font-weight: 700;
-  color: rgba(245, 176, 65, 0.85);
+  color: var(--gold-primary);
   white-space: nowrap;
 }
 
@@ -2016,8 +2800,8 @@ body[data-current-view="battle"] {
   font-weight: 800;
   letter-spacing: 1px;
   color: var(--gold-primary);
-  background: rgba(245, 176, 65, 0.08);
-  border: 1px solid rgba(245, 176, 65, 0.25);
+  background: var(--gold-glow-soft);
+  border: 1px solid var(--border-focus);
   padding: 4px 12px;
   border-radius: 999px;
   margin-bottom: 2px;
@@ -2802,6 +3586,129 @@ body[data-current-view="battle"] {
   gap: 16px;
 }
 
+/* ================= 테마 선택 컴포넌트 스타일 ================= */
+.theme-setting-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.theme-setting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.current-theme-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--gold-glow-soft);
+  color: var(--gold-primary);
+  border: 1px solid var(--border-focus);
+}
+
+.theme-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+
+.theme-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 12px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.theme-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-glass-bright);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.theme-card.active {
+  border-color: var(--gold-primary);
+  background: var(--gold-glow-soft);
+  box-shadow: 0 0 14px var(--gold-glow);
+}
+
+.theme-card-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  border: 1px solid var(--border-glass);
+}
+
+.theme-chip {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-card-info {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.theme-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.theme-card-desc {
+  font-size: 10.5px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.theme-active-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--gold-primary);
+  color: #08090d;
+  font-size: 10px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.theme-card.active .theme-active-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .font-settings-banner {
   background: linear-gradient(135deg, rgba(245, 176, 65, 0.12) 0%, rgba(0, 242, 254, 0.08) 100%);
   border: 1px solid rgba(245, 176, 65, 0.3);
@@ -2887,8 +3794,8 @@ body[data-current-view="battle"] {
   font-weight: 900;
   font-family: 'Outfit', monospace;
   color: var(--gold-primary);
-  background: rgba(245, 176, 65, 0.14);
-  border: 1px solid rgba(245, 176, 65, 0.35);
+  background: var(--gold-glow-soft);
+  border: 1px solid var(--border-focus);
   padding: 4px 12px;
   border-radius: 999px;
   min-width: 58px;

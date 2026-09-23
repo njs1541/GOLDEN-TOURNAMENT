@@ -133,6 +133,10 @@
                   <span class="input-icon">🎬</span>
                   <input type="text" id="input-yt-title" placeholder="영상 제목 (선택사항 - 미입력시 자동)" class="input-field">
                 </div>
+                <div class="input-group">
+                  <span class="input-icon">🎤</span>
+                  <input type="text" id="input-yt-creator" placeholder="가수 / 부른 사람 (선택사항 - 미입력시 자동)" class="input-field">
+                </div>
                 <button id="btn-add-video" class="btn-secondary btn-add-full">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   목록에 영상 추가하기
@@ -505,7 +509,7 @@
         <div class="modal-body">
           <p class="paste-modal-tip">공유받은 목록 텍스트를 붙여넣으세요. <strong>원래 가지고 있는 목록에 새로 추가</strong>됩니다.</p>
           <div class="paste-input-wrap">
-            <textarea id="paste-candidates-text" class="paste-textarea custom-scrollbar" placeholder="여기에 공유받은 텍스트를 붙여넣으세요 (Ctrl + V)...&#10;&#10;[지원되는 포맷 예시]&#10;01. NewJeans - Super Shy | https://www.youtube.com/watch?v=ArmDp-zijuc&#10;02. IVE - I AM | https://www.youtube.com/watch?v=6ZUIwj3FgUY&#10;&#10;* 줄마다 영상 링크가 포함되어 있으면 제목과 함께 자동으로 인식됩니다."></textarea>
+            <textarea id="paste-candidates-text" class="paste-textarea custom-scrollbar" placeholder="여기에 공유받은 텍스트를 붙여넣으세요 (Ctrl + V)...&#10;&#10;[지원되는 포맷 예시]&#10;01. Super Shy | https://www.youtube.com/watch?v=ArmDp-zijuc&#10;   👤 가수: NewJeans&#10;02. I AM | https://www.youtube.com/watch?v=6ZUIwj3FgUY&#10;   👤 가수: IVE&#10;&#10;* 줄마다 영상 링크가 포함되어 있으면 제목 및 가수 정보와 함께 자동으로 인식됩니다."></textarea>
           </div>
           <div class="paste-modal-footer">
             <button id="btn-read-clipboard-quick" class="btn-ghost btn-sm" type="button">

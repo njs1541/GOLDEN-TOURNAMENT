@@ -462,6 +462,7 @@ class AppController {
     // 신규 영상 입력 엔터 키 지원
     const inputUrl = document.getElementById('input-yt-url');
     const inputTitle = document.getElementById('input-yt-title');
+    const inputCreator = document.getElementById('input-yt-creator');
     const handleEnterAdd = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -470,6 +471,7 @@ class AppController {
     };
     if (inputUrl) inputUrl.addEventListener('keydown', handleEnterAdd);
     if (inputTitle) inputTitle.addEventListener('keydown', handleEnterAdd);
+    if (inputCreator) inputCreator.addEventListener('keydown', handleEnterAdd);
 
     // 모드 선택 카드 UI 동기화
     const modeCards = document.querySelectorAll('.mode-card');
@@ -538,10 +540,11 @@ class AppController {
     return null;
   }
 
-  // 신규 영상 추가 (미입력 시 유튜브 원본 타이틀 자동 추출)
+  // 신규 영상 추가 (미입력 시 유튜브 원본 타이틀 및 채널명 자동 추출)
   async handleAddVideo() {
     const inputUrl = document.getElementById('input-yt-url');
     const inputTitle = document.getElementById('input-yt-title');
+    const inputCreator = document.getElementById('input-yt-creator');
     const btnAdd = document.getElementById('btn-add-video');
     const ytId = this.parseYouTubeId(inputUrl ? inputUrl.value : '');
 
@@ -551,22 +554,26 @@ class AppController {
     }
 
     let title = inputTitle ? inputTitle.value.trim() : '';
-    let creator = "사용자 추가";
+    let creator = inputCreator ? inputCreator.value.trim() : '';
 
-    // 영상 제목 미입력 시 YouTube 공식 oEmbed API로 원본 영상 제목 및 채널명 자동 추출
-    if (!title) {
+    // 영상 제목이나 가수명 중 하나라도 비어있는 경우 YouTube 공식 oEmbed API로 원본 정보 자동 조회
+    if (!title || !creator) {
       let originalBtnHtml = '';
       if (btnAdd) {
         originalBtnHtml = btnAdd.innerHTML;
         btnAdd.disabled = true;
-        btnAdd.innerHTML = `<span>⏳</span> 유튜브 원본 제목 가져오는 중...`;
+        btnAdd.innerHTML = `<span>⏳</span> 유튜브 정보 조회 중...`;
       }
 
       try {
         const info = await this.fetchYouTubeInfo(ytId);
-        if (info && info.title) {
-          title = info.title;
-          creator = info.author_name || 'YouTube';
+        if (info) {
+          if (!title && info.title) {
+            title = info.title;
+          }
+          if (!creator && info.author_name) {
+            creator = info.author_name;
+          }
         }
       } catch (e) {
         console.warn('유튜브 정보 조회 오류:', e);
@@ -580,6 +587,9 @@ class AppController {
 
     if (!title) {
       title = `YouTube Video (${ytId})`;
+    }
+    if (!creator) {
+      creator = "사용자 추가";
     }
 
     const newVideo = {
@@ -597,6 +607,7 @@ class AppController {
 
     if (inputUrl) inputUrl.value = '';
     if (inputTitle) inputTitle.value = '';
+    if (inputCreator) inputCreator.value = '';
     this.renderCandidateList();
   }
 
@@ -615,7 +626,9 @@ class AppController {
     this.candidates.forEach((cand, idx) => {
       const numStr = String(idx + 1).padStart(2, '0');
       const ytUrl = `https://www.youtube.com/watch?v=${cand.youtubeId}`;
+      const creatorName = (cand.creator || '').trim() || '미지정';
       lines.push(`${numStr}. ${cand.title} | ${ytUrl}`);
+      lines.push(`   👤 가수: ${creatorName}`);
     });
 
     lines.push(`─────────────────────────────────────────`);
@@ -625,7 +638,7 @@ class AppController {
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(textToCopy).then(() => {
-        alert(`📋 참가 영상 목록(${this.candidates.length}곡)이 클립보드에 복사되었습니다!\n\n수정한 영상 제목과 유튜브 링크가 모두 포함되어 있습니다.\n다른 사람에게 공유하면 [목록 붙여넣기]로 동일한 목록을 즉시 생성/추가할 수 있습니다.`);
+        alert(`📋 참가 영상 목록(${this.candidates.length}곡)이 클립보드에 복사되었습니다!\n\n영상 제목과 가수 이름, 유튜브 링크가 모두 포함되어 있습니다.\n다른 사람에게 공유하면 [목록 붙여넣기]로 가수 정보까지 온전히 복원됩니다.`);
       }).catch(err => {
         this.fallbackCopyText(textToCopy);
       });
@@ -644,7 +657,7 @@ class AppController {
     textarea.select();
     try {
       document.execCommand('copy');
-      alert(`📋 참가 영상 목록이 클립보드에 복사되었습니다!\n\n수정한 영상 제목과 유튜브 링크가 모두 포함되어 있습니다.\n붙여넣기(Ctrl+V)하여 공유해 보세요.`);
+      alert(`📋 참가 영상 목록이 클립보드에 복사되었습니다!\n\n영상 제목과 가수 이름, 유튜브 링크가 모두 포함되어 있습니다.\n붙여넣기(Ctrl+V)하여 공유해 보세요.`);
     } catch (e) {
       prompt("아래 텍스트를 복사(Ctrl+C)하여 공유하세요:", text);
     }
@@ -721,7 +734,7 @@ class AppController {
                 id: `custom_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
                 title: (item.title || item.name || 'YouTube 영상').trim(),
                 youtubeId: ytId,
-                creator: item.creator || item.channel || '사용자 추가',
+                creator: item.creator || item.channel || item.artist || '사용자 추가',
                 startSec: Number(item.startSec) || 0,
                 isCustom: true
               });
@@ -775,12 +788,26 @@ class AppController {
           }
         }
 
-        // 바로 아랫줄에 '👤 채널: XXX' 서식이 있다면 채널명 보존
+        // 바로 아랫줄에 '👤 가수: XXX' 또는 '👤 채널: XXX' 등 서식이 있다면 가수/채널명 보존
         if (i + 1 < lines.length) {
           const nextLine = lines[i + 1].trim();
-          const channelMatch = nextLine.match(/(?:👤\s*채널\s*[:|]\s*)([^\n]+)/i);
-          if (channelMatch) {
-            creator = channelMatch[1].trim();
+          const creatorMatch = nextLine.match(/(?:👤\s*(?:가수|채널|아티스트|부른\s*사람|작곡가|보컬)\s*[:|]\s*)([^\n]+)/i);
+          if (creatorMatch) {
+            creator = creatorMatch[1].trim();
+          }
+        }
+
+        // 아랫줄에 없고 URL 뒷부분에 파이프로 가수명이 붙은 경우 (예: '제목 | URL | 가수')
+        if (creator === '공유 영상') {
+          const parts = line.split(match[0]);
+          if (parts.length > 1) {
+            let afterUrl = parts[1].replace(/^[|–—\-:\s]+|[|–—\-:\s]+$/g, '').trim();
+            if (afterUrl.length > 0 && !afterUrl.match(ytRegex)) {
+              creator = afterUrl;
+              if (title && title.endsWith(afterUrl)) {
+                title = title.substring(0, title.length - afterUrl.length).replace(/[|–—\-:\s]+$/, '').trim();
+              }
+            }
           }
         }
 
@@ -911,6 +938,51 @@ class AppController {
     });
   }
 
+  // 영상 가수/부른 사람 직접 수정 모드
+  startEditingCreator(idx, channelRowEl) {
+    const cand = this.candidates[idx];
+    if (!cand || !channelRowEl) return;
+
+    const currentCreator = cand.creator || '';
+    channelRowEl.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="opacity:0.6; flex-shrink:0;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+      <input type="text" class="input-edit-creator" value="${currentCreator.replace(/"/g, '&quot;')}" placeholder="가수 / 부른 사람 입력...">
+    `;
+
+    const input = channelRowEl.querySelector('.input-edit-creator');
+    if (!input) return;
+
+    input.focus();
+    input.select();
+
+    let isSaved = false;
+    const saveCreator = () => {
+      if (isSaved) return;
+      isSaved = true;
+      const newCreator = input.value.trim();
+      if (newCreator && newCreator !== currentCreator) {
+        cand.creator = newCreator;
+        this.saveCandidatesToStorage();
+      }
+      this.renderCandidateList();
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveCreator();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        isSaved = true;
+        this.renderCandidateList();
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      saveCreator();
+    });
+  }
+
   renderCandidateList() {
     const listEl = document.getElementById('candidate-list');
     const countEl = document.getElementById('candidate-count');
@@ -965,10 +1037,15 @@ class AppController {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
               </button>
             </div>
-            <span class="item-channel">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-              ${cand.creator || 'YouTube 영상'}
-            </span>
+            <div class="item-channel-row" data-idx="${idx}">
+              <span class="item-channel" title="클릭하여 가수/부른 사람 수정" data-idx="${idx}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                ${cand.creator || 'YouTube 영상'}
+              </span>
+              <button class="btn-edit-creator" title="가수/부른 사람 수정" data-idx="${idx}">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+            </div>
           </div>
         </div>
         <button class="btn-remove-item" title="제거" data-idx="${idx}">
@@ -1003,6 +1080,24 @@ class AppController {
         editBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.startEditingTitle(idx, titleRow);
+        });
+      }
+
+      // 가수/부른 사람 클릭 또는 수정 버튼 클릭 시 인라인 편집 모드 전환
+      const channelRow = itemEl.querySelector('.item-channel-row');
+      const channelEl = itemEl.querySelector('.item-channel');
+      const editCreatorBtn = itemEl.querySelector('.btn-edit-creator');
+
+      if (channelEl && channelRow) {
+        channelEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.startEditingCreator(idx, channelRow);
+        });
+      }
+      if (editCreatorBtn && channelRow) {
+        editCreatorBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.startEditingCreator(idx, channelRow);
         });
       }
 

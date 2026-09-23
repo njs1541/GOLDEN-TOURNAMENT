@@ -1517,16 +1517,75 @@ html {
   box-shadow: 0 0 10px rgba(245, 176, 65, 0.3);
 }
 
+.item-channel-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
 .item-channel {
   font-size: 11.5px;
   color: var(--text-dim);
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin-left: -4px;
+  transition: var(--transition-fast);
+}
+
+.item-channel:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .item-channel svg {
   opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.btn-edit-creator {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  opacity: 0.35;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.candidate-item:hover .btn-edit-creator {
+  opacity: 0.85;
+}
+
+.btn-edit-creator:hover {
+  opacity: 1 !important;
+  color: var(--gold-primary);
+  background: rgba(245, 176, 65, 0.14);
+}
+
+/* 인라인 가수 수정 텍스트필드 */
+.input-edit-creator {
+  width: 100%;
+  max-width: 240px;
+  background: rgba(4, 5, 8, 0.85);
+  border: 1px solid var(--gold-primary);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 2px 6px;
+  outline: none;
+  box-shadow: 0 0 10px rgba(245, 176, 65, 0.3);
 }
 
 .btn-remove-item {

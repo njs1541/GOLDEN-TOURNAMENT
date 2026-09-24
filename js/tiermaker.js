@@ -28,7 +28,7 @@ class TierMakerManager {
         <h3 style="font-size:20px; font-weight:800; margin-bottom:6px; color:var(--gold-primary);">${this.champion.title}</h3>
         <p style="color:var(--text-muted); font-size:14px; margin-bottom:10px;">${this.champion.creator || 'YouTube'}</p>
         <div style="display:flex; justify-content:center; gap:16px; font-size:13px; color:var(--text-main);">
-          <span>🏆 최종 ELO: <strong>${Math.round(this.champion.elo)}</strong></span>
+          <span>🏆 최종 점수: <strong>${Math.round(this.champion.elo)} RP</strong></span>
           <span>전적: <strong>${this.champion.wins}승 ${this.champion.losses}패</strong></span>
           <span>승률: <strong>${this.champion.matches > 0 ? Math.round((this.champion.wins / this.champion.matches) * 100) : 0}%</strong></span>
         </div>
@@ -142,7 +142,7 @@ class TierMakerManager {
   }
 
   copyRankingToClipboard() {
-    let text = `🏆 [스위스-Elo 골든 토너먼트 최종 순위 결과]\n`;
+    let text = `🏆 [골든 토너먼트 최종 순위 결과]\n`;
     text += `👑 1위 우승: ${this.champion.title}\n\n`;
 
     const tiers = ['S', 'A', 'B', 'C', 'D'];
@@ -153,7 +153,7 @@ class TierMakerManager {
         if (chips.length > 0) {
           text += `[${t} 티어]\n`;
           chips.forEach(chip => {
-            text += `- ${chip.dataset.title} (${chip.querySelector('.tier-chip-elo').textContent}점)\n`;
+            text += `- ${chip.dataset.title} (${chip.querySelector('.tier-chip-elo').textContent} RP)\n`;
           });
           text += `\n`;
         }
@@ -311,7 +311,7 @@ class TierMakerManager {
         const winRate = this.champion.matches > 0 ? Math.round((this.champion.wins / this.champion.matches) * 100) : 100;
         const recordStr = `${this.champion.wins || 0}승 ${this.champion.losses || 0}패`;
 
-        // 뱃지 1: 최종 ELO
+        // 뱃지 1: 최종 점수 (RP)
         ctx.fillStyle = 'rgba(245, 176, 65, 0.15)';
         this.drawRoundedRect(ctx, infoX, champCardY + 125, 170, 38, 8);
         ctx.fill();
@@ -319,7 +319,7 @@ class TierMakerManager {
         ctx.stroke();
         ctx.fillStyle = '#f5b041';
         ctx.font = 'bold 15px "Outfit", sans-serif';
-        ctx.fillText(`🏆 ELO: ${eloVal}`, infoX + 16, champCardY + 149);
+        ctx.fillText(`🏆 점수: ${eloVal} RP`, infoX + 16, champCardY + 149);
 
         // 뱃지 2: 전적
         ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
@@ -356,7 +356,7 @@ class TierMakerManager {
 
       ctx.fillStyle = '#64748b';
       ctx.font = '13px "Noto Sans KR", sans-serif';
-      ctx.fillText('조기 탈락 없는 스위스-Elo 래더 리그 최종 순위 랭킹', 430, tierStartY + 38);
+      ctx.fillText('조기 탈락 없는 공정 랭크 레이스 최종 순위 랭킹', 430, tierStartY + 38);
       ctx.restore();
 
       // ================= 4. S/A/B/C/D 티어별 행 렌더링 =================

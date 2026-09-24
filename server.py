@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-스위스-Elo 골든 토너먼트 로컬 서버 & 치지직 API 프록시
+골든 토너먼트 로컬 서버 & 치지직 API 프록시
 - 별도의 외부 패키지 설치 없이 Python 표준 라이브러리만 사용합니다.
 - HTML, CSS, JS 정적 파일 서빙 (포트 8000)
 - /api/proxy?url= 엔드포인트를 통해 브라우저의 치지직 API CORS 제약을 100% 해소합니다.
@@ -94,7 +94,7 @@ if __name__ == '__main__':
     try:
         with socketserver.TCPServer(("", PORT), TournamentRequestHandler) as httpd:
             print(f"===================================================")
-            print(f"[스위스-Elo 골든 토너먼트] 로컬 서버가 시작되었습니다.")
+            print(f"[골든 토너먼트 - 랭크 레이스] 로컬 서버가 시작되었습니다.")
             print(f"주소: http://localhost:{PORT}")
             print(f"치지직 API 프록시가 활성화되었습니다.")
             print(f"종료하려면 Ctrl+C를 누르거나 이 창을 닫아주세요.")

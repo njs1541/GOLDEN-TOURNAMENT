@@ -1464,7 +1464,7 @@ class AppController {
             <span class="item-title" title="${safeTitle}">${safeTitle}</span>
             <div class="item-channel">
               <span class="ranking-record-badge">${wins}승 ${losses}패</span>
-              <span class="ranking-elo-badge">ELO ${elo}</span>
+              <span class="ranking-elo-badge">${elo} RP</span>
             </div>
           </div>
         </div>
@@ -2516,7 +2516,7 @@ pause
       if (banner && bannerTitle && bannerDesc) {
         const eng = data.engineState;
         const percent = Math.round((eng.currentMatchIndex / eng.totalLadderMatches) * 100) || 0;
-        const viewText = data.currentView === 'final' ? '골든 파이널 4강전' : '스위스-Elo 래더 리그';
+        const viewText = data.currentView === 'final' ? '골든 파이널 4강전' : '본선 랭크 레이스';
         
         bannerTitle.textContent = `진행 중이던 ${viewText} 세션이 있습니다!`;
         bannerDesc.textContent = `진행도: ${eng.currentMatchIndex} / ${eng.totalLadderMatches} 매치 (${percent}%) &bull; 언제든 바로 이어서 진행할 수 있습니다.`;
@@ -2578,7 +2578,7 @@ pause
       const banner = document.getElementById('session-resume-banner');
       if (banner) banner.style.display = 'none';
 
-      this.showPerfToast('⏩ 토너먼트 이어하기 완료', '이전 진행 매치와 ELO 점수가 성공적으로 복원되었습니다!', 'info', 3000);
+      this.showPerfToast('⏩ 토너먼트 이어하기 완료', '이전 진행 매치와 랭크 점수가 성공적으로 복원되었습니다!', 'info', 3000);
     } catch (e) {
       console.error('세션 복원 실패:', e);
       alert("세션 복원 중 오류가 발생했습니다. 새로 시작해 주세요.");

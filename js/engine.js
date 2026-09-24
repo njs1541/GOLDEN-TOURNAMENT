@@ -98,8 +98,8 @@ class TournamentEngine {
     let phaseName = '';
 
     if (underExposed.length >= 1) {
-      // [1단계: 스위스 균등 노출] 노출이 적은 영상끼리 우선 매칭 (1명만 남아도 잔여 최소 노출 엄격 보장)
-      phaseName = '스위스 균등 노출';
+      // [1단계: 배치고사 (전원 2회)] 노출이 적은 영상끼리 우선 매칭 (1명만 남아도 잔여 최소 노출 엄격 보장)
+      phaseName = '배치고사 (전원 2회)';
       // 노출 수가 가장 적은 순으로 정렬 후 첫 번째 선택
       underExposed.sort((a, b) => a.matches - b.matches);
       candA = underExposed[0];
@@ -115,8 +115,8 @@ class TournamentEngine {
         candB = others[0];
       }
     } else {
-      // [2단계: 정밀 Elo 라이벌 매치] 레이팅이 가장 비슷한 두 후보 매칭
-      phaseName = 'Elo 래더 라이벌 매치';
+      // [2단계: 본선 랭크 레이스] 레이팅이 가장 비슷한 두 후보 라이벌 매칭
+      phaseName = '본선 랭크 레이스';
       // 무작위로 하나의 기준 후보 선택
       const randomIndex = Math.floor(Math.random() * this.candidates.length);
       candA = this.candidates[randomIndex];
@@ -167,10 +167,10 @@ class TournamentEngine {
     const progressLabel = document.getElementById('progress-text');
     const matchIndicator = document.getElementById('current-match-indicator');
 
-    const isSwiss = phase.includes('스위스');
+    const isPlacement = phase.includes('배치고사') || phase.includes('스위스');
     if (phaseText) phaseText.textContent = phase;
     if (phasePill) {
-      if (isSwiss) {
+      if (isPlacement) {
         phasePill.className = 'phase-pill pill-swiss';
       } else {
         phasePill.className = 'phase-pill pill-elo';
@@ -182,12 +182,12 @@ class TournamentEngine {
     if (progressLabel) progressLabel.textContent = `진행도: ${this.currentMatchIndex} / ${this.totalLadderMatches} 매치 (${progressPercent}%)`;
     if (matchIndicator) {
       matchIndicator.classList.remove('badge-multiline');
-      if (isSwiss) {
+      if (isPlacement) {
         matchIndicator.classList.remove('match-indicator-elo');
         matchIndicator.textContent = `MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
       } else {
         matchIndicator.classList.add('match-indicator-elo');
-        matchIndicator.textContent = `⚡ ELO RIVAL MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
+        matchIndicator.textContent = `⚡ RIVAL MATCH ${this.currentMatchIndex} / ${this.totalLadderMatches}`;
       }
     }
 
@@ -200,7 +200,7 @@ class TournamentEngine {
 
     if (titleA) titleA.textContent = candA.title;
     if (channelA) channelA.textContent = candA.creator || 'YouTube';
-    if (badgeEloA) badgeEloA.textContent = `ELO ${Math.round(candA.elo)}`;
+    if (badgeEloA) badgeEloA.textContent = `${Math.round(candA.elo)} RP`;
     if (statsRecordA) statsRecordA.textContent = `${candA.wins}승 ${candA.losses}패`;
     if (statsMatchesA) statsMatchesA.textContent = `${candA.matches}회 대결`;
     const linkDirectA = document.getElementById('link-direct-a');
@@ -215,7 +215,7 @@ class TournamentEngine {
 
     if (titleB) titleB.textContent = candB.title;
     if (channelB) channelB.textContent = candB.creator || 'YouTube';
-    if (badgeEloB) badgeEloB.textContent = `ELO ${Math.round(candB.elo)}`;
+    if (badgeEloB) badgeEloB.textContent = `${Math.round(candB.elo)} RP`;
     if (statsRecordB) statsRecordB.textContent = `${candB.wins}승 ${candB.losses}패`;
     if (statsMatchesB) statsMatchesB.textContent = `${candB.matches}회 대결`;
     const linkDirectB = document.getElementById('link-direct-b');
@@ -278,8 +278,8 @@ class TournamentEngine {
       this.app.chzzkChat.resetPoll();
     }
 
-    // 11. 스위스 ➔ Elo 래더 전환 안내 스플래시 모달 트리거
-    if (!isSwiss && !this.hasShownEloTransition) {
+    // 11. 배치고사 ➔ 본선 랭크 레이스 전환 안내 스플래시 모달 트리거
+    if (!isPlacement && !this.hasShownEloTransition) {
       this.hasShownEloTransition = true;
       this.showPhaseTransitionNotice();
     }
@@ -445,9 +445,9 @@ class TournamentEngine {
     const candB = this.candidates.find(c => c.id === lastSnapshot.currentMatch.candBId);
     this.currentMatch = { candA, candB, phase: lastSnapshot.currentMatch.phase };
 
-    // 스위스 단계로 되돌아갔다면 단계 전환 노출 플래그 복원
+    // 배치고사 단계로 되돌아갔다면 단계 전환 노출 플래그 복원
     this.closePhaseTransitionNotice();
-    if (lastSnapshot.currentMatch.phase && lastSnapshot.currentMatch.phase.includes('스위스')) {
+    if (lastSnapshot.currentMatch.phase && (lastSnapshot.currentMatch.phase.includes('배치고사') || lastSnapshot.currentMatch.phase.includes('스위스'))) {
       this.hasShownEloTransition = false;
     }
 

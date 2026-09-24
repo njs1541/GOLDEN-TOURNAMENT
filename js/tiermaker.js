@@ -103,19 +103,31 @@ class TierMakerManager {
     chip.dataset.title = cand.title;
 
     chip.innerHTML = `
-      <img src="https://img.youtube.com/vi/${cand.youtubeId}/mqdefault.jpg" alt="thumb" class="tier-chip-thumb">
-      <span class="tier-chip-title">${cand.title}</span>
-      <span class="tier-chip-elo">${Math.round(cand.elo)}</span>
+      <div class="tier-chip-thumb-wrap">
+        <img src="https://img.youtube.com/vi/${cand.youtubeId}/mqdefault.jpg" alt="thumb" class="tier-chip-thumb" loading="lazy">
+        <div class="tier-chip-play-overlay">▶</div>
+      </div>
+      <div class="tier-chip-info">
+        <div class="tier-chip-title" title="${cand.title}">${cand.title}</div>
+        <div class="tier-chip-bottom">
+          <span class="tier-chip-elo">${Math.round(cand.elo)}</span>
+          <span class="tier-chip-unit">RP</span>
+        </div>
+      </div>
     `;
 
     // 드래그 앤 드롭 이벤트
     chip.addEventListener('dragstart', (e) => {
       chip.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', cand.id);
     });
 
     chip.addEventListener('dragend', () => {
       chip.classList.remove('dragging');
+      document.querySelectorAll('.tier-items-dropzone').forEach(dz => {
+        dz.classList.remove('drag-over');
+      });
     });
 
     return chip;
@@ -124,21 +136,68 @@ class TierMakerManager {
   setupDropzone(dropzone) {
     dropzone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropzone.style.background = 'rgba(255, 255, 255, 0.08)';
+      e.dataTransfer.dropEffect = 'move';
+      dropzone.classList.add('drag-over');
+
+      const draggingEl = document.querySelector('.tier-chip.dragging');
+      if (!draggingEl) return;
+
+      const afterElement = this.getDragAfterElement(dropzone, e.clientX, e.clientY);
+      if (afterElement == null) {
+        if (dropzone.lastElementChild !== draggingEl) {
+          dropzone.appendChild(draggingEl);
+        }
+      } else {
+        if (draggingEl.nextElementSibling !== afterElement) {
+          dropzone.insertBefore(draggingEl, afterElement);
+        }
+      }
     });
 
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.style.background = '';
+    dropzone.addEventListener('dragleave', (e) => {
+      if (!dropzone.contains(e.relatedTarget)) {
+        dropzone.classList.remove('drag-over');
+      }
     });
 
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropzone.style.background = '';
+      dropzone.classList.remove('drag-over');
+
       const draggingEl = document.querySelector('.tier-chip.dragging');
-      if (draggingEl) {
+      if (!draggingEl) return;
+
+      const afterElement = this.getDragAfterElement(dropzone, e.clientX, e.clientY);
+      if (afterElement == null) {
         dropzone.appendChild(draggingEl);
+      } else {
+        dropzone.insertBefore(draggingEl, afterElement);
       }
     });
+  }
+
+  getDragAfterElement(dropzone, x, y) {
+    const draggableElements = [...dropzone.querySelectorAll('.tier-chip:not(.dragging)')];
+
+    for (const child of draggableElements) {
+      const box = child.getBoundingClientRect();
+
+      // 마우스 커서가 해당 카드의 상단보다 위(이전 행)에 있는 경우
+      if (y < box.top) {
+        return child;
+      }
+
+      // 마우스 커서가 해당 카드가 위치한 행 범위에 있는 경우
+      if (y <= box.bottom) {
+        const centerX = box.left + box.width / 2;
+        // 커서가 카드의 가로 중심보다 왼쪽에 위치하면 이 카드의 앞에 삽입
+        if (x < centerX) {
+          return child;
+        }
+      }
+    }
+
+    return null;
   }
 
   copyRankingToClipboard() {
@@ -210,7 +269,7 @@ class TierMakerManager {
       const width = 1240;
       const championAreaHeight = 360;
       const tierHeaderHeight = 60;
-      const tierRowHeight = 95;
+      const tierRowHeight = 148;
       const tierList = [
         { name: 'S', color: '#ef4444' },
         { name: 'A', color: '#f97316' },
@@ -406,9 +465,9 @@ class TierMakerManager {
         const chips = group ? group.chips : [];
 
         let chipX = 178;
-        const chipY = y + 8;
-        const chipW = 168;
-        const chipH = tierRowHeight - 28;
+        const chipY = y + 6;
+        const chipW = 112;
+        const chipH = tierRowHeight - 24; // 124px
 
         chips.forEach((chip) => {
           if (chipX + chipW > width - 90) return; // 오른쪽 넘침 방지
@@ -419,43 +478,78 @@ class TierMakerManager {
           const chipImg = imgEl ? thumbCache[imgEl.src] : null;
 
           // 칩 배경 카드
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+          ctx.fillStyle = 'rgba(26, 32, 53, 0.9)';
           this.drawRoundedRect(ctx, chipX, chipY, chipW, chipH, 8);
           ctx.fill();
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
           ctx.lineWidth = 1;
           ctx.stroke();
 
-          // 칩 썸네일
-          const thumbCardW = 44;
-          const thumbCardH = 44;
-          const thumbCardX = chipX + 6;
-          const thumbCardY = chipY + (chipH - thumbCardH) / 2;
+          // 칩 상단 썸네일 (16:9 비율)
+          const thumbCardW = chipW - 8;
+          const thumbCardH = Math.round(thumbCardW * 9 / 16);
+          const thumbCardX = chipX + 4;
+          const thumbCardY = chipY + 4;
 
           if (chipImg) {
             ctx.save();
-            this.drawRoundedRect(ctx, thumbCardX, thumbCardY, thumbCardW, thumbCardH, 6);
+            this.drawRoundedRect(ctx, thumbCardX, thumbCardY, thumbCardW, thumbCardH, 5);
             ctx.clip();
             ctx.drawImage(chipImg, thumbCardX, thumbCardY, thumbCardW, thumbCardH);
             ctx.restore();
           } else {
-            ctx.fillStyle = '#222';
-            this.drawRoundedRect(ctx, thumbCardX, thumbCardY, thumbCardW, thumbCardH, 6);
+            ctx.fillStyle = '#111';
+            this.drawRoundedRect(ctx, thumbCardX, thumbCardY, thumbCardW, thumbCardH, 5);
             ctx.fill();
           }
 
-          // 칩 텍스트
+          // 칩 하단 제목 (2줄 자동 래핑 및 말줄임 처리로 넉넉하게 노출)
           ctx.textAlign = 'left';
           ctx.textBaseline = 'top';
-
           ctx.fillStyle = '#f8fafc';
-          ctx.font = 'bold 11.5px "Noto Sans KR", sans-serif';
-          const shortTitle = title.length > 10 ? title.slice(0, 9) + '..' : title;
-          ctx.fillText(shortTitle, chipX + thumbCardW + 12, chipY + 12);
+          ctx.font = 'bold 9.5px "Noto Sans KR", sans-serif';
 
+          const maxTextW = chipW - 12;
+          const textStartY = thumbCardY + thumbCardH + 5;
+          let line1 = '';
+          let line2 = '';
+          const chars = Array.from(title);
+
+          for (let i = 0; i < chars.length; i++) {
+            const test = line1 + chars[i];
+            if (ctx.measureText(test).width <= maxTextW) {
+              line1 = test;
+            } else {
+              const rem = chars.slice(i).join('');
+              line2 = rem;
+              while (line2.length > 0 && ctx.measureText(line2 + '..').width > maxTextW) {
+                line2 = line2.slice(0, -1);
+              }
+              if (line2.length < rem.length) {
+                line2 += '..';
+              }
+              break;
+            }
+          }
+
+          ctx.fillText(line1, chipX + 6, textStartY);
+          if (line2) {
+            ctx.fillText(line2, chipX + 6, textStartY + 12.5);
+          }
+
+          // 하단 구분선
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+          ctx.beginPath();
+          ctx.moveTo(chipX + 6, chipY + chipH - 18);
+          ctx.lineTo(chipX + chipW - 6, chipY + chipH - 18);
+          ctx.stroke();
+
+          // 하단 점수 (RP)
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'middle';
           ctx.fillStyle = '#f5b041';
-          ctx.font = 'bold 11px "Outfit", monospace';
-          ctx.fillText(elo, chipX + thumbCardW + 12, chipY + 32);
+          ctx.font = 'bold 9.5px "Outfit", sans-serif';
+          ctx.fillText(elo + ' RP', chipX + chipW - 6, chipY + chipH - 9);
 
           chipX += chipW + 10;
         });

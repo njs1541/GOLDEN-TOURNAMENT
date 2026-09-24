@@ -8,6 +8,7 @@ const STORAGE_PERF_MODE_KEY = 'GOLDEN_TOURNAMENT_PERF_MODE';
 const STORAGE_SAVED_SESSION_KEY = 'GOLDEN_TOURNAMENT_SAVED_SESSION';
 const STORAGE_THEME_KEY = 'GOLDEN_TOURNAMENT_THEME';
 const STORAGE_INTRO_DISMISSED_KEY = 'GOLDEN_TOURNAMENT_INTRO_DISMISSED';
+const STORAGE_CURTAIN_KEY = 'GOLDEN_TOURNAMENT_CANDIDATE_CURTAIN';
 const DEFAULT_THEME = 'golden-obsidian';
 
 // 5개 디자인 테마 한글 레이블
@@ -36,6 +37,7 @@ class AppController {
     this.currentTheme = DEFAULT_THEME;
     this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
     this.isLowPerfMode = false;
+    this.isCandidateCurtainActive = true; // 참가영상 목록 임시 가림막(스포일러 방지) 기본 활성화
     this.currentView = 'setup'; // 'setup' | 'battle' | 'final' | 'result'
     this.currentIntroStep = 0; // 온보딩 가이드 현재 슬라이드 인덱스
     this.engine = null; // engine.js에서 초기화
@@ -76,6 +78,7 @@ class AppController {
 
     // 5. 초기 화면 렌더링
     this.renderCandidateList();
+    this.initCandidateCurtain();
     this.switchView('setup');
 
     // 6. 진행 중이던 저장 세션 확인 및 복원 배너 표시
@@ -123,6 +126,18 @@ class AppController {
     const btnAdd = document.getElementById('btn-add-video');
     if (btnAdd) {
       btnAdd.addEventListener('click', () => this.handleAddVideo());
+    }
+
+    // 참가영상 목록 가림막 토글 버튼 (접었다 폈다)
+    const btnToggleCurtain = document.getElementById('btn-toggle-curtain');
+    if (btnToggleCurtain) {
+      btnToggleCurtain.addEventListener('click', () => this.toggleCandidateCurtain());
+    }
+
+    // 가림막 내부의 원클릭 해제(접기) 버튼
+    const btnCurtainUnfold = document.getElementById('btn-curtain-unfold');
+    if (btnCurtainUnfold) {
+      btnCurtainUnfold.addEventListener('click', () => this.toggleCandidateCurtain(false));
     }
 
     // 참가영상 목록 전체 임베드 재생 점검 버튼
@@ -1159,6 +1174,92 @@ class AppController {
     input.addEventListener('blur', () => {
       saveCreator();
     });
+  }
+
+  // ================= 참가 영상 목록 임시 가림막 (스포일러 방지) =================
+
+  // 참가 영상 목록 가림막 상태 복원 (처음 접속 시 기본적으로 펼쳐진 상태 true)
+  initCandidateCurtain() {
+    try {
+      const stored = localStorage.getItem(STORAGE_CURTAIN_KEY);
+      // 저장된 설정이 없으면(최초 접속) 기본적으로 펼쳐진 상태로 둠
+      this.isCandidateCurtainActive = stored === null ? true : (stored === 'true');
+    } catch (e) {
+      this.isCandidateCurtainActive = true;
+    }
+    this.applyCandidateCurtain(this.isCandidateCurtainActive, false);
+  }
+
+  // 참가 영상 목록 가림막 펴기/접기 토글 (forceState가 주어지면 해당 상태로 설정)
+  toggleCandidateCurtain(forceState = null) {
+    const nextState = forceState !== null ? Boolean(forceState) : !this.isCandidateCurtainActive;
+    this.isCandidateCurtainActive = nextState;
+    try {
+      localStorage.setItem(STORAGE_CURTAIN_KEY, String(this.isCandidateCurtainActive));
+    } catch (e) {
+      // 로컬 스토리지 예외 무시
+    }
+    this.applyCandidateCurtain(this.isCandidateCurtainActive, true);
+  }
+
+  // 참가 영상 목록 가림막 UI 상태 반영 (저사양 환경 최적화: 가벼운 opacity/display 제어)
+  applyCandidateCurtain(isActive, showToast = false) {
+    const wrapperEl = document.getElementById('candidate-list-wrapper');
+    const curtainEl = document.getElementById('candidate-curtain');
+    const btnToggle = document.getElementById('btn-toggle-curtain');
+    const iconFold = document.getElementById('icon-curtain-fold');
+    const iconUnfold = document.getElementById('icon-curtain-unfold');
+    const textToggle = document.getElementById('text-curtain-toggle');
+
+    if (isActive) {
+      // 가림막 펼침 (목록 가림 상태)
+      if (wrapperEl) {
+        wrapperEl.classList.add('is-curtain-active');
+      }
+      if (curtainEl) {
+        curtainEl.style.display = 'flex';
+        requestAnimationFrame(() => {
+          curtainEl.classList.add('active');
+          curtainEl.setAttribute('aria-hidden', 'false');
+        });
+      }
+      if (btnToggle) {
+        btnToggle.classList.add('is-curtain-active');
+        btnToggle.setAttribute('title', '가림막을 접고 참가 영상 목록을 표시합니다');
+      }
+      if (iconFold) iconFold.style.display = 'none';
+      if (iconUnfold) iconUnfold.style.display = 'inline-block';
+      if (textToggle) textToggle.textContent = '가림막 접기';
+
+      if (showToast) {
+        this.showPerfToast('🙈 가림막 적용', '참가 영상 목록을 임시로 가렸습니다 (스포일러 방지).', 'info', 2500);
+      }
+    } else {
+      // 가림막 접힘 (목록 표시 상태)
+      if (wrapperEl) {
+        wrapperEl.classList.remove('is-curtain-active');
+      }
+      if (curtainEl) {
+        curtainEl.classList.remove('active');
+        curtainEl.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+          if (!this.isCandidateCurtainActive) {
+            curtainEl.style.display = 'none';
+          }
+        }, 160);
+      }
+      if (btnToggle) {
+        btnToggle.classList.remove('is-curtain-active');
+        btnToggle.setAttribute('title', '가림막을 펴서 참가 영상 목록을 숨깁니다 (스포일러 방지)');
+      }
+      if (iconFold) iconFold.style.display = 'inline-block';
+      if (iconUnfold) iconUnfold.style.display = 'none';
+      if (textToggle) textToggle.textContent = '가림막 펴기';
+
+      if (showToast) {
+        this.showPerfToast('👁️ 가림막 해제', '참가 영상 목록을 다시 표시합니다.', 'info', 2500);
+      }
+    }
   }
 
   renderCandidateList() {

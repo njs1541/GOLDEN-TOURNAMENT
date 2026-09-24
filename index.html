@@ -102,14 +102,47 @@
                 <label class="setup-label">참가 영상 목록</label>
                 <div class="header-action-group">
                   <span class="badge-count"><span id="candidate-count">16</span>개 등록됨</span>
+                  <button id="btn-toggle-curtain" class="btn-text-action btn-curtain-action is-curtain-active" title="가림막을 접고 참가 영상 목록을 표시합니다">
+                    <svg id="icon-curtain-fold" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display: none;">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                    <svg id="icon-curtain-unfold" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span id="text-curtain-toggle">가림막 접기</span>
+                  </button>
                   <button id="btn-check-embed-all" class="btn-text-action btn-inspect-action" title="등록된 영상들의 유튜브 임베드 재생 가능 여부를 점검합니다">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     재생 점검
                   </button>
                 </div>
               </div>
-              <div class="candidate-list-container custom-scrollbar" id="candidate-list">
-                <!-- 동적으로 리스트 렌더링 -->
+              <div class="candidate-list-wrapper is-curtain-active" id="candidate-list-wrapper">
+                <div class="candidate-list-container custom-scrollbar" id="candidate-list">
+                  <!-- 동적으로 리스트 렌더링 -->
+                </div>
+                <!-- 참가 영상 목록 가림막 (스포일러 방지) -->
+                <div class="candidate-curtain active" id="candidate-curtain" style="display: flex;" aria-hidden="false">
+                  <div class="curtain-inner">
+                    <div class="curtain-shield-badge">
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </div>
+                    <div class="curtain-title">참가 영상 목록이 가려져 있습니다</div>
+                    <p class="curtain-desc">대회 진행 및 방송 중 스포일러를 방지하기 위해 가림막이 쳐져 있습니다.</p>
+                    <button type="button" class="btn-secondary btn-curtain-unfold-action" id="btn-curtain-unfold">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      가림막 접기 (목록 보기)
+                    </button>
+                  </div>
+                </div>
               </div>
               <div class="candidate-bottom-actions">
                 <button id="btn-copy-candidates" class="btn-text-action btn-bottom-action" title="현재 참가 영상 목록을 복사하여 다른 사람에게 공유합니다">

@@ -1343,6 +1343,149 @@ html {
   font-weight: 600;
 }
 
+/* 참가 영상 목록 래퍼 및 가림막 */
+.candidate-list-wrapper {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 가림막이 펼쳐졌을 때 목록을 완전히 흐리고 어둡게 차광 처리 */
+.candidate-list-wrapper.is-curtain-active .candidate-list-container {
+  filter: blur(14px) brightness(0.25);
+  opacity: 0.12;
+  user-select: none;
+  pointer-events: none;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.candidate-list-container {
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.candidate-curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  background: rgba(18, 19, 26, 0.97);
+  border: 1px dashed rgba(245, 176, 65, 0.45);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease-out;
+  pointer-events: none;
+}
+
+.candidate-curtain.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.curtain-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 320px;
+  gap: 10px;
+}
+
+.curtain-shield-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(245, 176, 65, 0.12);
+  border: 1px solid rgba(245, 176, 65, 0.35);
+  color: var(--gold-primary, #f5b041);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.curtain-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main, #fff);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.curtain-desc {
+  font-size: 12px;
+  color: var(--text-muted, #94a3b8);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.btn-curtain-unfold-action {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(245, 176, 65, 0.15);
+  border: 1px solid rgba(245, 176, 65, 0.4);
+  color: var(--gold-primary, #f5b041);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-curtain-unfold-action:hover {
+  background: rgba(245, 176, 65, 0.25);
+  border-color: rgba(245, 176, 65, 0.7);
+  transform: translateY(-1px);
+}
+
+/* 헤더 가림막 토글 버튼 스타일 */
+.btn-curtain-action {
+  transition: all var(--transition-fast);
+}
+
+.btn-curtain-action.is-curtain-active {
+  background: rgba(245, 176, 65, 0.16);
+  border-color: rgba(245, 176, 65, 0.5);
+  color: var(--gold-primary, #f5b041);
+}
+
+/* 화이트 테마 대응 */
+html[data-theme="white-theme"] .candidate-list-wrapper.is-curtain-active .candidate-list-container {
+  filter: blur(14px) brightness(0.65);
+  opacity: 0.15;
+}
+html[data-theme="white-theme"] .candidate-curtain {
+  background: rgba(248, 250, 252, 0.97);
+  border-color: #cbd5e1;
+}
+html[data-theme="white-theme"] .curtain-title {
+  color: #0f172a;
+}
+html[data-theme="white-theme"] .curtain-desc {
+  color: #475569;
+}
+html[data-theme="white-theme"] .curtain-shield-badge {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+html[data-theme="white-theme"] .btn-curtain-action.is-curtain-active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
 /* 후보 비디오 리스트 컨테이너 */
 .candidate-list-container {
   max-height: 480px;

@@ -142,7 +142,7 @@ class TierMakerManager {
   }
 
   copyRankingToClipboard() {
-    let text = `🏆 [골든 토너먼트 최종 순위 결과]\n`;
+    let text = `🏆 [픽리그 최종 순위 결과]\n`;
     text += `👑 1위 우승: ${this.champion.title}\n\n`;
 
     const tiers = ['S', 'A', 'B', 'C', 'D'];

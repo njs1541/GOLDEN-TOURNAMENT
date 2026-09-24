@@ -415,7 +415,7 @@ class AppController {
     if (btnUndo) {
       btnUndo.addEventListener('click', () => {
         if (this.bracket && this.bracket.currentFinalStep !== 'done') {
-          this.showPerfToast('⚠️ 결승 토너먼트 진행 중', '골든 파이널 4강 및 결승전에서는 래더 투표 취소가 불가능합니다.', 'warning', 2500);
+          this.showPerfToast('⚠️ 결승 토너먼트 진행 중', '파이널 4강 및 결승전에서는 래더 투표 취소가 불가능합니다.', 'warning', 2500);
           return;
         }
         if (this.engine) this.engine.undoVote();
@@ -434,7 +434,7 @@ class AppController {
       if ((e.key === 'z' || e.key === 'Z') && !e.shiftKey) {
         e.preventDefault();
         if (isInBracket) {
-          this.showPerfToast('⚠️ 결승 토너먼트 진행 중', '골든 파이널 4강 및 결승전에서는 래더 투표 취소가 불가능합니다.', 'warning', 2500);
+          this.showPerfToast('⚠️ 결승 토너먼트 진행 중', '파이널 4강 및 결승전에서는 래더 투표 취소가 불가능합니다.', 'warning', 2500);
           return;
         }
         if (this.engine) this.engine.undoVote();
@@ -906,7 +906,7 @@ class AppController {
     }
 
     const lines = [
-      `🏆 [골든 토너먼트 참가 영상 목록] (총 ${this.candidates.length}곡)`,
+      `🏆 [픽리그 참가 영상 목록] (총 ${this.candidates.length}곡)`,
       `─────────────────────────────────────────`
     ];
 
@@ -919,7 +919,7 @@ class AppController {
     });
 
     lines.push(`─────────────────────────────────────────`);
-    lines.push(`✨ 위 내용을 복사한 뒤, 골든 토너먼트의 [목록 붙여넣기]를 누르면 동일한 참가 목록이 그대로 추가됩니다!`);
+    lines.push(`✨ 위 내용을 복사한 뒤, 픽리그의 [목록 붙여넣기]를 누르면 동일한 참가 목록이 그대로 추가됩니다!`);
 
     const textToCopy = lines.join('\n');
 
@@ -2610,7 +2610,7 @@ pause
       if (banner && bannerTitle && bannerDesc) {
         const eng = data.engineState;
         const percent = Math.round((eng.currentMatchIndex / eng.totalLadderMatches) * 100) || 0;
-        const viewText = data.currentView === 'final' ? '골든 파이널 4강전' : '본선 랭크 레이스';
+        const viewText = data.currentView === 'final' ? '파이널 4강전' : '본선 랭크 레이스';
         
         bannerTitle.textContent = `진행 중이던 ${viewText} 세션이 있습니다!`;
         bannerDesc.textContent = `진행도: ${eng.currentMatchIndex} / ${eng.totalLadderMatches} 매치 (${percent}%) &bull; 언제든 바로 이어서 진행할 수 있습니다.`;

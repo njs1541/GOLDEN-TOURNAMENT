@@ -274,7 +274,7 @@ class GoldenBracketManager {
         }
       });
     } else if (this.currentFinalStep === 'final') {
-      this.playMatch(this.grandFinal.candA, this.grandFinal.candB, '골든 파이널 결승전', (winner) => {
+      this.playMatch(this.grandFinal.candA, this.grandFinal.candB, '챔피언십 결승전', (winner) => {
         this.grandFinal.winner = winner;
         this.currentFinalStep = 'done';
         if (this.app && typeof this.app.saveTournamentSession === 'function') {
@@ -349,9 +349,9 @@ class GoldenBracketManager {
       }
     }
     if (window.renderStreakIndicator) {
-      window.renderStreakIndicator('⚡', '골든 파이널', '결승 토너먼트', 'theme-final');
+      window.renderStreakIndicator('⚡', '파이널', '결승 토너먼트', 'theme-final');
     } else {
-      document.getElementById('streak-indicator').textContent = '⚡ 골든 파이널 결승 토너먼트';
+      document.getElementById('streak-indicator').textContent = '⚡ 파이널 결승 토너먼트';
     }
 
     // 4강/결승전에서는 스킵, 되돌리기 및 4강 바로가기 버튼 숨김

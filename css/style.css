@@ -5273,4 +5273,364 @@ html[data-theme="white-theme"] .proxy-divider::after {
   gap: 4px;
 }
 
+/* ================= ONBOARDING INTRO GUIDE MODAL ================= */
+.modal-intro-guide {
+  z-index: 1050;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(3, 4, 8, 0.84);
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro-guide-dialog {
+  /* 기존 760px 대비 1.3배 확대 (988px) & 모든 페이지에서 팝업 크기 완전 고정 */
+  max-width: 988px;
+  width: 95%;
+  height: 780px;
+  max-height: 92vh;
+  padding: 24px 32px 22px;
+  border-radius: 20px;
+  border: 1px solid rgba(245, 176, 65, 0.32);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 45px rgba(245, 176, 65, 0.18);
+  background: linear-gradient(175deg, rgba(22, 26, 39, 0.96) 0%, rgba(13, 15, 23, 0.98) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-sizing: border-box;
+  transform: translate3d(0, 0, 0);
+}
+
+.intro-guide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.intro-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.intro-badge-icon {
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(245, 176, 65, 0.14);
+  border: 1px solid rgba(245, 176, 65, 0.3);
+  box-shadow: 0 0 18px rgba(245, 176, 65, 0.22);
+  flex-shrink: 0;
+}
+
+.intro-dialog-title {
+  font-size: 23px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+
+.intro-dialog-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+.intro-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.intro-step-indicators {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.intro-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.22);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s, box-shadow 0.22s;
+}
+
+.intro-dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.intro-dot.active {
+  width: 32px;
+  background: var(--gold-gradient);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+
+.intro-guide-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 16px 0 10px;
+  min-height: 0;
+}
+
+.intro-slider-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.intro-slide {
+  display: none;
+  opacity: 0;
+  transform: translate3d(12px, 0, 0);
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro-slide.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  animation: introFadeSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes introFadeSlide {
+  from {
+    opacity: 0;
+    transform: translate3d(16px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* 이미지 크기와 무관하게 모든 페이지에서 동일한 고정 크기 유지 */
+.intro-slide-media {
+  position: relative;
+  width: 100%;
+  height: 425px;
+  min-height: 425px;
+  max-height: 425px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.intro-slide-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.intro-step-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--gold-primary);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  border-radius: 7px;
+  border: 1px solid rgba(245, 176, 65, 0.38);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+/* 텍스트 영역: 글씨 크기 대폭 확대 & 높이 고정으로 안정적인 가독성 확보 */
+.intro-slide-info {
+  height: 130px;
+  min-height: 130px;
+  max-height: 130px;
+  margin-top: 14px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.slide-headline {
+  margin: 0 0 7px;
+  font-size: 21.5px;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.2px;
+}
+
+.slide-hl-icon {
+  font-size: 24px;
+}
+
+.slide-desc {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.68;
+  color: #e2e8f0;
+  letter-spacing: -0.2px;
+}
+
+.slide-desc strong {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+.intro-guide-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.intro-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 15.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+  user-select: none;
+  transition: color 0.16s ease;
+}
+
+.intro-checkbox-label:hover {
+  color: var(--text-main);
+}
+
+.intro-checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold-primary);
+  cursor: pointer;
+}
+
+.intro-nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.intro-nav-buttons button {
+  min-width: 110px;
+  padding: 10px 24px;
+  font-size: 15.5px;
+  font-weight: 700;
+}
+
+/* 화면 높이가 작은 노트북/디스플레이 대응 */
+@media (max-height: 840px) {
+  .intro-guide-dialog {
+    height: 94vh;
+    padding: 18px 24px 16px;
+  }
+
+  .intro-slide-media {
+    height: 335px;
+    min-height: 335px;
+    max-height: 335px;
+  }
+
+  .intro-slide-info {
+    height: 120px;
+    min-height: 120px;
+    max-height: 120px;
+    padding: 12px 18px;
+  }
+
+  .slide-headline {
+    font-size: 19px;
+  }
+
+  .slide-desc {
+    font-size: 14.5px;
+  }
+}
+
+/* 모바일 및 좁은 화면 대응 */
+@media (max-width: 768px) {
+  .intro-guide-dialog {
+    width: 95%;
+    height: auto;
+    max-height: 94vh;
+    padding: 16px;
+  }
+
+  .intro-dialog-title {
+    font-size: 17px;
+  }
+
+  .intro-dialog-sub {
+    display: none;
+  }
+
+  .intro-slide-media {
+    height: 220px;
+    min-height: 220px;
+    max-height: 220px;
+  }
+
+  .intro-slide-info {
+    height: auto;
+    min-height: 95px;
+    max-height: none;
+    margin-top: 10px;
+    padding: 12px 16px;
+  }
+
+  .slide-headline {
+    font-size: 16.5px;
+  }
+
+  .slide-desc {
+    font-size: 13.5px;
+  }
+}
+
+
 

@@ -7,6 +7,7 @@ const STORAGE_FONT_SETTINGS_KEY = 'GOLDEN_TOURNAMENT_FONT_SETTINGS';
 const STORAGE_PERF_MODE_KEY = 'GOLDEN_TOURNAMENT_PERF_MODE';
 const STORAGE_SAVED_SESSION_KEY = 'GOLDEN_TOURNAMENT_SAVED_SESSION';
 const STORAGE_THEME_KEY = 'GOLDEN_TOURNAMENT_THEME';
+const STORAGE_INTRO_DISMISSED_KEY = 'GOLDEN_TOURNAMENT_INTRO_DISMISSED';
 const DEFAULT_THEME = 'golden-obsidian';
 
 // 5개 디자인 테마 한글 레이블
@@ -36,6 +37,7 @@ class AppController {
     this.fontSettings = { ...DEFAULT_FONT_SETTINGS };
     this.isLowPerfMode = false;
     this.currentView = 'setup'; // 'setup' | 'battle' | 'final' | 'result'
+    this.currentIntroStep = 0; // 온보딩 가이드 현재 슬라이드 인덱스
     this.engine = null; // engine.js에서 초기화
     this.bracket = null; // bracket.js에서 초기화
     this.tierMaker = null; // tiermaker.js에서 초기화
@@ -78,6 +80,9 @@ class AppController {
 
     // 6. 진행 중이던 저장 세션 확인 및 복원 배너 표시
     this.checkSavedSession();
+
+    // 7. 시작 화면 온보딩 가이드 팝업 자동 진단 및 초기화
+    this.initIntroGuide();
   }
 
   // 후보 목록 전체를 웹 저장소(localStorage)에 실시간 동기화
@@ -491,6 +496,179 @@ class AppController {
         if (window.dualPlayer) window.dualPlayer.stopAll();
         this.switchView('setup');
       });
+    }
+
+    // 온보딩 가이드 팝업 이벤트 바인딩
+    this.bindIntroGuideEvents();
+  }
+
+  // 온보딩 가이드 모달 초기화 (첫 방문 시 자동 노출)
+  initIntroGuide() {
+    try {
+      const isDismissed = localStorage.getItem(STORAGE_INTRO_DISMISSED_KEY);
+      if (!isDismissed) {
+        // 첫 방문 시 사용자가 화면 구성을 인지할 수 있도록 약간의 딜레이 후 부드럽게 노출
+        setTimeout(() => {
+          // 이미 배틀 중이거나 다른 모달이 뜬 상태가 아닐 때만 노출
+          if (this.currentView === 'setup' && !document.querySelector('.modal-backdrop.active')) {
+            this.openIntroGuideModal(0);
+          }
+        }, 500);
+      }
+    } catch (e) {
+      console.warn('온보딩 가이드 설정 로드 실패:', e);
+    }
+  }
+
+  // 온보딩 가이드 이벤트 바인딩
+  bindIntroGuideEvents() {
+    const btnOpenGuide = document.getElementById('btn-open-intro-guide');
+    const btnCloseModal = document.getElementById('btn-close-intro-modal');
+    const modal = document.getElementById('modal-intro-guide');
+    const btnPrev = document.getElementById('btn-intro-prev');
+    const btnNext = document.getElementById('btn-intro-next');
+    const chkDontShow = document.getElementById('chk-intro-dont-show');
+    const dots = document.querySelectorAll('.intro-dot');
+
+    if (btnOpenGuide) {
+      btnOpenGuide.addEventListener('click', () => this.openIntroGuideModal(0));
+    }
+
+    if (btnCloseModal) {
+      btnCloseModal.addEventListener('click', () => this.closeIntroGuideModal());
+    }
+
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) this.closeIntroGuideModal();
+      });
+    }
+
+    if (btnPrev) {
+      btnPrev.addEventListener('click', () => {
+        this.showIntroStep(this.currentIntroStep - 1);
+      });
+    }
+
+    if (btnNext) {
+      btnNext.addEventListener('click', () => {
+        if (this.currentIntroStep >= 4) {
+          this.closeIntroGuideModal();
+        } else {
+          this.showIntroStep(this.currentIntroStep + 1);
+        }
+      });
+    }
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        this.showIntroStep(index);
+      });
+    });
+
+    if (chkDontShow) {
+      chkDontShow.addEventListener('change', (e) => {
+        try {
+          if (e.target.checked) {
+            localStorage.setItem(STORAGE_INTRO_DISMISSED_KEY, 'true');
+          } else {
+            localStorage.removeItem(STORAGE_INTRO_DISMISSED_KEY);
+          }
+        } catch (err) {
+          console.warn('localStorage 저장 실패:', err);
+        }
+      });
+    }
+
+    // 키보드 네비게이션: 가이드 모달 활성화 시 좌/우 화살표, ESC, Enter 처리
+    window.addEventListener('keydown', (e) => {
+      if (!modal || !modal.classList.contains('active')) return;
+
+      if (e.key === 'Escape') {
+        this.closeIntroGuideModal();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        this.showIntroStep(this.currentIntroStep - 1);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (this.currentIntroStep >= 4) {
+          this.closeIntroGuideModal();
+        } else {
+          this.showIntroStep(this.currentIntroStep + 1);
+        }
+      } else if (e.key === 'Enter') {
+        if (this.currentIntroStep >= 4) {
+          e.preventDefault();
+          this.closeIntroGuideModal();
+        } else {
+          e.preventDefault();
+          this.showIntroStep(this.currentIntroStep + 1);
+        }
+      }
+    });
+  }
+
+  // 온보딩 가이드 모달 열기
+  openIntroGuideModal(step = 0) {
+    const modal = document.getElementById('modal-intro-guide');
+    if (!modal) return;
+    this.showIntroStep(step);
+    modal.classList.add('active');
+
+    // 체크박스 상태 동기화
+    const chkDontShow = document.getElementById('chk-intro-dont-show');
+    if (chkDontShow) {
+      try {
+        chkDontShow.checked = localStorage.getItem(STORAGE_INTRO_DISMISSED_KEY) === 'true';
+      } catch (e) {}
+    }
+  }
+
+  // 온보딩 가이드 모달 닫기
+  closeIntroGuideModal() {
+    const modal = document.getElementById('modal-intro-guide');
+    if (modal) {
+      modal.classList.remove('active');
+    }
+  }
+
+  // 온보딩 가이드 특정 스텝(0~4) 표시 및 UI 갱신
+  showIntroStep(stepIndex) {
+    const totalSteps = 5;
+    const targetStep = Math.max(0, Math.min(stepIndex, totalSteps - 1));
+    this.currentIntroStep = targetStep;
+
+    const slides = document.querySelectorAll('.intro-slide');
+    const dots = document.querySelectorAll('.intro-dot');
+    const btnPrev = document.getElementById('btn-intro-prev');
+    const btnNext = document.getElementById('btn-intro-next');
+
+    slides.forEach((slide, idx) => {
+      if (idx === targetStep) {
+        slide.classList.add('active');
+      } else {
+        slide.classList.remove('active');
+      }
+    });
+
+    dots.forEach((dot, idx) => {
+      if (idx === targetStep) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+
+    if (btnPrev) {
+      btnPrev.style.visibility = targetStep === 0 ? 'hidden' : 'visible';
+    }
+
+    if (btnNext) {
+      if (targetStep === totalSteps - 1) {
+        btnNext.innerHTML = '<span>토너먼트 시작하기 🚀</span>';
+      } else {
+        btnNext.innerHTML = '<span>다음 ▶</span>';
+      }
     }
   }
 

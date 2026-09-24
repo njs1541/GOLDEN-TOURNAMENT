@@ -46,6 +46,14 @@
           </svg>
           테마 & 화면 설정
         </button>
+        <button id="btn-open-intro-guide" class="btn-ghost" title="토너먼트 진행 가이드 팝업 보기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          진행 가이드
+        </button>
         <a href="manual.html" target="_blank" class="btn-ghost" title="전체 기능 사용 설명서 새 탭 열기" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
           <span>📖</span>
           <span>사용 설명서</span>
@@ -963,6 +971,144 @@
       </div>
     </div>
   </div>
+
+  <!-- 처음 시작 화면 소개 및 진행 가이드 모달 -->
+  <div class="modal-backdrop modal-intro-guide" id="modal-intro-guide" role="dialog" aria-modal="true" aria-labelledby="intro-guide-title">
+    <div class="modal-dialog glass-panel intro-guide-dialog">
+      <div class="intro-guide-header">
+        <div class="intro-title-group">
+          <span class="intro-badge-icon">🏆</span>
+          <div>
+            <h3 id="intro-guide-title" class="intro-dialog-title">골든 토너먼트 진행 가이드</h3>
+            <p class="intro-dialog-sub">조기 탈락 없는 공정한 매칭부터 최후의 챔피언 등극까지의 여정</p>
+          </div>
+        </div>
+        <div class="intro-header-actions">
+          <div class="intro-step-indicators" id="intro-step-dots">
+            <button type="button" class="intro-dot active" data-step="0" title="1단계: 셋업 & 코스 선택"></button>
+            <button type="button" class="intro-dot" data-step="1" title="2단계: 스위스 공정 노출"></button>
+            <button type="button" class="intro-dot" data-step="2" title="3단계: 실시간 Elo 랭킹"></button>
+            <button type="button" class="intro-dot" data-step="3" title="4단계: 파이널 4강 토너먼트"></button>
+            <button type="button" class="intro-dot" data-step="4" title="5단계: 챔피언 시상대 & 티어표"></button>
+          </div>
+          <button class="modal-close" id="btn-close-intro-modal" aria-label="가이드 닫기">&times;</button>
+        </div>
+      </div>
+
+      <div class="intro-guide-body">
+        <div class="intro-slider-container">
+          <!-- Slide 1 -->
+          <div class="intro-slide active" data-index="0">
+            <div class="intro-slide-media">
+              <img src="docs/images/01_main_setup.png" alt="토너먼트 영상 등록 및 코스 선택" class="intro-slide-img">
+              <span class="intro-step-pill">STEP 01</span>
+            </div>
+            <div class="intro-slide-info">
+              <h4 class="slide-headline">
+                <span class="slide-hl-icon">🎬</span>
+                <span>참가 영상 등록 & 맞춤 코스 선택</span>
+              </h4>
+              <p class="slide-desc">
+                유튜브 링크나 영상 ID를 추가하여 출전 리스트를 구성하세요.<br>
+                방송 시간 및 스타일에 맞춰 <strong>초고속 퀵(2R)</strong>, <strong>정규 스탠다드(3R)</strong>, <strong>풀 챔피언십(4R)</strong> 코스 중 원하는 방식을 자유롭게 선택할 수 있습니다.
+              </p>
+            </div>
+          </div>
+
+          <!-- Slide 2 -->
+          <div class="intro-slide" data-index="1">
+            <div class="intro-slide-media">
+              <img src="docs/images/07_battle_swiss_voting.png" alt="스위스 라운드 공정 노출 및 투표" class="intro-slide-img">
+              <span class="intro-step-pill">STEP 02</span>
+            </div>
+            <div class="intro-slide-info">
+              <h4 class="slide-headline">
+                <span class="slide-hl-icon">🛡️</span>
+                <span>조기 탈락 없는 스위스 공정 노출 & 투표</span>
+              </h4>
+              <p class="slide-desc">
+                1회 패배로 즉시 탈락하는 불합리함 없이, <strong>모든 참가곡이 최소 2회 이상</strong> 대결 무대에 공평하게 오릅니다.<br>
+                두 영상을 동시에 비교 감상하고 스트리머 판정 또는 <strong>치지직 실시간 채팅 투표(1/2)</strong>로 승자를 결정합니다.
+              </p>
+            </div>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="intro-slide" data-index="2">
+            <div class="intro-slide-media">
+              <img src="docs/images/09_battle_elo_ladder.png" alt="실시간 Elo 라이벌 매칭" class="intro-slide-img">
+              <span class="intro-step-pill">STEP 03</span>
+            </div>
+            <div class="intro-slide-info">
+              <h4 class="slide-headline">
+                <span class="slide-hl-icon">⚔️</span>
+                <span>실시간 Elo 레이팅 기반 박빙의 라이벌 매칭</span>
+              </h4>
+              <p class="slide-desc">
+                모든 대결 결과는 실시간 체스식 <strong>Elo 레이팅 시스템</strong>에 즉시 반영됩니다.<br>
+                실력 점수가 팽팽한 호적수끼리 매칭되어 마지막 순간까지 손에 땀을 쥐는 4강 진출권 쟁탈전을 펼칩니다.
+              </p>
+            </div>
+          </div>
+
+          <!-- Slide 4 -->
+          <div class="intro-slide" data-index="3">
+            <div class="intro-slide-media">
+              <img src="docs/images/10_bracket_final4_tree.png" alt="골든 파이널 4강 본선 토너먼트" class="intro-slide-img">
+              <span class="intro-step-pill">STEP 04</span>
+            </div>
+            <div class="intro-slide-info">
+              <h4 class="slide-headline">
+                <span class="slide-hl-icon">👑</span>
+                <span>최강 4팀의 격돌! 골든 파이널 4강전 & 결승</span>
+              </h4>
+              <p class="slide-desc">
+                치열한 래더를 뚫고 올라온 <strong>상위 4개 최강 후보</strong>가 챔피언십 브래킷 트리에 진출합니다.<br>
+                준결승(4강) 2경기와 대망의 그랜드 파이널(결승전)을 거쳐 오직 한 팀만이 왕좌를 차지합니다.
+              </p>
+            </div>
+          </div>
+
+          <!-- Slide 5 -->
+          <div class="intro-slide" data-index="4">
+            <div class="intro-slide-media">
+              <img src="docs/images/13_result_champion_podium.png" alt="챔피언 시상대 및 티어표 결과" class="intro-slide-img">
+              <span class="intro-step-pill">STEP 05</span>
+            </div>
+            <div class="intro-slide-info">
+              <h4 class="slide-headline">
+                <span class="slide-hl-icon">🌟</span>
+                <span>영예의 챔피언 시상대 & 풀 티어메이커 보드</span>
+              </h4>
+              <p class="slide-desc">
+                우승 트로피와 함께 화려한 골든 세레머니가 펼쳐지며, 모든 후보의 최종 순위와 성적이 <strong>S / A / B / C / D 티어표</strong>로 자동 정렬됩니다.<br>
+                완성된 결과를 이미지로 캡처하거나 공유하여 토너먼트를 완벽하게 마무리하세요!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="intro-guide-footer">
+        <label class="intro-checkbox-label">
+          <input type="checkbox" id="chk-intro-dont-show">
+          <span class="checkbox-custom"></span>
+          <span>다시 보지 않기</span>
+        </label>
+        
+        <div class="intro-nav-buttons">
+          <button id="btn-intro-prev" class="btn-ghost btn-sm" type="button" style="visibility: hidden;">
+            <span>◀ 이전</span>
+          </button>
+          <button id="btn-intro-next" class="btn-primary btn-gold-glow btn-sm" type="button">
+            <span>다음 ▶</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div> <!-- /#app-container -->
 
   <!-- 성능 알림 토스트 알림창 -->
   <div id="perf-toast-container" class="perf-toast-container" aria-live="polite"></div>

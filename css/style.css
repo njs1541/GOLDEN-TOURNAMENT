@@ -5731,7 +5731,557 @@ html[data-theme="white-theme"] .proxy-divider::after {
   }
 
   .slide-desc {
-    font-size: 14.5px;
+    font-size: 13.5px;
+  }
+}
+
+/* ==========================================================================
+   글로벌 저작권 표기 & 프로그램 소유권 & 문의 푸터 (GLOBAL FOOTER)
+   ========================================================================== */
+.app-global-footer {
+  width: 100%;
+  padding: 10px 24px 36px;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: opacity 0.25s ease;
+}
+
+/* 1:1 대결 화면(view-battle) 진행 중에는 플레이 화면 집중을 위해 푸터를 숨김 */
+body:has(#view-battle.active) .app-global-footer {
+  display: none !important;
+}
+
+.footer-container {
+  width: 100%;
+  max-width: 1280px;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: var(--radius-xl);
+  box-sizing: border-box;
+}
+
+.footer-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footer-brand-col {
+  flex: 1 1 420px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footer-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.footer-brand-logo {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.footer-brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.footer-owner-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: rgba(245, 176, 65, 0.14);
+  border: 1px solid rgba(245, 176, 65, 0.38);
+  color: var(--gold-primary);
+  box-shadow: 0 0 10px rgba(245, 176, 65, 0.12);
+}
+
+.footer-desc {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.footer-contact-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.footer-contact-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.contact-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contact-email-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-email-link {
+  font-family: 'JetBrains Mono', 'Outfit', monospace;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--gold-primary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.footer-email-link:hover {
+  color: #fff;
+  text-shadow: 0 0 10px var(--gold-glow);
+  text-decoration: underline;
+}
+
+.btn-copy-email {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass-bright, rgba(255, 255, 255, 0.15));
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-copy-email:hover {
+  background: rgba(245, 176, 65, 0.18);
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+  transform: translateY(-1px);
+}
+
+.btn-copy-email.copied {
+  background: rgba(0, 255, 163, 0.2) !important;
+  border-color: #00ffa3 !important;
+  color: #00ffa3 !important;
+}
+
+.footer-quick-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.footer-link-action {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-dim);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footer-link-action:hover {
+  color: var(--gold-primary);
+  text-decoration: underline;
+}
+
+.footer-sep {
+  color: var(--text-dim);
+  opacity: 0.5;
+}
+
+.footer-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-glass);
+  padding-top: 14px;
+  font-size: 12px;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-copyright-text {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.footer-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-mini {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  color: var(--text-dim);
+  letter-spacing: 0.4px;
+}
+
+/* ==========================================================================
+   저작권 & 프로그램 소유권 & 문의 상세 모달 (COPYRIGHT MODAL)
+   ========================================================================== */
+.copyright-modal-dialog {
+  max-width: 680px;
+  width: 92%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.copyright-modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.copyright-policy-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  transition: border-color var(--transition-fast);
+}
+
+.copyright-policy-card:hover {
+  border-color: var(--border-glass-bright);
+}
+
+.policy-card-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.policy-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.policy-card-header h4 {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--gold-primary);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.policy-card-content p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-main);
+  margin: 0 0 10px 0;
+}
+
+.policy-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.policy-list li {
+  position: relative;
+  padding-left: 15px;
+  margin-bottom: 6px;
+}
+
+.policy-list li:last-child {
+  margin-bottom: 0;
+}
+
+.policy-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--gold-primary);
+  font-weight: bold;
+}
+
+.policy-inline-link {
+  color: var(--gold-primary);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.modal-contact-box {
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-contact-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.contact-lbl {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+.modal-email-val {
+  font-family: 'JetBrains Mono', 'Outfit', monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gold-primary);
+  text-decoration: none;
+}
+
+.modal-email-val:hover {
+  text-decoration: underline;
+}
+
+.btn-copy-email-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass-bright, rgba(255, 255, 255, 0.15));
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-copy-email-sub:hover {
+  background: rgba(245, 176, 65, 0.2);
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+}
+
+.btn-send-email-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #000;
+  background: var(--gold-gradient);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px var(--gold-glow);
+}
+
+.btn-send-email-sub:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.contact-guide-tips {
+  border-top: 1px dashed var(--border-glass);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guide-tip-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.tip-tags-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.guide-tip-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+}
+
+.copyright-modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--border-glass);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ================= 화이트 테마 대응 ================= */
+html[data-theme="white-theme"] .footer-container {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+}
+html[data-theme="white-theme"] .footer-owner-tag {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+  color: #1d4ed8 !important;
+}
+html[data-theme="white-theme"] .footer-desc {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .footer-contact-card {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .contact-card-header {
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .footer-email-link {
+  color: #2563eb !important;
+}
+html[data-theme="white-theme"] .btn-copy-email,
+html[data-theme="white-theme"] .btn-copy-email-sub {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html[data-theme="white-theme"] .btn-copy-email:hover,
+html[data-theme="white-theme"] .btn-copy-email-sub:hover {
+  background: #eff6ff !important;
+  border-color: #2563eb !important;
+  color: #2563eb !important;
+}
+html[data-theme="white-theme"] .footer-bottom-row {
+  border-top-color: #e2e8f0 !important;
+  color: #64748b !important;
+}
+html[data-theme="white-theme"] .badge-mini {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .copyright-modal-dialog {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .copyright-policy-card {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+html[data-theme="white-theme"] .policy-card-header h4 {
+  color: #1e3a8a !important;
+}
+html[data-theme="white-theme"] .policy-card-content p {
+  color: #1e293b !important;
+}
+html[data-theme="white-theme"] .policy-list {
+  color: #475569 !important;
+}
+html[data-theme="white-theme"] .modal-contact-box {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+html[data-theme="white-theme"] .modal-email-val {
+  color: #2563eb !important;
+}
+html[data-theme="white-theme"] .btn-send-email-sub {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: #ffffff !important;
+}
+html[data-theme="white-theme"] .guide-tip-tag {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+/* ================= 반응형 (모바일) ================= */
+@media (max-width: 768px) {
+  .footer-container {
+    padding: 18px 20px;
+  }
+
+  .footer-top-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .footer-contact-col {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .footer-contact-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .contact-email-row {
+    justify-content: space-between;
+  }
+
+  .footer-bottom-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 

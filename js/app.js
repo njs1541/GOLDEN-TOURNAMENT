@@ -515,6 +515,100 @@ class AppController {
 
     // 온보딩 가이드 팝업 이벤트 바인딩
     this.bindIntroGuideEvents();
+
+    // 저작권 정책 & 소유권 & 문의 모달 및 이메일 복사 바인딩
+    this.bindCopyrightEvents();
+  }
+
+  // 저작권 정책 & 소유권 & 문의 모달 및 이메일 복사 이벤트 바인딩
+  bindCopyrightEvents() {
+    const modalCopyright = document.getElementById('modal-copyright');
+    const btnOpenHeader = document.getElementById('btn-open-copyright-modal');
+    const btnOpenFooter = document.getElementById('btn-footer-open-copyright');
+    const btnCloseModal = document.getElementById('btn-close-copyright-modal');
+    const btnConfirmModal = document.getElementById('btn-close-copyright-confirm');
+
+    const openModal = () => {
+      if (modalCopyright) modalCopyright.classList.add('active');
+    };
+    const closeModal = () => {
+      if (modalCopyright) modalCopyright.classList.remove('active');
+    };
+
+    if (btnOpenHeader) btnOpenHeader.addEventListener('click', openModal);
+    if (btnOpenFooter) btnOpenFooter.addEventListener('click', openModal);
+    if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+    if (btnConfirmModal) btnConfirmModal.addEventListener('click', closeModal);
+
+    if (modalCopyright) {
+      modalCopyright.addEventListener('click', (e) => {
+        if (e.target === modalCopyright) closeModal();
+      });
+    }
+
+    // Escape 키 입력 시 모달 닫기
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalCopyright && modalCopyright.classList.contains('active')) {
+        closeModal();
+      }
+    });
+
+    // 이메일 클립보드 복사 버튼 (푸터 & 모달 공통)
+    const emailToCopy = 'njs1541@naver.com';
+
+    const handleCopyEmail = async (btnEl, textElId, originalText) => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(emailToCopy);
+        } else {
+          // 구형 브라우저 fallback
+          const tempInput = document.createElement('input');
+          tempInput.value = emailToCopy;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempInput);
+        }
+
+        this.showPerfToast('📋 이메일 복사 완료', `문의 이메일(${emailToCopy})이 클립보드에 복사되었습니다!`, 'info', 3000);
+
+        if (btnEl) {
+          btnEl.classList.add('copied');
+          const textEl = textElId ? document.getElementById(textElId) : null;
+          if (textEl) {
+            textEl.textContent = '✓ 복사됨!';
+          } else {
+            btnEl.textContent = '✓ 복사됨!';
+          }
+
+          setTimeout(() => {
+            btnEl.classList.remove('copied');
+            if (textEl) {
+              textEl.textContent = originalText;
+            } else {
+              btnEl.textContent = originalText;
+            }
+          }, 2000);
+        }
+      } catch (err) {
+        console.error('클립보드 복사 실패:', err);
+        prompt('아래 이메일 주소를 직접 복사(Ctrl+C)하세요:', emailToCopy);
+      }
+    };
+
+    const btnCopyFooter = document.getElementById('btn-copy-footer-email');
+    if (btnCopyFooter) {
+      btnCopyFooter.addEventListener('click', () => {
+        handleCopyEmail(btnCopyFooter, 'text-copy-footer-email', '이메일 복사');
+      });
+    }
+
+    const btnCopyModal = document.getElementById('btn-copy-modal-email');
+    if (btnCopyModal) {
+      btnCopyModal.addEventListener('click', () => {
+        handleCopyEmail(btnCopyModal, null, '📋 이메일 복사');
+      });
+    }
   }
 
   // 온보딩 가이드 모달 초기화 (첫 방문 시 자동 노출)

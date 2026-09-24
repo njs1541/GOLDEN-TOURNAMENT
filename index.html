@@ -54,6 +54,14 @@
           </svg>
           진행 가이드
         </button>
+        <button id="btn-open-copyright-modal" class="btn-ghost" title="저작권 정책 및 프로그램 소유자/문의 정보 보기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          저작권 &amp; 문의
+        </button>
         <a href="manual.html" target="_blank" class="btn-ghost" title="전체 기능 사용 설명서 새 탭 열기" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
           <span>📖</span>
           <span>사용 설명서</span>
@@ -494,6 +502,66 @@
         </div>
       </section>
     </main>
+
+    <!-- 글로벌 저작권 표기 & 소유권 & 문의 푸터 -->
+    <footer class="app-global-footer">
+      <div class="footer-container glass-panel">
+        <div class="footer-top-row">
+          <div class="footer-brand-col">
+            <div class="footer-brand-title">
+              <span class="footer-brand-logo">🏆</span>
+              <strong class="footer-brand-name">GOLDEN TOURNAMENT</strong>
+              <span class="footer-owner-tag">👑 Created &amp; Owned by nai-com</span>
+            </div>
+            <p class="footer-desc">
+              골든 토너먼트는 <strong>nai-com</strong>이 기획·개발하고 소유한 웹 영상 토너먼트 시스템입니다.<br>
+              본 시스템 내에서 재생되는 모든 영상 및 음원의 권리는 해당 유튜브 원작자에게 있으며, YouTube Player API 규정을 준수합니다.
+            </p>
+          </div>
+
+          <div class="footer-contact-col">
+            <div class="footer-contact-card">
+              <div class="contact-card-header">
+                <span class="contact-icon">✉️</span>
+                <span class="contact-title">문의 &amp; 영상 제외 요청</span>
+              </div>
+              <div class="contact-email-row">
+                <a href="mailto:njs1541@naver.com" class="footer-email-link" title="메일 클라이언트로 문의 메일 발송">
+                  njs1541@naver.com
+                </a>
+                <button type="button" id="btn-copy-footer-email" class="btn-copy-email" title="이메일 주소 복사">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span id="text-copy-footer-email">이메일 복사</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="footer-quick-links">
+              <button type="button" id="btn-footer-open-copyright" class="footer-link-action">
+                📜 저작권 &amp; 소유권 정책 상세
+              </button>
+              <span class="footer-sep">&bull;</span>
+              <a href="manual.html" target="_blank" class="footer-link-action">
+                📖 공식 사용 설명서
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom-row">
+          <p class="footer-copyright-text">
+            &copy; 2026 <strong>GOLDEN TOURNAMENT</strong>. All rights reserved. Designed, Built &amp; Owned by <strong>nai-com</strong>.
+          </p>
+          <div class="footer-badges">
+            <span class="badge-mini">YouTube API Compliant</span>
+            <span class="badge-mini">Chzzk Live Ready</span>
+          </div>
+        </div>
+      </div>
+    </footer>
 
     <!-- 실시간 랭킹 모달 다이얼로그 -->
     <div class="modal-backdrop" id="modal-live-ranking">
@@ -1137,6 +1205,98 @@
             <span>다음 ▶</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 저작권 정책 및 프로그램 소유권 / 문의 상세 모달 -->
+  <div class="modal-backdrop" id="modal-copyright" role="dialog" aria-modal="true" aria-labelledby="copyright-modal-title">
+    <div class="modal-dialog glass-panel copyright-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-title-icon">⚖️</span>
+          <div>
+            <h3 id="copyright-modal-title">저작권 고지 &amp; 프로그램 소유권 안내</h3>
+            <p class="modal-subtitle">프로그램 지식재산권, 유튜브 콘텐츠 면책 및 공식 문의처</p>
+          </div>
+        </div>
+        <button class="modal-close" id="btn-close-copyright-modal" aria-label="모달 닫기">&times;</button>
+      </div>
+
+      <div class="modal-body custom-scrollbar copyright-modal-body">
+        <!-- 섹션 1: 프로그램 소유권 -->
+        <div class="copyright-policy-card card-ownership">
+          <div class="policy-card-header">
+            <span class="policy-icon">👑</span>
+            <h4>프로그램 개발 및 소유권 (Program Ownership)</h4>
+          </div>
+          <div class="policy-card-content">
+            <p>
+              본 <strong>골든 토너먼트 (GOLDEN TOURNAMENT)</strong> 웹 애플리케이션의 기획, 시스템 아키텍처, 매칭 알고리즘(공정 배치고사, ELO 랭크 레이스, 4강 브래킷, 실시간 시청자 투표 시스템), UI/UX 디자인 및 프론트엔드 소스코드의 모든 권리와 지식재산권은 <strong>소유주 nai-com</strong>에게 있습니다.
+            </p>
+            <ul class="policy-list">
+              <li><strong>프로그램 개발 및 소유자:</strong> nai-com</li>
+              <li><strong>공식 문의 및 관리자:</strong> <a href="mailto:njs1541@naver.com" class="policy-inline-link">njs1541@naver.com</a></li>
+              <li><strong>이용 범위:</strong> 개인 엔터테인먼트, 스트리머 및 크리에이터 방송 송출, 커뮤니티 토너먼트 진행 목적으로 자유롭게 플레이할 수 있습니다. 단, 소스코드의 무단 복제 및 영리 목적의 상업적 무단 도용·재배포는 엄격히 금지됩니다.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 섹션 2: 유튜브 콘텐츠 저작권 면책 -->
+        <div class="copyright-policy-card card-yt-license">
+          <div class="policy-card-header">
+            <span class="policy-icon">🎬</span>
+            <h4>유튜브 콘텐츠 저작권 고지 (YouTube Content Disclaimer)</h4>
+          </div>
+          <div class="policy-card-content">
+            <p>
+              골든 토너먼트에서 등록되어 재생되는 모든 동영상, 음원, 아티스트 정보 및 섬네일의 저작권과 제반 권리는 <strong>해당 원작자 및 유튜브 채널 권리자</strong>에게 귀속됩니다.
+            </p>
+            <ul class="policy-list">
+              <li>본 프로그램은 영상을 별도 서버에 저장·변환·다운로드하지 않으며, <strong>YouTube 공식 IFrame Player API</strong> 규정을 철저히 준수하여 인라인 임베드 스트리밍만을 중개합니다.</li>
+              <li>영상 재생으로 발생하는 모든 조회수, 시청 시간 및 광고 수익은 유튜브 시스템 정책에 따라 원작자의 채널로 100% 온전히 집계됩니다.</li>
+              <li>본 서비스는 유튜브 영상 및 음원에 대한 어떠한 소유권이나 상업적 권리도 주장하지 않습니다.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 섹션 3: 문의 및 제외 요청 접수 -->
+        <div class="copyright-policy-card card-contact">
+          <div class="policy-card-header">
+            <span class="policy-icon">✉️</span>
+            <h4>저작권 문의 &amp; 영상 제외/삭제 요청 (Contact &amp; Takedown)</h4>
+          </div>
+          <div class="policy-card-content">
+            <p>
+              원작자(또는 저작권자)의 요청이 있을 경우, 본 프로그램의 기본 프리셋 목록에서 해당 영상을 즉각 제외하거나 교체 조치하고 있습니다. 또한 기능 제안 및 버그 제보 등 다양한 문의를 환영합니다.
+            </p>
+            
+            <div class="modal-contact-box">
+              <div class="modal-contact-row">
+                <span class="contact-lbl">공식 문의 이메일:</span>
+                <a href="mailto:njs1541@naver.com" class="modal-email-val">njs1541@naver.com</a>
+                <button type="button" id="btn-copy-modal-email" class="btn-copy-email-sub" title="이메일 복사">
+                  📋 이메일 복사
+                </button>
+                <a href="mailto:njs1541@naver.com?subject=[골든토너먼트 문의]" class="btn-send-email-sub">
+                  🚀 메일 보내기
+                </a>
+              </div>
+              <div class="contact-guide-tips">
+                <p class="guide-tip-title">📌 문의 시 메일 제목 권장 양식:</p>
+                <div class="tip-tags-wrap">
+                  <span class="guide-tip-tag">[저작권/삭제요청] 영상 제목 및 유튜브 URL 포함</span>
+                  <span class="guide-tip-tag">[버그/개선문의] 증상 설명 및 재현 방법</span>
+                  <span class="guide-tip-tag">[기타/협업] 협업 제안 및 일반 문의</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer copyright-modal-footer">
+        <button type="button" id="btn-close-copyright-confirm" class="btn-primary btn-gold-glow btn-sm">확인했습니다</button>
       </div>
     </div>
   </div>

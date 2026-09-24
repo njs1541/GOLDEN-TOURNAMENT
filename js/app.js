@@ -27,7 +27,7 @@ const DEFAULT_FONT_SETTINGS = {
   battleChannel: 16,  // 16px
   battleMeta: 16,     // 16px
   battleBtn: 18,      // 18px
-  bracketTitle: 16,   // 16px
+  bracketTitle: 18,   // 18px
   rankingTitle: 16    // 16px
 };
 

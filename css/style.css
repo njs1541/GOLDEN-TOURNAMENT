@@ -51,7 +51,7 @@
   --fs-battle-channel: 16px;
   --fs-battle-meta: 16px;
   --fs-battle-btn: 18px;
-  --fs-bracket-title: 16px;
+  --fs-bracket-title: 18px;
   --fs-ranking-title: 16px;
 }
 
@@ -3243,12 +3243,37 @@ body[data-current-view="battle"] {
 }
 
 /* ================= 3. GOLDEN FINAL 4 BRACKET VIEW ================= */
+#view-viewport[data-view="final"] {
+  padding: 16px 20px !important;
+  min-height: calc(100vh - 100px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#view-final.active {
+  max-width: 98vw !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex: 1 !important;
+}
+
 .final-container {
-  max-width: 1080px;
+  max-width: 1560px;
   margin: auto;
   width: 100%;
-  padding: 20px 32px;
+  padding: 24px 36px;
   position: relative;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 30px rgba(245, 176, 65, 0.05);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* 상단 헤더 & 경기 시작 액션 바 통합 (스크롤 없이 바로 조작) */
@@ -3256,17 +3281,17 @@ body[data-current-view="battle"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 12px;
+  gap: 24px;
+  margin-bottom: 18px;
   text-align: left;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .final-header-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .final-header-top-badge {
@@ -3279,32 +3304,32 @@ body[data-current-view="battle"] {
 }
 
 .final-header-info .view-title {
-  font-size: 22px;
+  font-size: 32px;
   font-weight: 900;
   margin: 0;
   background: var(--gold-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .final-header-info .view-desc {
-  font-size: 12.5px;
+  font-size: 15px;
   margin: 0;
   color: var(--text-dim);
 }
 
 .sparkle-badge {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 900;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   color: var(--accent-rose);
-  background: linear-gradient(90deg, rgba(255, 65, 108, 0.15) 0%, rgba(245, 176, 65, 0.15) 100%);
-  padding: 4px 12px;
+  background: linear-gradient(90deg, rgba(255, 65, 108, 0.18) 0%, rgba(245, 176, 65, 0.18) 100%);
+  padding: 6px 16px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 65, 108, 0.35);
+  border: 1px solid rgba(255, 65, 108, 0.4);
   display: inline-block;
-  box-shadow: 0 0 14px rgba(255, 65, 108, 0.18);
+  box-shadow: 0 0 16px rgba(255, 65, 108, 0.22);
 }
 
 .bracket-tree {
@@ -3312,25 +3337,27 @@ body[data-current-view="battle"] {
   justify-content: center;
   align-items: center;
   gap: 0;
-  margin: 12px 0 6px 0;
+  margin: 16px 0 8px 0;
   position: relative;
+  width: 100%;
 }
 
 /* 라운드 컬럼 */
 .bracket-round {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  width: 380px;
+  gap: 22px;
+  width: 520px;
   flex-shrink: 0;
 }
 
 .round-semifinals {
+  width: 520px;
   z-index: 2;
 }
 
 .round-final {
-  width: 400px;
+  width: 550px;
   z-index: 2;
 }
 
@@ -3338,85 +3365,86 @@ body[data-current-view="battle"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 13.5px;
   font-weight: 800;
   letter-spacing: 1px;
   color: var(--gold-primary);
   background: var(--gold-glow-soft);
   border: 1px solid var(--border-focus);
-  padding: 4px 12px;
+  padding: 6px 18px;
   border-radius: 999px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   align-self: center;
 }
 
 .badge-grand-final {
   color: #ffd700;
-  background: linear-gradient(90deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 65, 108, 0.15) 100%);
-  border-color: rgba(255, 215, 0, 0.4);
-  box-shadow: 0 0 16px rgba(255, 215, 0, 0.2);
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.18) 0%, rgba(255, 65, 108, 0.18) 100%);
+  border-color: rgba(255, 215, 0, 0.45);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.25);
 }
 
 .round-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--gold-primary);
-  box-shadow: 0 0 6px var(--gold-primary);
+  box-shadow: 0 0 8px var(--gold-primary);
 }
 
 .round-dot-gold {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #ffd700;
-  box-shadow: 0 0 8px #ffd700;
+  box-shadow: 0 0 10px #ffd700;
 }
 
 /* 매치 노드 카드 */
 .bracket-match-node {
-  background: rgba(18, 21, 32, 0.75);
+  background: rgba(18, 21, 32, 0.85);
   border: 1px solid var(--border-glass-bright);
   border-radius: var(--radius-lg);
-  padding: 10px 14px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
 }
 
 .bracket-match-node:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .bracket-match-node.completed {
-  border-color: rgba(245, 176, 65, 0.35);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6), 0 0 20px rgba(245, 176, 65, 0.08);
+  border-color: rgba(245, 176, 65, 0.4);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65), 0 0 24px rgba(245, 176, 65, 0.12);
 }
 
 .node-final {
-  padding: 14px 16px;
-  background: linear-gradient(135deg, rgba(28, 22, 38, 0.85) 0%, rgba(18, 21, 32, 0.85) 100%);
-  border: 1px solid rgba(255, 215, 0, 0.35);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65), 0 0 26px rgba(255, 215, 0, 0.12);
+  padding: 22px 24px;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(32, 25, 45, 0.9) 0%, rgba(20, 24, 38, 0.9) 100%);
+  border: 1.5px solid rgba(255, 215, 0, 0.45);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 32px rgba(255, 215, 0, 0.16);
 }
 
 .node-final:hover {
-  border-color: rgba(255, 215, 0, 0.6);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.75), 0 0 34px rgba(255, 215, 0, 0.2);
+  border-color: rgba(255, 215, 0, 0.75);
+  box-shadow: 0 16px 46px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.25);
 }
 
 .node-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 11px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 13.5px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .match-tag {
@@ -3439,7 +3467,7 @@ body[data-current-view="battle"] {
 .node-slots {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 /* 개별 슬롯 아이템 */
@@ -3447,22 +3475,23 @@ body[data-current-view="battle"] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 6px 10px;
-  background: rgba(0, 0, 0, 0.45);
+  gap: 14px;
+  padding: 10px 14px;
+  min-height: 72px;
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
 }
 
 .bracket-slot:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .bracket-slot.winner {
-  background: linear-gradient(90deg, rgba(245, 176, 65, 0.16) 0%, rgba(245, 176, 65, 0.06) 100%);
-  border: 1px solid rgba(245, 176, 65, 0.5);
-  box-shadow: 0 0 16px rgba(245, 176, 65, 0.15);
+  background: linear-gradient(90deg, rgba(245, 176, 65, 0.2) 0%, rgba(245, 176, 65, 0.08) 100%);
+  border: 1.5px solid rgba(245, 176, 65, 0.6);
+  box-shadow: 0 0 20px rgba(245, 176, 65, 0.2);
 }
 
 .bracket-slot.winner .slot-title {
@@ -3472,12 +3501,13 @@ body[data-current-view="battle"] {
 
 .slot-thumb-box {
   position: relative;
-  width: 44px;
-  height: 26px;
-  border-radius: 4px;
+  width: 88px;
+  height: 50px;
+  border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
   background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .slot-thumb {
@@ -3490,57 +3520,62 @@ body[data-current-view="battle"] {
   position: absolute;
   top: 0;
   left: 0;
-  font-size: 8.5px;
+  font-size: 10.5px;
   font-weight: 900;
-  padding: 1px 4px;
-  background: rgba(0, 0, 0, 0.75);
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.8);
   color: var(--gold-primary);
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 6px;
+  border-right: 1px solid rgba(245, 176, 65, 0.3);
+  border-bottom: 1px solid rgba(245, 176, 65, 0.3);
 }
 
 .slot-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   text-align: left;
   flex: 1;
   overflow: hidden;
 }
 
 .slot-title {
-  font-size: var(--fs-bracket-title, 16px);
-  font-weight: 700;
+  font-size: var(--fs-bracket-title, 18px);
+  font-weight: 800;
   color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .slot-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: calc(var(--fs-bracket-title, 16px) * 0.82);
+  gap: 10px;
+  font-size: calc(var(--fs-bracket-title, 18px) * 0.82);
 }
 
 .slot-elo {
   color: var(--gold-primary);
-  font-weight: 800;
+  font-weight: 900;
   font-family: 'Outfit', monospace;
+  font-size: 14.5px;
 }
 
 .slot-record {
   color: var(--text-dim);
+  font-size: 13px;
 }
 
 .slot-winner-tag {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 900;
   color: #000;
   background: var(--gold-gradient);
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 999px;
-  box-shadow: 0 0 10px var(--gold-glow);
+  box-shadow: 0 0 12px var(--gold-glow);
   flex-shrink: 0;
   letter-spacing: 0.5px;
 }
@@ -3548,41 +3583,44 @@ body[data-current-view="battle"] {
 .slot-waiting {
   background: rgba(255, 255, 255, 0.02);
   border-style: dashed;
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .slot-placeholder-thumb {
-  width: 44px;
-  height: 26px;
-  border-radius: 4px;
+  width: 88px;
+  height: 50px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 20px;
   flex-shrink: 0;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
 }
 
 .slot-sub {
-  font-size: 10.5px;
+  font-size: 12.5px;
   color: var(--text-dim);
 }
 
 .slot-vs-divider {
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 900;
   color: var(--text-dim);
   text-align: center;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  margin: 1px 0;
 }
 
 .slot-vs-divider.vs-final {
   color: var(--accent-rose);
+  font-size: 12px;
 }
 
 /* 대진표 동적 SVG 네온 연결선 (이긴 노래 ➔ 결승전 진출 시각화) */
 .bracket-connectors {
-  width: 72px;
+  width: 100px;
   align-self: stretch;
   position: relative;
   flex-shrink: 0;
@@ -3605,18 +3643,18 @@ body[data-current-view="battle"] {
 
 /* 경기 전 대기 상태: 은은한 점선 */
 .conn-path.path-idle {
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 1.8;
-  stroke-dasharray: 4 4;
-  opacity: 0.6;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 2.2;
+  stroke-dasharray: 5 5;
+  opacity: 0.65;
 }
 
 /* 이긴 노래로부터 결승전으로 흐르는 활성 황금 네온 라인! */
 .conn-path.path-active-winner {
   stroke: url(#gold-stream-grad);
-  stroke-width: 3.5;
+  stroke-width: 4.5;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.75));
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.85));
   opacity: 1;
   stroke-dasharray: none;
   animation: streamFlow 1.4s ease-out;
@@ -3651,19 +3689,20 @@ body[data-current-view="battle"] {
 }
 
 #btn-start-final-match {
-  padding: 12px 24px;
-  font-size: 15px;
-  font-weight: 800;
+  padding: 15px 36px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
   border-radius: var(--radius-lg);
-  box-shadow: 0 4px 20px var(--gold-glow), 0 0 30px var(--gold-glow-soft);
+  box-shadow: 0 6px 26px var(--gold-glow), 0 0 40px var(--gold-glow-soft);
   white-space: nowrap;
   cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
 }
 
 #btn-start-final-match:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 28px var(--gold-glow), 0 0 40px var(--gold-glow-soft);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 32px var(--gold-glow), 0 0 48px rgba(245, 176, 65, 0.4);
 }
 
 /* ================= 4. TIER RESULT VIEW ================= */
@@ -4055,11 +4094,15 @@ body[data-current-view="battle"] {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
-    gap: 12px;
+    gap: 14px;
   }
 
   .final-header-info {
     align-items: center;
+  }
+
+  .final-header-info .view-title {
+    font-size: 26px;
   }
 
   .final-action-area {
@@ -4070,6 +4113,41 @@ body[data-current-view="battle"] {
   #btn-start-final-match {
     width: 100%;
     justify-content: center;
+    font-size: 16px;
+    padding: 14px 20px;
+  }
+
+  .final-container {
+    padding: 18px 16px;
+    overflow-x: auto;
+  }
+
+  .bracket-tree {
+    min-width: 900px;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 1280px) {
+  .bracket-round {
+    width: 440px;
+    gap: 18px;
+  }
+
+  .round-semifinals {
+    width: 440px;
+  }
+
+  .round-final {
+    width: 460px;
+  }
+
+  .bracket-connectors {
+    width: 80px;
+  }
+
+  .final-container {
+    padding: 20px 24px;
   }
 }
 

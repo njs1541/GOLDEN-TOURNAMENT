@@ -35,6 +35,9 @@ class GoldenBracketManager {
   start() {
     this.renderBracketView();
     this.app.switchView('final');
+    if (window.updateLeagueStageTracker) {
+      window.updateLeagueStageTracker(this.currentFinalStep || 'semi1');
+    }
 
     const btnStart = document.getElementById('btn-start-final-match');
     if (btnStart) {
@@ -78,7 +81,7 @@ class GoldenBracketManager {
         <div class="slot-info">
           <span class="slot-title" title="${cand.title}">${cand.title}</span>
           <div class="slot-meta">
-            <span class="slot-elo">ELO ${Math.round(cand.elo)}</span>
+            <span class="slot-elo">${Math.round(cand.elo)} RP</span>
             <span class="slot-record">${cand.wins}승 ${cand.losses}패</span>
           </div>
         </div>
@@ -242,12 +245,14 @@ class GoldenBracketManager {
 
   runNextFinalMatch() {
     if (this.currentFinalStep === 'semi1') {
+      if (window.updateLeagueStageTracker) window.updateLeagueStageTracker('semi1');
       this.playMatch(this.semi1.candA, this.semi1.candB, '4강 제1경기 (1위 vs 4위)', (winner) => {
         this.semi1.winner = winner;
         this.grandFinal.candA = winner;
         this.currentFinalStep = 'semi2';
         this.renderBracketView();
         this.app.switchView('final');
+        if (window.updateLeagueStageTracker) window.updateLeagueStageTracker('semi2');
         const btnStart = document.getElementById('btn-start-final-match');
         if (btnStart) {
           btnStart.textContent = "4강 제2경기 시작 (2위 vs 3위)";
@@ -258,12 +263,14 @@ class GoldenBracketManager {
         }
       });
     } else if (this.currentFinalStep === 'semi2') {
+      if (window.updateLeagueStageTracker) window.updateLeagueStageTracker('semi2');
       this.playMatch(this.semi2.candA, this.semi2.candB, '4강 제2경기 (2위 vs 3위)', (winner) => {
         this.semi2.winner = winner;
         this.grandFinal.candB = winner;
         this.currentFinalStep = 'final';
         this.renderBracketView();
         this.app.switchView('final');
+        if (window.updateLeagueStageTracker) window.updateLeagueStageTracker('final');
         const btnStart = document.getElementById('btn-start-final-match');
         if (btnStart) {
           btnStart.textContent = "결승전 시작하기 🏆";
@@ -274,9 +281,11 @@ class GoldenBracketManager {
         }
       });
     } else if (this.currentFinalStep === 'final') {
+      if (window.updateLeagueStageTracker) window.updateLeagueStageTracker('final');
       this.playMatch(this.grandFinal.candA, this.grandFinal.candB, '챔피언십 결승전', (winner) => {
         this.grandFinal.winner = winner;
         this.currentFinalStep = 'done';
+        if (window.updateLeagueStageTracker) window.updateLeagueStageTracker('result');
         if (this.app && typeof this.app.saveTournamentSession === 'function') {
           this.app.saveTournamentSession();
         }
@@ -297,7 +306,7 @@ class GoldenBracketManager {
     // 메타데이터 렌더링
     document.getElementById('title-a').textContent = candA.title;
     document.getElementById('channel-a').textContent = candA.creator || 'YouTube';
-    document.getElementById('badge-elo-a').textContent = `ELO ${Math.round(candA.elo)}`;
+    document.getElementById('badge-elo-a').textContent = `${Math.round(candA.elo)} RP`;
     document.getElementById('stats-record-a').textContent = `${candA.wins}승 ${candA.losses}패`;
     const statsMatchesA = document.getElementById('stats-matches-a');
     if (statsMatchesA) statsMatchesA.textContent = `${candA.matches}회 대결`;
@@ -306,7 +315,7 @@ class GoldenBracketManager {
 
     document.getElementById('title-b').textContent = candB.title;
     document.getElementById('channel-b').textContent = candB.creator || 'YouTube';
-    document.getElementById('badge-elo-b').textContent = `ELO ${Math.round(candB.elo)}`;
+    document.getElementById('badge-elo-b').textContent = `${Math.round(candB.elo)} RP`;
     document.getElementById('stats-record-b').textContent = `${candB.wins}승 ${candB.losses}패`;
     const statsMatchesB = document.getElementById('stats-matches-b');
     if (statsMatchesB) statsMatchesB.textContent = `${candB.matches}회 대결`;

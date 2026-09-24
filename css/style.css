@@ -1058,6 +1058,347 @@ html {
   }
 }
 
+/* ================= LEAGUE STAGE TRACKER (리그 5단계 진행도 트래커) ================= */
+.league-stage-tracker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 18, 27, 0.75);
+  border: 1px solid var(--border-glass);
+  padding: 5px 14px;
+  border-radius: 999px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all var(--transition-smooth);
+}
+
+.stage-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  position: relative;
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.stage-step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: all var(--transition-fast);
+}
+
+.stage-step-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.stage-step-name {
+  line-height: 1.2;
+}
+
+/* 대기 단계 (아직 도달하지 않음) */
+.stage-step.is-waiting {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+/* 통과 완료된 단계 */
+.stage-step.is-completed {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+.stage-step.is-completed .stage-step-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+}
+
+/* 현재 진행 중인 단계 (불이 환하게 들어오는 황금빛 네온 라이트 효과!) */
+.stage-step.is-active {
+  background: linear-gradient(135deg, rgba(245, 176, 65, 0.22) 0%, rgba(255, 215, 0, 0.12) 100%);
+  border: 1.5px solid var(--gold-light);
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 0 16px rgba(245, 176, 65, 0.65), inset 0 0 10px rgba(255, 215, 0, 0.2);
+  transform: translateY(-1px) scale(1.04);
+  animation: stageGlowPulse 1.8s infinite ease-in-out;
+}
+
+.stage-step.is-active .stage-step-dot {
+  background: var(--gold-light);
+  box-shadow: 0 0 10px var(--gold-light);
+  transform: scale(1.3);
+}
+
+.stage-step.is-active .stage-step-icon {
+  filter: drop-shadow(0 0 6px var(--gold-light));
+}
+
+.stage-step.is-active .stage-step-name {
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes stageGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 14px rgba(245, 176, 65, 0.5), inset 0 0 8px rgba(255, 215, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(245, 176, 65, 0.85), inset 0 0 14px rgba(255, 215, 0, 0.35);
+  }
+}
+
+.stage-step-arrow {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 13px;
+  font-weight: 900;
+  user-select: none;
+}
+
+/* ================= HEADER MENU & POPOVER (상단 메뉴 제어 및 팝업) ================= */
+.header-menu-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-more-menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-more-menu:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(245, 176, 65, 0.4);
+  color: var(--gold-primary);
+  box-shadow: 0 0 12px rgba(245, 176, 65, 0.2);
+}
+
+.menu-arrow {
+  font-size: 10px;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.btn-more-menu[aria-expanded="true"] .menu-arrow {
+  transform: rotate(180deg);
+}
+
+.header-menu-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 270px;
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  background: rgba(14, 17, 26, 0.96);
+  border: 1px solid rgba(245, 176, 65, 0.35);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 24px rgba(245, 176, 65, 0.18);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  z-index: 250;
+  animation: popoverFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.popover-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 6px;
+}
+
+.popover-badge {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--gold-gradient);
+  color: #000;
+}
+
+.popover-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popover-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.popover-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(245, 176, 65, 0.25);
+  transform: translateX(3px);
+}
+
+.popover-item-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.popover-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popover-item-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.popover-item:hover .popover-item-title {
+  color: var(--gold-light);
+}
+
+.popover-item-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.popover-item-ext {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-weight: 900;
+}
+
+/* ================= 뷰 상태에 따른 헤더 요소 노출/숨김 규칙 ================= */
+/* 1. 셋업 화면(시작 전) */
+body[data-current-view="setup"] .league-stage-tracker,
+body:not([data-current-view]) .league-stage-tracker {
+  display: none !important;
+}
+
+body[data-current-view="setup"] #header-menu-container,
+body:not([data-current-view]) #header-menu-container {
+  display: none !important;
+}
+
+body[data-current-view="setup"] .header-menu-direct,
+body:not([data-current-view]) .header-menu-direct {
+  display: inline-flex !important;
+}
+
+body[data-current-view="setup"] #match-phase-badge,
+body:not([data-current-view]) #match-phase-badge {
+  display: inline-flex !important;
+}
+
+/* 2. 리그 진행 중 (battle, final, result 등) */
+body:not([data-current-view="setup"]):not(:not([data-current-view])) .header-menu-direct,
+body[data-current-view="battle"] .header-menu-direct,
+body[data-current-view="final"] .header-menu-direct,
+body[data-current-view="result"] .header-menu-direct {
+  display: none !important;
+}
+
+body:not([data-current-view="setup"]):not(:not([data-current-view])) #header-menu-container,
+body[data-current-view="battle"] #header-menu-container,
+body[data-current-view="final"] #header-menu-container,
+body[data-current-view="result"] #header-menu-container {
+  display: inline-flex !important;
+}
+
+body:not([data-current-view="setup"]):not(:not([data-current-view])) .league-stage-tracker,
+body[data-current-view="battle"] .league-stage-tracker,
+body[data-current-view="final"] .league-stage-tracker,
+body[data-current-view="result"] .league-stage-tracker {
+  display: flex !important;
+}
+
+/* 리그 진행 중에는 전체 5단계 트래커가 자리잡으므로 중복 단일 뱃지는 숨겨서 공간 극대화 */
+body[data-current-view="battle"] #match-phase-badge,
+body[data-current-view="final"] #match-phase-badge,
+body[data-current-view="result"] #match-phase-badge {
+  display: none !important;
+}
+
+/* 반응형 모바일 화면 최적화 */
+@media (max-width: 960px) {
+  .league-stage-tracker {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .stage-step {
+    padding: 4px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .stage-step-name {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 16px;
+  }
+  .league-stage-tracker {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* ================= PROGRESS TRACK ================= */
 .progress-track {
   width: 100%;

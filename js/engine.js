@@ -168,6 +168,9 @@ class TournamentEngine {
     const matchIndicator = document.getElementById('current-match-indicator');
 
     const isPlacement = phase.includes('배치고사') || phase.includes('스위스');
+    if (window.updateLeagueStageTracker) {
+      window.updateLeagueStageTracker(isPlacement ? 'placement' : 'ladder');
+    }
     if (phaseText) phaseText.textContent = phase;
     if (phasePill) {
       if (isPlacement) {
@@ -370,7 +373,7 @@ class TournamentEngine {
 
       // 토스트 알림 연동
       if (this.app && typeof this.app.showPerfToast === 'function') {
-        this.app.showPerfToast('⚡ 실시간 Elo 래더 리그 돌입', '이제 레이팅이 비슷한 라이벌끼리 매칭됩니다!', 'info', 3000);
+        this.app.showPerfToast('⚡ 본선 랭크 레이스 돌입', '이제 점수가 비슷한 라이벌끼리 매칭됩니다!', 'info', 3000);
       }
     }
   }
@@ -460,7 +463,7 @@ class TournamentEngine {
       this.app.saveTournamentSession();
     }
     if (this.app && typeof this.app.showPerfToast === 'function') {
-      this.app.showPerfToast('↺ 직전 투표 취소됨', '이전 매치 및 ELO 변동이 정상 복구되었습니다.', 'info', 2500);
+      this.app.showPerfToast('↺ 직전 투표 취소됨', '이전 매치 및 RP 변동이 정상 복구되었습니다.', 'info', 2500);
     }
     return true;
   }

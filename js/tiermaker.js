@@ -244,7 +244,7 @@ class TierMakerManager {
       ctx.font = 'bold 15px "Outfit", sans-serif';
       ctx.textAlign = 'center';
       ctx.letterSpacing = '3px';
-      ctx.fillText('👑 GOLDEN TOURNAMENT 2026', width / 2, 40);
+      ctx.fillText('👑 PICK LEAGUE 2026', width / 2, 40);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 26px "Outfit", sans-serif';
@@ -465,7 +465,7 @@ class TierMakerManager {
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = dataUrl;
-      a.download = `golden_tournament_championship_report_${Date.now()}.png`;
+      a.download = `픽리그_종합_티어표_${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

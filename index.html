@@ -24,6 +24,39 @@
         </div>
       </div>
 
+      <!-- 리그 진행 단계 트래커 (리그 진행 중 중앙 공간에 펼쳐지며 현재 단계에 점등) -->
+      <nav class="league-stage-tracker" id="league-stage-tracker" aria-label="리그 진행 단계">
+        <div class="stage-step" id="stage-step-placement" data-stage="placement" title="1단계: 참가곡 전체 공정 배치고사">
+          <span class="stage-step-dot"></span>
+          <span class="stage-step-icon">🎯</span>
+          <span class="stage-step-name">배치고사</span>
+        </div>
+        <div class="stage-step-arrow">›</div>
+        <div class="stage-step" id="stage-step-ladder" data-stage="ladder" title="2단계: 실시간 라이벌 본선랭크 레이스">
+          <span class="stage-step-dot"></span>
+          <span class="stage-step-icon">⚡</span>
+          <span class="stage-step-name">본선랭크 레이스</span>
+        </div>
+        <div class="stage-step-arrow">›</div>
+        <div class="stage-step" id="stage-step-semi1" data-stage="semi1" title="3단계: 4강 제 1경기 (1위 vs 4위)">
+          <span class="stage-step-dot"></span>
+          <span class="stage-step-icon">⚔️</span>
+          <span class="stage-step-name">4강 제 1경기</span>
+        </div>
+        <div class="stage-step-arrow">›</div>
+        <div class="stage-step" id="stage-step-semi2" data-stage="semi2" title="4단계: 4강 제 2경기 (2위 vs 3위)">
+          <span class="stage-step-dot"></span>
+          <span class="stage-step-icon">⚔️</span>
+          <span class="stage-step-name">4강 제 2경기</span>
+        </div>
+        <div class="stage-step-arrow">›</div>
+        <div class="stage-step" id="stage-step-final" data-stage="final" title="5단계: 최종 우승 결정전">
+          <span class="stage-step-dot"></span>
+          <span class="stage-step-icon">🏆</span>
+          <span class="stage-step-name">결승전</span>
+        </div>
+      </nav>
+
       <div class="header-controls">
         <div id="match-phase-badge" class="phase-pill pill-swiss">
           <span class="pulse-dot"></span>
@@ -39,14 +72,16 @@
           </svg>
           실시간 랭킹
         </button>
-        <button id="btn-open-font-settings" class="btn-ghost" title="테마 및 화면/글씨 크기 설정">
+
+        <!-- 셋업 화면에서 펼쳐지는 상단 메뉴 4종 (리그 시작 시 숨김) -->
+        <button id="btn-open-font-settings" class="btn-ghost header-menu-direct" title="테마 및 화면/글씨 크기 설정">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
-          테마 & 화면 설정
+          테마 &amp; 화면 설정
         </button>
-        <button id="btn-open-intro-guide" class="btn-ghost" title="토너먼트 진행 가이드 팝업 보기">
+        <button id="btn-open-intro-guide" class="btn-ghost header-menu-direct" title="토너먼트 진행 가이드 팝업 보기">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -54,7 +89,7 @@
           </svg>
           진행 가이드
         </button>
-        <button id="btn-open-copyright-modal" class="btn-ghost" title="저작권 정책 및 프로그램 소유자/문의 정보 보기">
+        <button id="btn-open-copyright-modal" class="btn-ghost header-menu-direct" title="저작권 정책 및 프로그램 소유자/문의 정보 보기">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -62,10 +97,60 @@
           </svg>
           저작권 &amp; 문의
         </button>
-        <a href="manual.html" target="_blank" class="btn-ghost" title="전체 기능 사용 설명서 새 탭 열기" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+        <a href="manual.html" target="_blank" class="btn-ghost header-menu-direct" title="전체 기능 사용 설명서 새 탭 열기" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
           <span>📖</span>
           <span>사용 설명서</span>
         </a>
+
+        <!-- 리그 진행 중 버튼 하나로 팝업을 띄우는 메뉴 버튼 및 팝업 컨테이너 -->
+        <div class="header-menu-container" id="header-menu-container">
+          <button id="btn-header-more-menu" class="btn-ghost btn-more-menu" title="설정 및 안내 메뉴" type="button" aria-haspopup="true" aria-expanded="false">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>설정 &amp; 안내</span>
+            <span class="menu-arrow">▾</span>
+          </button>
+          <div id="header-menu-popover" class="header-menu-popover glass-panel-elevated" style="display:none;" role="menu">
+            <div class="popover-arrow"></div>
+            <div class="popover-header">
+              <span class="popover-badge">MENU</span>
+              <span class="popover-title">설정 및 안내</span>
+            </div>
+            <div class="popover-list">
+              <button type="button" class="popover-item" id="pop-item-font-settings">
+                <span class="popover-item-icon">⚙️</span>
+                <div class="popover-item-content">
+                  <span class="popover-item-title">테마 &amp; 화면 설정</span>
+                  <span class="popover-item-desc">테마 변경, 글씨 및 화면 크기 조절</span>
+                </div>
+              </button>
+              <button type="button" class="popover-item" id="pop-item-intro-guide">
+                <span class="popover-item-icon">💡</span>
+                <div class="popover-item-content">
+                  <span class="popover-item-title">진행 가이드</span>
+                  <span class="popover-item-desc">리그 규칙 및 단계별 진행 요령</span>
+                </div>
+              </button>
+              <button type="button" class="popover-item" id="pop-item-copyright">
+                <span class="popover-item-icon">🛡️</span>
+                <div class="popover-item-content">
+                  <span class="popover-item-title">저작권 &amp; 문의</span>
+                  <span class="popover-item-desc">지식재산권, 정책 및 소유자 정보</span>
+                </div>
+              </button>
+              <a href="manual.html" target="_blank" class="popover-item" id="pop-item-manual" style="text-decoration:none;">
+                <span class="popover-item-icon">📖</span>
+                <div class="popover-item-content">
+                  <span class="popover-item-title">사용 설명서</span>
+                  <span class="popover-item-desc">전체 기능 상세 매뉴얼 새 탭 열기</span>
+                </div>
+                <span class="popover-item-ext">↗</span>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -86,7 +171,7 @@
             <span class="resume-banner-icon">⚡</span>
             <div class="resume-banner-text">
               <h4 id="resume-banner-title">진행 중이던 토너먼트 세션이 있습니다!</h4>
-              <p id="resume-banner-desc">이전에 진행 중이던 매치 및 ELO 전적이 안전하게 보관되어 있습니다.</p>
+              <p id="resume-banner-desc">이전에 진행 중이던 매치 및 RP 전적이 안전하게 보관되어 있습니다.</p>
             </div>
           </div>
           <div class="resume-banner-actions">
@@ -874,7 +959,7 @@
                   <span class="setting-icon">📊</span>
                   <div>
                     <label class="setting-label" for="slider-ranking-title">실시간 랭킹 & 티어표 글씨</label>
-                    <span class="setting-desc">Elo 순위표 모달 및 최종 티어표 카드 제목 크기</span>
+                    <span class="setting-desc">실시간 순위표 모달 및 최종 티어표 카드 제목 크기</span>
                   </div>
                 </div>
                 <span class="setting-val-badge" id="val-ranking-title">16px</span>
@@ -1232,7 +1317,7 @@
           </div>
           <div class="policy-card-content">
             <p>
-              본 <strong>픽리그 (PICK LEAGUE)</strong> 웹 애플리케이션의 기획, 시스템 아키텍처, 매칭 알고리즘(공정 배치고사, ELO 랭크 레이스, 4강 브래킷, 실시간 시청자 투표 시스템), UI/UX 디자인 및 프론트엔드 소스코드의 모든 권리와 지식재산권은 <strong>소유주 nai-com</strong>에게 있습니다.
+              본 <strong>픽리그 (PICK LEAGUE)</strong> 웹 애플리케이션의 기획, 시스템 아키텍처, 매칭 알고리즘(공정 배치고사, 본선 랭크 레이스, 4강 브래킷, 실시간 시청자 투표 시스템), UI/UX 디자인 및 프론트엔드 소스코드의 모든 권리와 지식재산권은 <strong>소유주 nai-com</strong>에게 있습니다.
             </p>
             <ul class="policy-list">
               <li><strong>프로그램 개발 및 소유자:</strong> nai-com</li>

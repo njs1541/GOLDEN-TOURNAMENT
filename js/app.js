@@ -86,6 +86,10 @@ class AppController {
 
     // 7. 시작 화면 온보딩 가이드 팝업 자동 진단 및 초기화
     this.initIntroGuide();
+
+    // 8. 상단 헤더 메뉴 팝업 및 리그 진행 단계 트래커 초기화
+    this.initHeaderMoreMenu();
+    this.initLeagueStageTracker();
   }
 
   // 후보 목록 전체를 웹 저장소(localStorage)에 실시간 동기화
@@ -1494,6 +1498,10 @@ class AppController {
     }
     document.body.setAttribute('data-current-view', viewName);
 
+    // 팝업 메뉴 닫기
+    const popover = document.getElementById('header-menu-popover');
+    if (popover) popover.style.display = 'none';
+
     const views = ['setup', 'battle', 'final', 'result'];
     views.forEach(v => {
       const el = document.getElementById(`view-${v}`);
@@ -1506,7 +1514,142 @@ class AppController {
       }
     });
 
+    // 화면 전환 시 진행 단계 트래커 상태 동기화
+    if (viewName === 'setup') {
+      this.updateLeagueStageTracker('setup');
+    } else if (viewName === 'result') {
+      this.updateLeagueStageTracker('result');
+    } else if (viewName === 'final') {
+      if (this.bracket) {
+        this.updateLeagueStageTracker(this.bracket.currentFinalStep || 'semi1');
+      } else {
+        this.updateLeagueStageTracker('semi1');
+      }
+    } else if (viewName === 'battle') {
+      if (this.bracket && this.bracket.currentFinalStep !== 'done') {
+        this.updateLeagueStageTracker(this.bracket.currentFinalStep);
+      } else if (this.engine && this.engine.currentMatch) {
+        const isPlacement = this.engine.currentMatch.phase.includes('배치고사') || this.engine.currentMatch.phase.includes('스위스');
+        this.updateLeagueStageTracker(isPlacement ? 'placement' : 'ladder');
+      }
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // 상단 헤더 통합 팝업 메뉴 초기화
+  initHeaderMoreMenu() {
+    const btnMore = document.getElementById('btn-header-more-menu');
+    const popover = document.getElementById('header-menu-popover');
+    if (!btnMore || !popover) return;
+
+    const togglePopover = (forceState) => {
+      const isVisible = popover.style.display !== 'none';
+      const nextState = forceState !== undefined ? forceState : !isVisible;
+      popover.style.display = nextState ? 'block' : 'none';
+      btnMore.setAttribute('aria-expanded', String(nextState));
+      if (nextState) {
+        popover.classList.add('popover-animate-in');
+      }
+    };
+
+    btnMore.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePopover();
+    });
+
+    // 팝업 내부 아이템 클릭 연동
+    const itemFont = document.getElementById('pop-item-font-settings');
+    const itemGuide = document.getElementById('pop-item-intro-guide');
+    const itemCopyright = document.getElementById('pop-item-copyright');
+    const itemManual = document.getElementById('pop-item-manual');
+
+    if (itemFont) {
+      itemFont.addEventListener('click', () => {
+        togglePopover(false);
+        const originalBtn = document.getElementById('btn-open-font-settings');
+        if (originalBtn) originalBtn.click();
+      });
+    }
+
+    if (itemGuide) {
+      itemGuide.addEventListener('click', () => {
+        togglePopover(false);
+        const originalBtn = document.getElementById('btn-open-intro-guide');
+        if (originalBtn) originalBtn.click();
+      });
+    }
+
+    if (itemCopyright) {
+      itemCopyright.addEventListener('click', () => {
+        togglePopover(false);
+        const originalBtn = document.getElementById('btn-open-copyright-modal');
+        if (originalBtn) originalBtn.click();
+      });
+    }
+
+    if (itemManual) {
+      itemManual.addEventListener('click', () => {
+        togglePopover(false);
+      });
+    }
+
+    // 바깥 영역 클릭 시 닫기
+    document.addEventListener('click', (e) => {
+      if (!popover.contains(e.target) && !btnMore.contains(e.target)) {
+        togglePopover(false);
+      }
+    });
+
+    // ESC 키로 닫기
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && popover.style.display !== 'none') {
+        togglePopover(false);
+      }
+    });
+  }
+
+  // 리그 5단계 진행도 트래커 초기화 및 단계 갱신
+  initLeagueStageTracker() {
+    window.updateLeagueStageTracker = (stage) => this.updateLeagueStageTracker(stage);
+    this.updateLeagueStageTracker(this.currentView === 'setup' ? 'setup' : 'placement');
+  }
+
+  updateLeagueStageTracker(stage) {
+    const stepMap = {
+      placement: document.getElementById('stage-step-placement'),
+      ladder: document.getElementById('stage-step-ladder'),
+      semi1: document.getElementById('stage-step-semi1'),
+      semi2: document.getElementById('stage-step-semi2'),
+      final: document.getElementById('stage-step-final'),
+    };
+
+    const stageOrder = ['placement', 'ladder', 'semi1', 'semi2', 'final'];
+    const currentIndex = stageOrder.indexOf(stage);
+
+    stageOrder.forEach((sKey, idx) => {
+      const stepEl = stepMap[sKey];
+      if (!stepEl) return;
+
+      stepEl.classList.remove('is-active', 'is-completed', 'is-waiting');
+
+      if (stage === 'result') {
+        // 모든 경기 종료 후 최종 결과
+        stepEl.classList.add('is-completed');
+      } else if (currentIndex === -1) {
+        // 셋업 화면 등
+        stepEl.classList.add('is-waiting');
+      } else if (idx < currentIndex) {
+        // 이전 단계는 완료
+        stepEl.classList.add('is-completed');
+      } else if (idx === currentIndex) {
+        // 현재 진행 중인 단계는 불빛 점등!
+        stepEl.classList.add('is-active');
+      } else {
+        // 다음 단계는 대기
+        stepEl.classList.add('is-waiting');
+      }
+    });
   }
 
   startTournament() {

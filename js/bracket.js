@@ -449,6 +449,7 @@ class GoldenBracketManager {
   importState(data) {
     if (!data) return;
     this.currentFinalStep = data.currentFinalStep || 'semi1';
+    if (data.finalFour) this.finalFour = data.finalFour;
     if (data.semi1) this.semi1 = data.semi1;
     if (data.semi2) this.semi2 = data.semi2;
     if (data.grandFinal) this.grandFinal = data.grandFinal;

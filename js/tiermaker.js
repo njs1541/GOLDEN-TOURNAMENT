@@ -263,13 +263,13 @@ class TierMakerManager {
     }
 
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
       const width = 1240;
       const championAreaHeight = 360;
       const tierHeaderHeight = 60;
-      const tierRowHeight = 148;
+      const baseRowHeight = 148;
+      const rowGap = 132; // 2줄 이상 시 행 간격
+      const maxChipsPerRow = 8; // 한 줄당 최대 칩 개수
+
       const tierList = [
         { name: 'S', color: '#ef4444' },
         { name: 'A', color: '#f97316' },
@@ -278,8 +278,25 @@ class TierMakerManager {
         { name: 'D', color: '#3b82f6' }
       ];
 
+      // 각 티어별 칩 요소 및 행 높이 사전 계산
+      const dropzoneElements = tierList.map(t => {
+        const chips = Array.from(document.getElementById(`dropzone-${t.name}`)?.querySelectorAll('.tier-chip') || []);
+        const rowsNeeded = Math.max(1, Math.ceil(chips.length / maxChipsPerRow));
+        const height = baseRowHeight + ((rowsNeeded - 1) * rowGap);
+        return {
+          tier: t,
+          chips,
+          rowsNeeded,
+          height
+        };
+      });
+
+      const totalTiersHeight = dropzoneElements.reduce((sum, g) => sum + g.height, 0);
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
       canvas.width = width;
-      canvas.height = championAreaHeight + tierHeaderHeight + (tierRowHeight * tierList.length) + 40;
+      canvas.height = championAreaHeight + tierHeaderHeight + totalTiersHeight + 40;
 
       // 1. 다크 프리미엄 배경 채우기
       const bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -418,17 +435,11 @@ class TierMakerManager {
       ctx.fillText('조기 탈락 없는 공정 랭크 레이스 최종 순위 랭킹', 430, tierStartY + 38);
       ctx.restore();
 
-      // ================= 4. S/A/B/C/D 티어별 행 렌더링 =================
+      // ================= 4. S/A/B/C/D 티어별 행 렌더링 (다단 줄바꿈 완벽 지원) =================
       const rowsStartY = tierStartY + tierHeaderHeight;
 
       // 썸네일 이미지 사전 로드 캐시
       const thumbCache = {};
-      const dropzoneElements = tierList.map(t => ({
-        tier: t,
-        chips: document.getElementById(`dropzone-${t.name}`)?.querySelectorAll('.tier-chip') || []
-      }));
-
-      // 모든 칩의 썸네일 이미지 로드
       for (const group of dropzoneElements) {
         for (const chip of group.chips) {
           const imgEl = chip.querySelector('.tier-chip-thumb');
@@ -438,39 +449,42 @@ class TierMakerManager {
         }
       }
 
-      tierList.forEach((tier, idx) => {
-        const y = rowsStartY + (idx * tierRowHeight);
+      let currentTierY = rowsStartY;
+
+      dropzoneElements.forEach((group) => {
+        const tier = group.tier;
+        const currentTierH = group.height;
+        const y = currentTierY;
 
         // 티어 등급 사각형 뱃지
         ctx.fillStyle = tier.color;
-        this.drawRoundedRect(ctx, 80, y, 76, tierRowHeight - 12, 10);
+        this.drawRoundedRect(ctx, 80, y, 76, currentTierH - 12, 10);
         ctx.fill();
 
         ctx.fillStyle = '#000000';
         ctx.font = '900 32px "Outfit", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(tier.name, 80 + 38, y + (tierRowHeight - 12) / 2);
+        ctx.fillText(tier.name, 80 + 38, y + (currentTierH - 12) / 2);
 
         // 티어 드롭존 배경 트랙
         ctx.fillStyle = 'rgba(255, 255, 255, 0.025)';
-        this.drawRoundedRect(ctx, 166, y, width - 246, tierRowHeight - 12, 10);
+        this.drawRoundedRect(ctx, 166, y, width - 246, currentTierH - 12, 10);
         ctx.fill();
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // 칩들 렌더링
-        const group = dropzoneElements.find(g => g.tier.name === tier.name);
-        const chips = group ? group.chips : [];
-
-        let chipX = 178;
-        const chipY = y + 6;
+        // 칩들 렌더링 (8개 초과 시 아래 줄로 자동 래핑되어 단 하나도 잘리지 않음)
         const chipW = 112;
-        const chipH = tierRowHeight - 24; // 124px
+        const chipH = 124;
 
-        chips.forEach((chip) => {
-          if (chipX + chipW > width - 90) return; // 오른쪽 넘침 방지
+        group.chips.forEach((chip, chipIdx) => {
+          const col = chipIdx % maxChipsPerRow;
+          const row = Math.floor(chipIdx / maxChipsPerRow);
+
+          const chipX = 178 + (col * (chipW + 10));
+          const chipY = y + 6 + (row * rowGap);
 
           const title = chip.dataset.title || chip.querySelector('.tier-chip-title')?.textContent || '영상';
           const elo = chip.querySelector('.tier-chip-elo')?.textContent || '';
@@ -550,9 +564,9 @@ class TierMakerManager {
           ctx.fillStyle = '#f5b041';
           ctx.font = 'bold 9.5px "Outfit", sans-serif';
           ctx.fillText(elo + ' RP', chipX + chipW - 6, chipY + chipH - 9);
-
-          chipX += chipW + 10;
         });
+
+        currentTierY += currentTierH;
       });
 
       // 5. 다운로드 트리거

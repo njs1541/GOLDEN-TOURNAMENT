@@ -785,14 +785,14 @@ class AppController {
     }
   }
 
-  // 유튜브 URL / ID 파싱 헬퍼
+  // 유튜브 URL / ID 파싱 헬퍼 (일반 영상, 쇼츠, 라이브, 모바일 공유 URL 등 포괄 지원)
   parseYouTubeId(urlOrId) {
     if (!urlOrId) return null;
     const trimmed = urlOrId.trim();
     if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
       return trimmed;
     }
-    const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    const match = trimmed.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
     return match ? match[1] : null;
   }
 
@@ -2601,13 +2601,13 @@ title Golden Tournament - Local Proxy Server
 cls
 echo ========================================================
 echo  [Golden Tournament] Chzzk Proxy Server (Port 8000)
-echo  https://njs1541.github.io/GOLDEN-TOURNAMENT/
+echo  http://localhost:8000/
 echo  Keep this window open while using Chzzk integration.
 echo ========================================================
 echo.
 
-rem 브라우저 자동 실행 (창이 뜨는 것을 원치 않으시면 아래 줄 맨 앞에 rem을 입력하세요)
-start https://njs1541.github.io/GOLDEN-TOURNAMENT/
+rem 브라우저 자동 실행 (로컬 프록시 서버 주소로 직접 접속하여 CORS 및 Mixed Content 완전 차단)
+start http://localhost:8000/
 
 if exist server.py goto run_server
 

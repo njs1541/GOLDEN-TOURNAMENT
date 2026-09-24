@@ -425,14 +425,14 @@ class ChzzkChatManager {
     if (!userId) userId = `anon_${Math.random()}`;
 
     // 투표 명령어 파싱
-    // 좌측(A): 1, !1, A, !A, ㄱ, 1번, 좌, 좌측, 왼, 왼쪽
-    // 우측(B): 2, !2, B, !B, ㄴ, 2번, 우, 우측, 오, 오른쪽
+    // 좌측(A): 1, !1, 1., A, !A, A번, ㄱ, !ㄱ, 1번, 좌, 좌측, 왼, 왼쪽
+    // 우측(B): 2, !2, 2., B, !B, B번, ㄴ, !ㄴ, 2번, 우, 우측, 오, 오른쪽
     let voteSide = null;
     const lower = messageText.toLowerCase();
 
-    if (/^(1|!1|a|!a|1번|좌|좌측|왼|왼쪽)$/i.test(lower)) {
+    if (/^(1|!1|1\.|a|!a|a번|ㄱ|!ㄱ|1번|좌|좌측|왼|왼쪽)$/i.test(lower)) {
       voteSide = 'A';
-    } else if (/^(2|!2|b|!b|2번|우|우측|오|오른쪽)$/i.test(lower)) {
+    } else if (/^(2|!2|2\.|b|!b|b번|ㄴ|!ㄴ|2번|우|우측|오|오른쪽)$/i.test(lower)) {
       voteSide = 'B';
     }
 
